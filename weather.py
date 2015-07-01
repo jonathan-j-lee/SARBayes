@@ -111,7 +111,7 @@ def get_stations(date, coordinates, datasetid='GHCND', d=20):
             yield station
 
 
-def get_conditions(date, coordinates, datasetid='GHCND'):
+def get_conditions(date, coordinates, datasetid='GHCND', d=20):
     """ Get the weather conditions at a given date and location.
         Returns as a dictionary: 
           * Maximum temperature (tenths of degrees C)
@@ -125,7 +125,7 @@ def get_conditions(date, coordinates, datasetid='GHCND'):
         data_type: [] for data_type in ['TMAX', 'TMIN', 'AWND', 'PRCP', 'SNOW']
     }
     
-    stations = get_stations(date, coordinates)
+    stations = get_stations(date, coordinates, d=d)
     raw_data = request_data(
         'data', 
         datasetid=datasetid, 
@@ -141,7 +141,6 @@ def get_conditions(date, coordinates, datasetid='GHCND'):
         for measurement in raw_data['results']:
             try:
                 data_type, value = measurement['datatype'], measurement['value']
-                print(data_type)
                 if data_type in required_data:
                     required_data[data_type].append(float(value))
             except ValueError:  # The value was not a float

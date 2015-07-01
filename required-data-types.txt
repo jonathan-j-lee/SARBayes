@@ -1,0 +1,6 @@
+AL: Temp/H (C)
+AM: Temp/L (C)
+AN: Wind (kph)
+AO: Weather Type (clear, overcacst, etc.)
+AP: Snow (Y/N)
+AQ: Rain (Y/N)

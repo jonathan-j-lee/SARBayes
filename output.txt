@@ -1,0 +1,626 @@
+Updating case 4433 . . . 
+  Temp/H = 29.72 degrees C
+  Temp/L = 5.82 degrees C
+Updating case 4450 . . . 
+  Temp/H = 37.5 degrees C
+  Temp/L = 19.88 degrees C
+  AVG Wind Speed = 111.6 km/h
+Updating case 4461 . . . 
+  Temp/H = 21.83 degrees C
+  Temp/L = 13.73 degrees C
+  Raining: Yes
+Updating case 4462 . . . 
+  Temp/H = 21.83 degrees C
+  Temp/L = 13.73 degrees C
+  Raining: Yes
+Updating case 4471 . . . 
+  Temp/H = 40.6 degrees C
+  Temp/L = 27.2 degrees C
+Updating case 4478 . . . 
+  Temp/H = 35.3 degrees C
+  Temp/L = 24.02 degrees C
+Updating case 4479 . . . 
+  Temp/H = 35.3 degrees C
+  Temp/L = 24.02 degrees C
+Updating case 4482 . . . 
+Updating case 4491 . . . 
+  Temp/H = 32.8 degrees C
+  Temp/L = 16.7 degrees C
+Updating case 4494 . . . 
+  Temp/H = 23.98 degrees C
+  Temp/L = 7.44 degrees C
+Updating case 4500 . . . 
+  Temp/H = 31.1 degrees C
+  Temp/L = 17.75 degrees C
+Updating case 4503 . . . 
+Updating case 4504 . . . 
+  Temp/H = 27.22 degrees C
+  Temp/L = 13.88 degrees C
+  AVG Wind Speed = 52.2 km/h
+Updating case 4506 . . . 
+  Temp/H = 25.17 degrees C
+  Temp/L = 7.97 degrees C
+Updating case 4512 . . . 
+  Temp/H = 33.05 degrees C
+  Temp/L = 19.2 degrees C
+Updating case 4516 . . . 
+  Temp/H = 34.43 degrees C
+  Temp/L = 8.9 degrees C
+Updating case 4519 . . . 
+  Temp/H = 22.52 degrees C
+  Temp/L = 6.65 degrees C
+  AVG Wind Speed = 118.8 km/h
+Updating case 4522 . . . 
+  Temp/H = 27.5 degrees C
+  Temp/L = 10.55 degrees C
+Updating case 4525 . . . 
+  Temp/H = 22.43 degrees C
+  Temp/L = 10.2 degrees C
+Updating case 4527 . . . 
+  Temp/H = 26.95 degrees C
+  Temp/L = 8.6 degrees C
+Updating case 4531 . . . 
+Updating case 4535 . . . 
+Updating case 4538 . . . 
+  Temp/H = 26.34 degrees C
+  Temp/L = 13.73 degrees C
+  AVG Wind Speed = 104.4 km/h
+  Raining: Yes
+Updating case 4540 . . . 
+  Temp/H = 25.57 degrees C
+  Temp/L = 0.77 degrees C
+Updating case 4544 . . . 
+  Temp/H = 28.6 degrees C
+  Temp/L = 18.85 degrees C
+Updating case 4548 . . . 
+  Temp/H = 16.83 degrees C
+  Temp/L = 3.5 degrees C
+  Raining: Yes
+Updating case 4556 . . . 
+  Temp/H = 22.2 degrees C
+  Temp/L = 3.3 degrees C
+Updating case 4560 . . . 
+  Temp/H = 16.1 degrees C
+  Temp/L = 4.4 degrees C
+Updating case 4564 . . . 
+  Temp/H = 8.9 degrees C
+  Temp/L = 0.53 degrees C
+Updating case 4565 . . . 
+  Temp/H = 8.9 degrees C
+  Temp/L = 0.53 degrees C
+Updating case 4567 . . . 
+Updating case 4577 . . . 
+  Temp/H = 26.37 degrees C
+  Temp/L = 13.77 degrees C
+  AVG Wind Speed = 108.0 km/h
+  Raining: Yes
+Updating case 4586 . . . 
+  Temp/H = 20.55 degrees C
+  Temp/L = 2.5 degrees C
+Updating case 4587 . . . 
+  Temp/H = 17.5 degrees C
+  Temp/L = 3.05 degrees C
+Updating case 4588 . . . 
+  Temp/H = 21.68 degrees C
+  Temp/L = 2.06 degrees C
+Updating case 4599 . . . 
+  Temp/H = 21.7 degrees C
+  Temp/L = -3.9 degrees C
+Updating case 4601 . . . 
+  Temp/H = 21.4 degrees C
+  Temp/L = 9.27 degrees C
+Updating case 4603 . . . 
+Updating case 4608 . . . 
+  Temp/H = 19.8 degrees C
+Updating case 4609 . . . 
+  Temp/H = 25.29 degrees C
+  Temp/L = 15.01 degrees C
+  AVG Wind Speed = 331.2 km/h
+  Raining: Yes
+Updating case 4615 . . . 
+  Temp/H = 26.54 degrees C
+  Temp/L = 3.9 degrees C
+Updating case 4616 . . . 
+  Temp/H = 25.0 degrees C
+  Temp/L = 5.57 degrees C
+Updating case 4618 . . . 
+  Temp/H = 19.4 degrees C
+  AVG Wind Speed = 144.0 km/h
+Updating case 4629 . . . 
+  Temp/H = 16.8 degrees C
+  Temp/L = -2.78 degrees C
+Updating case 4638 . . . 
+  Temp/H = 10.0 degrees C
+  Temp/L = -1.47 degrees C
+  AVG Wind Speed = 248.4 km/h
+Updating case 4646 . . . 
+  Temp/H = 24.84 degrees C
+  Temp/L = 13.23 degrees C
+  AVG Wind Speed = 208.8 km/h
+  Raining: Yes
+Updating case 4655 . . . 
+  Temp/H = 5.54 degrees C
+  Temp/L = -5.8 degrees C
+  Raining: Yes
+Updating case 4657 . . . 
+  Temp/H = 13.22 degrees C
+  Temp/L = -0.22 degrees C
+  AVG Wind Speed = 32.4 km/h
+Updating case 4666 . . . 
+  Temp/H = -1.1 degrees C
+  Temp/L = -5.6 degrees C
+Updating case 4668 . . . 
+  Temp/H = 25.55 degrees C
+  Temp/L = 2.75 degrees C
+Updating case 4674 . . . 
+  Temp/H = 32.2 degrees C
+  Temp/L = 7.75 degrees C
+Updating case 4678 . . . 
+  Temp/H = 14.88 degrees C
+  Temp/L = 1.4 degrees C
+Updating case 4683 . . . 
+  Temp/H = 24.45 degrees C
+  Temp/L = 4.6 degrees C
+Updating case 4685 . . . 
+  Temp/H = 27.66 degrees C
+  Temp/L = 12.22 degrees C
+  AVG Wind Speed = 162.0 km/h
+Updating case 4686 . . . 
+  Temp/H = 26.1 degrees C
+  Temp/L = 11.95 degrees C
+Updating case 4690 . . . 
+  Temp/H = 21.28 degrees C
+  Temp/L = 3.05 degrees C
+Updating case 4695 . . . 
+  Temp/H = 21.03 degrees C
+  Temp/L = 1.85 degrees C
+  Raining: Yes
+Updating case 13148 . . . 
+  Temp/H = 25.08 degrees C
+  Temp/L = 13.33 degrees C
+  AVG Wind Speed = 262.8 km/h
+Updating case 13560 . . . 
+Updating case 13598 . . . 
+  AVG Wind Speed = 187.2 km/h
+Updating case 13641 . . . 
+  AVG Wind Speed = 223.2 km/h
+Updating case 29880 . . . 
+  Temp/H = 30.02 degrees C
+  AVG Wind Speed = 208.8 km/h
+  Raining: Yes
+Updating case 29881 . . . 
+  Temp/H = 27.93 degrees C
+  Temp/L = 15.79 degrees C
+  AVG Wind Speed = 194.4 km/h
+  Raining: Yes
+Updating case 29887 . . . 
+  Temp/L = 15.79 degrees C
+  AVG Wind Speed = 154.8 km/h
+Updating case 29893 . . . 
+  AVG Wind Speed = 154.8 km/h
+Updating case 29897 . . . 
+  Temp/H = 26.02 degrees C
+  Temp/L = 12.98 degrees C
+  AVG Wind Speed = 237.6 km/h
+Updating case 29904 . . . 
+  Temp/H = 25.21 degrees C
+  Temp/L = 14.71 degrees C
+  Raining: Yes
+Updating case 29906 . . . 
+  AVG Wind Speed = 284.4 km/h
+Updating case 29908 . . . 
+  Temp/H = 25.26 degrees C
+  Temp/L = 11.01 degrees C
+  AVG Wind Speed = 288.0 km/h
+  Raining: Yes
+Updating case 29912 . . . 
+  AVG Wind Speed = 324.0 km/h
+Updating case 29913 . . . 
+  Temp/H = 24.74 degrees C
+  Temp/L = 12.12 degrees C
+  AVG Wind Speed = 302.4 km/h
+  Raining: Yes
+Updating case 29917 . . . 
+  Temp/H = 23.57 degrees C
+  Temp/L = 10.8 degrees C
+  AVG Wind Speed = 219.6 km/h
+  Raining: Yes
+Updating case 29921 . . . 
+  Temp/H = 25.72 degrees C
+  Temp/L = 12.86 degrees C
+  AVG Wind Speed = 342.0 km/h
+  Raining: Yes
+Updating case 29922 . . . 
+  Temp/H = 25.85 degrees C
+  Temp/L = 13.64 degrees C
+  AVG Wind Speed = 262.8 km/h
+  Raining: Yes
+Updating case 29923 . . . 
+  Temp/L = 14.46 degrees C
+Updating case 29927 . . . 
+  Temp/L = 13.18 degrees C
+  AVG Wind Speed = 399.6 km/h
+Updating case 29932 . . . 
+  Temp/H = 27.72 degrees C
+  Temp/L = 12.16 degrees C
+  AVG Wind Speed = 136.8 km/h
+  Raining: Yes
+Updating case 29935 . . . 
+  Temp/H = 28.81 degrees C
+  Temp/L = 14.73 degrees C
+  AVG Wind Speed = 270.0 km/h
+  Raining: Yes
+Updating case 29936 . . . 
+  Temp/L = 13.37 degrees C
+Updating case 29938 . . . 
+  Temp/H = 27.59 degrees C
+  Temp/L = 13.58 degrees C
+  AVG Wind Speed = 378.0 km/h
+Updating case 29939 . . . 
+  Temp/L = 11.88 degrees C
+Updating case 29940 . . . 
+  Temp/H = 26.79 degrees C
+  Temp/L = 13.52 degrees C
+  AVG Wind Speed = 345.6 km/h
+Updating case 29947 . . . 
+  Temp/H = 27.67 degrees C
+  AVG Wind Speed = 219.6 km/h
+Updating case 29948 . . . 
+  Temp/H = 27.67 degrees C
+  Temp/L = 15.11 degrees C
+  AVG Wind Speed = 219.6 km/h
+  Raining: Yes
+Updating case 29953 . . . 
+  AVG Wind Speed = 219.6 km/h
+Updating case 29955 . . . 
+  AVG Wind Speed = 327.6 km/h
+Updating case 29962 . . . 
+  Temp/L = 15.03 degrees C
+  AVG Wind Speed = 183.6 km/h
+Updating case 29993 . . . 
+Updating case 29996 . . . 
+  Temp/L = 12.15 degrees C
+Updating case 29998 . . . 
+  AVG Wind Speed = 144.0 km/h
+  Raining: Yes
+Updating case 29999 . . . 
+  Temp/L = 7.33 degrees C
+Updating case 30001 . . . 
+  Raining: Yes
+Updating case 30002 . . . 
+  Temp/L = 10.64 degrees C
+  AVG Wind Speed = 140.4 km/h
+Updating case 30006 . . . 
+  AVG Wind Speed = 219.6 km/h
+Updating case 30008 . . . 
+  Temp/H = 28.46 degrees C
+  Temp/L = 14.25 degrees C
+  AVG Wind Speed = 151.2 km/h
+Updating case 30009 . . . 
+  Temp/L = 10.4 degrees C
+Updating case 30012 . . . 
+  Temp/H = 27.27 degrees C
+  Temp/L = 13.23 degrees C
+  AVG Wind Speed = 230.4 km/h
+  Raining: Yes
+Updating case 30027 . . . 
+Updating case 30033 . . . 
+  Temp/H = 29.38 degrees C
+  Temp/L = 17.23 degrees C
+  AVG Wind Speed = 122.4 km/h
+  Raining: Yes
+Updating case 30037 . . . 
+  Temp/H = 26.44 degrees C
+  Temp/L = 13.83 degrees C
+  AVG Wind Speed = 93.6 km/h
+  Raining: Yes
+Updating case 30045 . . . 
+  Temp/H = 24.1 degrees C
+  Temp/L = 12.96 degrees C
+  AVG Wind Speed = 212.4 km/h
+  Raining: Yes
+Updating case 30052 . . . 
+  AVG Wind Speed = 198.0 km/h
+Updating case 30053 . . . 
+  Temp/H = 25.46 degrees C
+  Temp/L = 12.07 degrees C
+  AVG Wind Speed = 158.4 km/h
+Updating case 30062 . . . 
+  AVG Wind Speed = 244.8 km/h
+Updating case 30069 . . . 
+Updating case 30076 . . . 
+  AVG Wind Speed = 190.8 km/h
+Updating case 30077 . . . 
+Updating case 30086 . . . 
+  Temp/H = 29.19 degrees C
+  Temp/L = 17.23 degrees C
+  AVG Wind Speed = 169.2 km/h
+  Raining: Yes
+Updating case 30087 . . . 
+  Temp/H = 26.85 degrees C
+  Temp/L = 14.38 degrees C
+  AVG Wind Speed = 118.8 km/h
+Updating case 30088 . . . 
+  Temp/H = 27.35 degrees C
+  AVG Wind Speed = 100.8 km/h
+Updating case 30089 . . . 
+Updating case 30090 . . . 
+  Temp/L = 15.55 degrees C
+  AVG Wind Speed = 136.8 km/h
+Updating case 30093 . . . 
+  AVG Wind Speed = 183.6 km/h
+Updating case 30099 . . . 
+  AVG Wind Speed = 64.8 km/h
+Updating case 30115 . . . 
+  AVG Wind Speed = 277.2 km/h
+Updating case 30117 . . . 
+  Temp/L = 14.67 degrees C
+  Raining: Yes
+Updating case 30132 . . . 
+  Temp/L = 18.28 degrees C
+Updating case 30133 . . . 
+  Temp/H = 25.5 degrees C
+  Temp/L = 15.92 degrees C
+  AVG Wind Speed = 136.8 km/h
+Updating case 30138 . . . 
+  Temp/H = 25.26 degrees C
+  Temp/L = 13.91 degrees C
+  AVG Wind Speed = 79.2 km/h
+Updating case 30142 . . . 
+  Temp/L = 14.57 degrees C
+  AVG Wind Speed = 183.6 km/h
+Updating case 30144 . . . 
+  Temp/H = 28.25 degrees C
+  Temp/L = 15.56 degrees C
+  AVG Wind Speed = 82.8 km/h
+  Raining: Yes
+Updating case 30148 . . . 
+  Temp/L = 15.21 degrees C
+  AVG Wind Speed = 75.6 km/h
+Updating case 30153 . . . 
+  Temp/H = 24.48 degrees C
+  Temp/L = 13.76 degrees C
+  AVG Wind Speed = 86.4 km/h
+  Raining: Yes
+Updating case 30158 . . . 
+  Temp/H = 27.22 degrees C
+  Temp/L = 13.59 degrees C
+  AVG Wind Speed = 284.4 km/h
+Updating case 30159 . . . 
+  AVG Wind Speed = 230.4 km/h
+Updating case 30161 . . . 
+  AVG Wind Speed = 158.4 km/h
+Updating case 30171 . . . 
+  Temp/H = 23.96 degrees C
+  Temp/L = 9.68 degrees C
+  AVG Wind Speed = 212.4 km/h
+Updating case 30175 . . . 
+  Temp/H = 24.47 degrees C
+  Temp/L = 10.6 degrees C
+  AVG Wind Speed = 223.2 km/h
+  Raining: Yes
+Updating case 30177 . . . 
+  Temp/H = 29.7 degrees C
+  Temp/L = 10.3 degrees C
+Updating case 30179 . . . 
+  Temp/H = 26.69 degrees C
+  Temp/L = 14.05 degrees C
+  AVG Wind Speed = 374.4 km/h
+Updating case 30182 . . . 
+  Temp/L = 10.84 degrees C
+Updating case 30183 . . . 
+  Temp/H = 27.01 degrees C
+  Temp/L = 11.72 degrees C
+  AVG Wind Speed = 302.4 km/h
+Updating case 30185 . . . 
+  Temp/H = 29.02 degrees C
+  Temp/L = 13.78 degrees C
+  AVG Wind Speed = 43.2 km/h
+Updating case 30186 . . . 
+  Temp/H = 28.06 degrees C
+  Temp/L = 13.36 degrees C
+  AVG Wind Speed = 61.2 km/h
+Updating case 30187 . . . 
+  Temp/H = 28.06 degrees C
+  Temp/L = 13.36 degrees C
+  AVG Wind Speed = 61.2 km/h
+Updating case 30190 . . . 
+  Temp/H = 29.74 degrees C
+  Temp/L = 14.09 degrees C
+  AVG Wind Speed = 298.8 km/h
+Updating case 30191 . . . 
+  Temp/H = 27.12 degrees C
+  Temp/L = 12.4 degrees C
+  AVG Wind Speed = 194.4 km/h
+Updating case 30194 . . . 
+  Temp/H = 26.82 degrees C
+  Temp/L = 12.7 degrees C
+  AVG Wind Speed = 244.8 km/h
+  Raining: Yes
+Updating case 30195 . . . 
+  Temp/H = 28.8 degrees C
+  Temp/L = 12.73 degrees C
+  AVG Wind Speed = 234.0 km/h
+  Raining: Yes
+Updating case 30197 . . . 
+  Temp/H = 28.23 degrees C
+  Temp/L = 13.83 degrees C
+  AVG Wind Speed = 302.4 km/h
+Updating case 30199 . . . 
+  Temp/H = 28.75 degrees C
+  Temp/L = 14.72 degrees C
+  AVG Wind Speed = 370.8 km/h
+Updating case 30202 . . . 
+  Temp/H = 28.81 degrees C
+  Temp/L = 13.65 degrees C
+  AVG Wind Speed = 122.4 km/h
+Updating case 30204 . . . 
+  AVG Wind Speed = 230.4 km/h
+Updating case 30206 . . . 
+  Temp/H = 28.75 degrees C
+  Temp/L = 15.06 degrees C
+  AVG Wind Speed = 198.0 km/h
+Updating case 30212 . . . 
+  AVG Wind Speed = 100.8 km/h
+Updating case 30213 . . . 
+  Temp/L = 13.82 degrees C
+  AVG Wind Speed = 219.6 km/h
+  Raining: Yes
+Updating case 30214 . . . 
+  Temp/H = 26.58 degrees C
+  Temp/L = 13.82 degrees C
+  AVG Wind Speed = 219.6 km/h
+  Raining: Yes
+Updating case 30221 . . . 
+  Temp/H = 25.53 degrees C
+  Temp/L = 14.63 degrees C
+  AVG Wind Speed = 205.2 km/h
+  Raining: Yes
+Updating case 30222 . . . 
+  Temp/H = 25.53 degrees C
+  Temp/L = 14.63 degrees C
+  AVG Wind Speed = 205.2 km/h
+  Raining: Yes
+Updating case 30226 . . . 
+  Temp/H = 27.98 degrees C
+  Temp/L = 15.87 degrees C
+  AVG Wind Speed = 115.2 km/h
+  Raining: Yes
+Updating case 30255 . . . 
+  Temp/H = 27.73 degrees C
+  Temp/L = 14.07 degrees C
+  AVG Wind Speed = 226.8 km/h
+Updating case 30258 . . . 
+  AVG Wind Speed = 194.4 km/h
+Updating case 30267 . . . 
+  Temp/H = 27.16 degrees C
+  Temp/L = 12.86 degrees C
+  AVG Wind Speed = 126.0 km/h
+Updating case 30274 . . . 
+  Temp/H = 26.4 degrees C
+  Temp/L = 12.03 degrees C
+  AVG Wind Speed = 216.0 km/h
+Updating case 30278 . . . 
+  Temp/L = 14.36 degrees C
+Updating case 30280 . . . 
+  Temp/H = 30.75 degrees C
+  Temp/L = 16.37 degrees C
+  AVG Wind Speed = 136.8 km/h
+Updating case 30286 . . . 
+  Temp/H = 27.74 degrees C
+  Temp/L = 13.44 degrees C
+  AVG Wind Speed = 262.8 km/h
+  Raining: Yes
+Updating case 30288 . . . 
+  Temp/H = 28.0 degrees C
+  Temp/L = 14.11 degrees C
+  AVG Wind Speed = 241.2 km/h
+  Raining: Yes
+Updating case 30289 . . . 
+  Temp/H = 29.17 degrees C
+  Temp/L = 15.25 degrees C
+  AVG Wind Speed = 198.0 km/h
+  Raining: Yes
+Updating case 30292 . . . 
+  Temp/H = 28.46 degrees C
+  Temp/L = 14.83 degrees C
+  AVG Wind Speed = 309.6 km/h
+Updating case 30299 . . . 
+  AVG Wind Speed = 273.6 km/h
+  Raining: Yes
+Updating case 30300 . . . 
+  AVG Wind Speed = 219.6 km/h
+Updating case 30308 . . . 
+  AVG Wind Speed = 68.4 km/h
+Updating case 30312 . . . 
+  AVG Wind Speed = 176.4 km/h
+Updating case 30313 . . . 
+  Temp/H = 27.91 degrees C
+  Temp/L = 15.85 degrees C
+Updating case 30314 . . . 
+Updating case 30315 . . . 
+  AVG Wind Speed = 280.8 km/h
+Updating case 30322 . . . 
+  AVG Wind Speed = 82.8 km/h
+  Raining: Yes
+Updating case 30327 . . . 
+  AVG Wind Speed = 104.4 km/h
+Updating case 30334 . . . 
+  AVG Wind Speed = 68.4 km/h
+Updating case 30335 . . . 
+Updating case 30339 . . . 
+  Temp/L = 16.82 degrees C
+  AVG Wind Speed = 151.2 km/h
+Updating case 30344 . . . 
+  Temp/L = 14.0 degrees C
+  Raining: Yes
+Updating case 30349 . . . 
+  AVG Wind Speed = 86.4 km/h
+Updating case 30351 . . . 
+Updating case 30361 . . . 
+  Temp/H = 25.83 degrees C
+  Temp/L = 15.63 degrees C
+  AVG Wind Speed = 68.4 km/h
+Updating case 30370 . . . 
+  Temp/L = 12.49 degrees C
+  AVG Wind Speed = 100.8 km/h
+Updating case 30374 . . . 
+  Raining: Yes
+Updating case 30376 . . . 
+  Temp/L = 11.4 degrees C
+  AVG Wind Speed = 198.0 km/h
+Updating case 30385 . . . 
+  Temp/L = 11.19 degrees C
+Updating case 30388 . . . 
+  Temp/L = 14.07 degrees C
+  AVG Wind Speed = 93.6 km/h
+Updating case 30400 . . . 
+Updating case 30401 . . . 
+  Temp/H = 28.27 degrees C
+  Temp/L = 12.13 degrees C
+Updating case 30402 . . . 
+Updating case 30404 . . . 
+  Temp/L = 13.74 degrees C
+  AVG Wind Speed = 280.8 km/h
+Updating case 30410 . . . 
+  Temp/H = 29.72 degrees C
+  Temp/L = 12.34 degrees C
+  AVG Wind Speed = 230.4 km/h
+Updating case 30411 . . . 
+  Temp/H = 28.56 degrees C
+  Temp/L = 12.08 degrees C
+  AVG Wind Speed = 255.6 km/h
+Updating case 30412 . . . 
+  AVG Wind Speed = 136.8 km/h
+Updating case 30414 . . . 
+  Temp/L = 12.12 degrees C
+Updating case 30415 . . . 
+  Temp/L = 13.64 degrees C
+Updating case 30416 . . . 
+  AVG Wind Speed = 133.2 km/h
+Updating case 30417 . . . 
+  AVG Wind Speed = 147.6 km/h
+Updating case 30421 . . . 
+  Temp/H = 28.85 degrees C
+  Temp/L = 14.68 degrees C
+  AVG Wind Speed = 298.8 km/h
+Updating case 30423 . . . 
+  Temp/H = 30.35 degrees C
+  Temp/L = 16.54 degrees C
+  AVG Wind Speed = 259.2 km/h
+Updating case 30431 . . . 
+  Temp/H = 25.31 degrees C
+  Temp/L = 12.74 degrees C
+  AVG Wind Speed = 136.8 km/h
+Updating case 30438 . . . 
+  AVG Wind Speed = 86.4 km/h
+Updating case 30440 . . . 
+  Temp/H = 27.01 degrees C
+  Temp/L = 16.79 degrees C
+Updating case 30442 . . . 
+  Temp/H = 27.65 degrees C
+  Temp/L = 15.29 degrees C
+  AVG Wind Speed = 219.6 km/h
+Updating case 30450 . . . 
+  Temp/L = 17.78 degrees C
+  AVG Wind Speed = 252.0 km/h
