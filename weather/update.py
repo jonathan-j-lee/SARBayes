@@ -43,6 +43,8 @@ def get_date_and_location(raw_date, raw_lkp_ns, raw_lkp_ew, datemode):
         
         if -90 <= lkp_ns <= 90 and -180 <= lkp_ew <= 180:
             return date, lkp_ns, lkp_ew
+        else:
+            print(raw_lkp_ns, raw_lkp_ew)
 
 
 def read_case_data(filename):
@@ -54,8 +56,8 @@ def read_case_data(filename):
 
 
 def update_case_data(input_filename, output_filename):
-    workbook = xlsxwriter.Workbook(output_filename)
-    worksheet = workbook.add_worksheet()
+    # workbook = xlsxwriter.Workbook(output_filename)
+    # worksheet = workbook.add_worksheet()
     
     for row, row_index, datemode in read_case_data(input_filename):
         raw_weather_data = row[37:40] + row[41:43]
@@ -88,10 +90,10 @@ def update_case_data(input_filename, output_filename):
                         new_weather_data['SNOW'] == 0 else 'No'
                     print('  Raining: {}'.format(rain))
         
-        worksheet.write_row('A{}'.format(row_index), row)
+        # worksheet.write_row('A{}'.format(row_index), row)
     
-    workbook.close()
+    # workbook.close()
 
 
 if __name__ == '__main__':
-    update_case_data('ISRIDclean.xlsx', 'ISRIDclean-updated.xlsx')
+    update_case_data('../ISRIDclean.xlsx', '../ISRIDclean-updated.xlsx')

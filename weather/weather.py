@@ -6,7 +6,6 @@ SARbayes
 ================================================================================
 The purpose of this module is to provide access to historic weather data using 
 the API of the National Centers for Environmental Information (NCEI).
-
 The API provides the following endpoints: 
   * datasets
   * datacategories
@@ -15,10 +14,8 @@ The API provides the following endpoints:
   * locations
   * stations
   * data
-
 Every call to the API yields JSON data, with one key for results and the other 
 for metadata like so: 
-
     {
         "results": ..., 
         "metadata": {
@@ -29,10 +26,8 @@ for metadata like so:
             }
         }
     }
-
 The maximum number of results that can be requested per call is 1000. The 
 default limit is 25 items.
-
 The full documentation is at "http://www.ncdc.noaa.gov/cdo-web/webservices/v2".
 ================================================================================
 """

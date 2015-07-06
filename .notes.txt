@@ -1,0 +1,13 @@
+NY State Cases
+=======================================
+
+County numbers: http://library.columbia.edu/locations/dssc/data/nycounty_fips.html
+
+Ecoregion Division?
+
+State plane coordinates: http://www.ngs.noaa.gov/TOOLS/spc.shtml
+
+http://www.spatialreference.org/
+
+UTM 18T Bottom-Left Corner -> 243900.4, 4432069.1 (Easting, Northing)
+  = (Lat = 40, Lon = -78)

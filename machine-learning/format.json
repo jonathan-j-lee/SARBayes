@@ -1,0 +1,20 @@
+[
+    {
+        "name": "key", 
+        "index": 1, 
+        "type": "s", 
+        "meta": "m"
+    }, 
+    {
+        "name": "status", 
+        "index": 46, 
+        "type": "d", 
+        "meta": "c"
+    }, 
+    {
+        "name": "age", 
+        "index": 15, 
+        "type": "c", 
+        "meta": ""
+    }
+]
