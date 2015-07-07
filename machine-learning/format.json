@@ -16,5 +16,17 @@
         "index": 15, 
         "type": "c", 
         "meta": ""
+    }, 
+    {
+        "name": "category", 
+        "index": 11, 
+        "type": "d", 
+        "meta": ""
+    }, 
+    {
+        "name": "hours", 
+        "index": 31, 
+        "type": "c", 
+        "meta": ""
     }
 ]

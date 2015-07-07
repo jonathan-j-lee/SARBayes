@@ -2,13 +2,34 @@
 # SARbayes/machine-learning/format.py
 
 
+import itertools
 import json
 import xlrd
 
 
 def process(attributes, row):
-    row = list(row[attr['index']] for index in attributes)
-    print(row)
+    data = list()
+    
+    for attr in attributes:
+        item = row[attr['index']]
+        if attr['name'] == 'status':
+            item = 'DEAD' if 'DOA' in item else 'ALIVE'
+        if type(item) is str and len(item) > 0:
+            item = item.replace('.', ',').split(',')
+            if attr['type'] == 'c':
+                item = [float(_.replace('s', '')) 
+                    for _ in item if _ and _ != '?']
+        else:
+            item = [item]
+        data.append(item)
+    
+    for item in itertools.zip_longest(*data, fillvalue=None):
+        item = list(item)
+        while None in item:
+            index = item.index(None)
+            item[index] = str(data[index][0])
+        item = list((str(_) if _ else '?') for _ in item)
+        yield item
 
 
 def main(input_filename, config_filename, output_filename):
