@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-# SARbayes/weather/update.py
+# SARbayes/weather/format.py
 
 
-import datetime
-import geopy
-import weather
 import xlrd
 import xlsxwriter
 

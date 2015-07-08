@@ -58,5 +58,5 @@ target/
 
 *.xlsx
 *.tab
-weather/LKPs.txt
 *.bak
+trash/*

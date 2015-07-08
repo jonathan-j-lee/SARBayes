@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# weather.py
+# SARbayes/weather/weather.py
 
 """
 SARbayes
@@ -98,7 +98,8 @@ def get_stations(date, coordinates, datasetid='GHCND', d=20):
         datasetid=datasetid, 
         startdate=date_as_str, 
         enddate=date_as_str, 
-        extent=extent
+        extent=extent, 
+        limit=1000
     )
     
     if 'results' in raw_data:
