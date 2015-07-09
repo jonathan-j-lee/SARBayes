@@ -37,7 +37,7 @@ def process(row, index, datemode):
             # Already latitude and longitude
             if -90 <= ns <= 90 and -180 <= ew <= 180 and \
                     ns % 1.0 != 0 and ew % 1.0 != 0:
-                row[33], row[34] = float(ns), float(ew)
+                row[33], row[34] = round(ns, 6), round(ew, 6)
             # Truncated UTM
             elif 0 <= ns < 1000 and 0 <= ew < 1000:
                 assert ns == int(ns) and ew == int(ew)
