@@ -1,17 +1,29 @@
 #!/usr/bin/env python3
 # SARbayes/weather/update.py
 
+"""
+SARbayes
+
+This module adds missing weather data to the database.
+
+See "help(weather)" for more information.
+"""
 
 import datetime
 import geopy
-import weather
 import xlrd
-import xlsxwriter
+
+from formatting import modify_database
+import weather
 
 
-def main():
-    pass
+def process(row, index, datemode):
+    try:
+        date = datetime.datetime(*xlrd.xldate_as_tuple(row[3], datemode))
+    except (TypeError, xlrd.xldate.XLDateNegative):
+        pass
 
 
 if __name__ == '__main__':
-    main()
+    modify_database(
+        '../ISRID-2.xlsx', '../ISRID-3.xlsx', 'ISRIDclean', process)
