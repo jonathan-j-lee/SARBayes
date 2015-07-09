@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SARbayes/machine-learning/format.py
+# SARbayes/machine_learning/formatting.py
 
 
 import itertools

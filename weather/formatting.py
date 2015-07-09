@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SARbayes/weather/format.py
+# SARbayes/weather/formatting.py
 
 """
 SARbayes
@@ -18,12 +18,13 @@ More resources:
   * http://www.earthpoint.us/TownshipsSearchByDescription.aspx
 """
 
+import coordinates
 import xlrd
 import xlsxwriter
 import re
 
 DECIMAL = r'^-{0,1}\d*\.\d+$'
-DMS = r'^\d{1,3}[\s\.\'\"]\d{1,3}[\s\.\'\"]\d{1,3}$'
+DMS = r'^\d{1,3}[\s\.]\d{1,3}[\s\.]\d{1,3}$'
 
 
 def process(row, index, datemode):
@@ -31,9 +32,47 @@ def process(row, index, datemode):
     if lkp_ns and lkp_ew:
         m1, m2 = re.match(DECIMAL, lkp_ns), re.match(DECIMAL, lkp_ew)
         if m1 and m2:
+            ns, ew = float(lkp_ns), float(lkp_ew)
+            
+            # Already latitude and longitude
+            if -90 <= ns <= 90 and -180 <= ew <= 180 and \
+                    ns % 1.0 != 0 and ew % 1.0 != 0:
+                row[33], row[34] = float(ns), float(ew)
+            # Truncated UTM
+            elif 0 <= ns < 1000 and 0 <= ew < 1000:
+                assert ns == int(ns) and ew == int(ew)
+                ns, ew = str(int(ns)).rjust(3, '0'), str(int(ew)).rjust(3, '0')
+                ns, ew = ns.ljust(5, '0'), ns.ljust(5, '0')
+                if 'NY' in row[1]:
+                    k = int(row[5])
+                    ns = int('4' + str(k) + ns)
+                    ew = int('5' + ew)
+                    lat, lon = coordinates.utm_to_lat_lon(ew, ns, 18, 1)
+                    row[33], row[34] = round(lat, 6), round(lon, 6)
+            # UTM
+            else:
+                if 'NY' in row[1]:
+                    lat, lon = coordinates.utm_to_lat_lon(ew, ns, 18, 1)
+                    row[33], row[34] = round(lat, 6), round(lon, 6)
+            
             return
+        
         m1, m2 = re.match(DMS, lkp_ns), re.match(DMS, lkp_ew)
         if m1 and m2:
+            lkp_ns, lkp_ew = lkp_ns.replace('.', ' '), lkp_ew.replace('.', ' ')
+            dms_ns, dms_ew = lkp_ns.split(' '), lkp_ew.split(' ')
+            s_ns, s_ew = dms_ns[2], dms_ew[2]
+            if len(s_ns) > 2:
+                dms_ns[2] = s_ns[:2] + '.' + s_ns[2:]
+            if len(s_ew) > 2:
+                dms_ew[2] = s_ew[:2] + '.' + s_ew[2:]
+            
+            ns = round(coordinates.dms_to_decimal(
+                float(dms_ns[0]), float(dms_ns[1]), float(dms_ns[2])), 6)
+            ew = round(coordinates.dms_to_decimal(
+                float(dms_ew[0]), float(dms_ew[1]), float(dms_ew[2])), 6)
+            
+            row[33], row[34] = ns, ew
             return
         
         # Ignore unreadable cases
