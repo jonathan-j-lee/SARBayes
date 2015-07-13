@@ -2,31 +2,43 @@
     {
         "name": "key", 
         "index": 1, 
-        "type": "s", 
-        "meta": "m"
+        "type": "string", 
+        "meta": "meta"
     }, 
     {
         "name": "status", 
         "index": 46, 
-        "type": "d", 
-        "meta": "c"
+        "type": "discrete", 
+        "meta": "class"
     }, 
     {
         "name": "age", 
         "index": 15, 
-        "type": "c", 
+        "type": "continuous", 
         "meta": ""
     }, 
     {
         "name": "category", 
         "index": 11, 
-        "type": "d", 
+        "type": "discrete", 
         "meta": ""
     }, 
     {
         "name": "hours", 
         "index": 31, 
-        "type": "c", 
+        "type": "continuous", 
+        "meta": ""
+    }, 
+    {
+        "name": "temp_high", 
+        "index": 37, 
+        "type": "continuous", 
+        "meta": ""
+    }, 
+    {
+        "name": "temp_low", 
+        "index": 38, 
+        "type": "continuous", 
         "meta": ""
     }
 ]

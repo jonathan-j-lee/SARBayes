@@ -51,4 +51,4 @@ def main(input_filename, config_filename, output_filename):
 
 
 if __name__ == '__main__':
-    main('../ISRIDclean.xlsx', 'format.json', 'ISRID.tab')
+    main('../ISRID-updated.xlsx', 'format.json', 'ISRID.tab')

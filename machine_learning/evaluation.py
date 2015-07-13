@@ -61,8 +61,10 @@ def get_confusion_matrix(data, learner, folds=10):
         return confusion_matrix
 
 
-def print_statistics(data, learner, folds=10, file=sys.stdout):
+def print_statistics(data, learner, folds=10, _file=sys.stdout):
+    start = time.time()
     confusion_matrix = get_confusion_matrix(data, learner, folds)
+    end = time.time()
     class_names = get_class_names(data)
     
     correct = 0
@@ -70,8 +72,21 @@ def print_statistics(data, learner, folds=10, file=sys.stdout):
         correct += confusion_matrix[index, index]
     else:
         accuracy = 100*correct/len(data)
+    
+    print(STATS_TEMPLATE.format(
+        learner.name, 
+        end - start, 
+        ', '.join(attr.name for attr in data.domain.attributes), 
+        '\n    '.join(row_name.ljust(16) + col_name.ljust(16) + 
+            str(int(
+                confusion_matrix[int(row_value), int(col_value)])).ljust(16) 
+            for row_name, row_value in class_names.items()
+            for col_name, col_value in class_names.items()
+        ), 
+        accuracy
+    ), file=_file)
 
 
 data = Orange.data.Table('ISRID')
-learner = Orange.classification.TreeLearner
+learner = Orange.classification.NaiveBayesLearner
 print_statistics(data, learner)
