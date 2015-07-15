@@ -1,0 +1,21 @@
+# SARbayes/ISRID/settings.yaml
+
+# Worksheet title
+title: ISRID
+
+# Use argument names.
+# See: http://openpyxl.readthedocs.org/en/latest/styles.html
+styles: 
+    font: 
+        name: Monospace
+        size: 10
+
+columns: 
+    key: 
+        index: 1
+    date: 
+        index: 3
+    lkp_ns: 
+        index: 33
+    lkp_ew: 
+        index: 34
