@@ -19,3 +19,11 @@ columns:
         index: 33
     lkp_ew: 
         index: 34
+
+# NOAA Tokens
+tokens: 
+  - CAKlHptoFxCtALqpfyjIKtmpfCbQIWse 
+  - ZTZdegFESMPyfcbxZzdApotLPuZqZbjV
+  - koceZQKoKxrRBnsKGKwkvVSXUUsrjUWO
+  - tyatdcCMMaBwWKAHdQvQkVLxYcUbizCt
+  - tZAjzLeMUjwHRzbyCshFDCUsUGecVpWT

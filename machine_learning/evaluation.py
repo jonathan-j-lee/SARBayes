@@ -88,5 +88,14 @@ def print_statistics(data, learner, folds=10, _file=sys.stdout):
 
 
 data = Orange.data.Table('ISRID')
+
+indices = list()
+
+for index, case in enumerate(data):
+    if sum(np.isnan(value) for value in case.attributes()) <= 1:
+        indices.append(index)
+
+data = Orange.data.Table.from_table_rows(data, indices)
+
 learner = Orange.classification.NaiveBayesLearner
 print_statistics(data, learner)
