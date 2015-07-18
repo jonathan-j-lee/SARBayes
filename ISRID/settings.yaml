@@ -13,6 +13,10 @@ styles:
 columns: 
     key: 
         index: 1
+    city:
+        index: 4
+    county: 
+        index: 5
     date: 
         index: 3
     lkp_ns: 

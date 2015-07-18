@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SARbayes/weather/coordinates.py
+# SARbayes/ISRID/coordinates.py
 
 """
 SARbayes
