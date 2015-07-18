@@ -20,6 +20,15 @@ DECIMAL = re.compile(r'([+-]?\d+\.?\d*)')
 DM = re.compile(r'(\d+)[^\d](\d+(\.|\')\d+)')
 DMS = re.compile(r'(\d{1,3})[\s\'\"\-/\.]{1,2}(\d+)[^\d]{1,2}(\d+)')
 
+GEOLOCATOR = geopy.Nominatim()
+COUNTRIES = {
+    'AU': 'Austrailia', 
+    'CA-BC': 'British Columbia, Canada', 
+    'NZ': 'New Zealand', 
+    'US-AZ': 'Arizona, United States', 
+    'US-WA': 'Washington, United States'
+}
+
 
 def _format_date(raw_date):
     if type(raw_date) is datetime.datetime:
@@ -61,14 +70,12 @@ def _format_date(raw_date):
             assert 0 <= minute < 60 and 0 <= second < 60
             
             date = datetime.datetime(year, month, day, hour, minute, second)
-            # util.log('Converting date: "{}" -> "{}"'.format(
-            #     raw_date, date.isoformat()))
             return date
         except AssertionError:
             pass
 
 
-def _format_lkp(raw_key, raw_city, raw_county, raw_lkp_ns, raw_lkp_ew, index):
+def _format_lkp(index, raw_key, raw_city, raw_county, raw_lkp_ns, raw_lkp_ew):
     assert raw_lkp_ns is not None
     lat, lon = None, None
     
@@ -95,7 +102,7 @@ def _format_lkp(raw_key, raw_city, raw_county, raw_lkp_ns, raw_lkp_ew, index):
                     if 'W' in raw_lkp_ns:
                         lon *= -1
                 else:
-                    print(len(result), result, raw_lkp_ns, raw_key)
+                    pass  # No idea what any of this is
     else:
         if type(raw_lkp_ns) is type(raw_lkp_ew) is int:
             if 0 <= raw_lkp_ns < 1000 and 0 <= raw_lkp_ew < 1000:
@@ -152,14 +159,24 @@ def _format_lkp(raw_key, raw_city, raw_county, raw_lkp_ns, raw_lkp_ew, index):
     
     if not (lat and lon):
         # Use city/county instead
-        pass
-    
-    if lat and lon:
-        lat, lon = round(lat, 6), round(lon, 6)
-        assert -90 <= lat <= 90 and -180 <= lon <= 180
+        country = ''
+        for abbreviation, name in COUNTRIES.items():
+            if abbreviation in raw_key:
+                country = abbreviation
         
-        # util.log('Case {}: ("{}", "{}") -> ({}, {})'.format(
-        #     index, raw_lkp_ns, raw_lkp_ew, lat, lon))
+        if 'US' not in country:
+            return None, None
+        
+        query = ' '.join(((raw_city.strip() if raw_city else ''), 
+            (raw_county.strip() if raw_county else ''), country))
+        query = query.replace('SAR', '').strip()
+        try:
+            point = GEOLOCATOR.geocode(query, timeout=10)
+            if point:
+                lat, lon = point.latitude, point.longitude
+        except geopy.exc.GeocoderTimedOut:
+            util.log('Error: Case {}: Query timed out ("{}").'.format(
+                index, query))
     
     return lat, lon
 
@@ -170,6 +187,9 @@ def standardize(index, row_values, column_settings):
         date = _format_date(raw_date)
         assert type(date) is datetime.datetime
         row_values[column_settings['date']['index']] = date
+        if type(raw_date) is not datetime.datetime:
+            util.log('Case {}: "{}" -> "{}"'.format(
+                index, raw_date, date.isoformat()))
     except (KeyError, AssertionError):
         pass
     
@@ -182,9 +202,16 @@ def standardize(index, row_values, column_settings):
         
         if raw_lkp_ns or raw_lkp_ew:
             lat, lon = _format_lkp(
-                raw_key, raw_city, raw_county, raw_lkp_ns, raw_lkp_ew, index)
+                index, raw_key, raw_city, raw_county, raw_lkp_ns, raw_lkp_ew)
+            
             assert type(lat) is type(lon) is float
+            assert -90 <= lat <= 90 and -180 <= lon <= 180
+            
+            lat, lon = round(lat, 6), round(lon, 6)
             row_values[column_settings['lkp_ns']['index']] = lat
             row_values[column_settings['lkp_ew']['index']] = lon
+            if not (type(raw_lkp_ns) is type(raw_lkp_ew) is float):
+                util.log('Case {}: ("{}", "{}") -> ("{}", "{}")'.format(
+                    index, raw_lkp_ns, raw_lkp_ew, lat, lon))
     except (KeyError, AssertionError):
         pass

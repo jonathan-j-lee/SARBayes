@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SARbayes/weather/weather.py
+# SARbayes/ISRID/weather.py
 
 """
 SARbayes
@@ -16,6 +16,7 @@ The API provides the following endpoints:
   * data
 Every call to the API yields JSON data, with one key for results and the other 
 for metadata like so: 
+
     {
         "results": ..., 
         "metadata": {
@@ -26,32 +27,47 @@ for metadata like so:
             }
         }
     }
+
 The maximum number of results that can be requested per call is 1000. The 
 default limit is 25 items.
 The full documentation is at "http://www.ncdc.noaa.gov/cdo-web/webservices/v2".
+
+Note: 
+  * By default, for each token, you are limited to 1000 requests per day.
 ================================================================================
 """
 
-import urllib.request, urllib.parse
+import urllib.request, urllib.parse, urllib.error
 import geopy
 import json
 from math import pi, sin, cos, asin, degrees, radians
 import numpy as np
+import util
 
 API_URL = 'http://www.ncdc.noaa.gov/cdo-web/api/v2/{}?{}'
-API_TOKEN = 'CAKlHptoFxCtALqpfyjIKtmpfCbQIWse'
+API_TOKENS = ()  # Set in application
+_token_index = 0
 
 R = 6371  # Earth's radius in km
 
 
 def request_data(endpoint, safe=':,', **parameters):
     """ Build the URL and fetch the data. """
+    global _token_index
     url = API_URL.format(endpoint, 
         urllib.parse.urlencode(parameters, safe=safe))
-    request = urllib.request.Request(url, headers={'token': API_TOKEN})
-    response = urllib.request.urlopen(request)
-    raw_data = json.loads(response.read().decode('utf-8'))
-    return raw_data
+    try:
+        request = urllib.request.Request(url, 
+            headers={'token': API_TOKENS[_token_index]})
+        response = urllib.request.urlopen(request)
+        raw_data = json.loads(response.read().decode('utf-8'))
+        return raw_data
+    except urllib.error.HTTPError:
+        _token_index += 1
+        return request_data(endpoint, safe=safe, **parameters)
+    except IndexError:
+        util.log('Error: No more requests allowed.')
+        quit(2)
 
 
 def get_bounds(coordinates, d):
@@ -143,6 +159,6 @@ def get_conditions(date, coordinates, datasetid='GHCND', d=20):
                 pass
     
     for data_type, values in required_data.items():
-        required_data[data_type] = np.average(values) if values else None
+        required_data[data_type] = float(np.average(values)) if values else None
     
     return required_data

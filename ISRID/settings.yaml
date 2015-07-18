@@ -23,6 +23,16 @@ columns:
         index: 33
     lkp_ew: 
         index: 34
+    temp_max: 
+        index: 37
+    temp_min: 
+        index: 38
+    wind_speed: 
+        index: 39
+    snow: 
+        index: 41
+    rain: 
+        index: 42
 
 # NOAA Tokens
 tokens: 
