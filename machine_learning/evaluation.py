@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
-# SARbayes/machine-learning/evaluate.py
+# SARbayes/machine_learning/evaluate.py
 
 
 import numpy as np
-import Orange
+import Orange, Orange.base
 import sys
 import time
 
@@ -20,6 +20,116 @@ STATS_TEMPLATE = '''Statistics:
     
     Accuracy: {:.3f} %
 '''
+
+
+class BaselineLearner(Orange.base.Learner):
+    """ Dud Learner """
+    name = 'baseline learner'
+    
+    def __call__(self, train_data):
+        def classifier(test_data):
+            class_names = get_class_names(test_data)
+            return np.full(len(test_data), class_names['ALIVE'])
+        return classifier
+
+
+class CaseBasedLearner(Orange.base.Learner):
+    """ Case-Based Learner """
+    name = 'case-based learner'
+    
+    def __init__(self):
+        self._probabilities = dict()
+    
+    def __call__(self, train_data):
+        # attr -> feature
+        
+        class_names = get_class_names(train_data)
+        for attr in train_data.domain.attributes:
+            self._probabilities[attr.name] = dict()
+            col_values = list(filter(
+                lambda value: not np.isnan(value), 
+                list(instance[attr.name]._value for instance in train_data)
+            ))
+            
+            if attr.is_continuous:
+                _min, _max = min(col_values), max(col_values)
+                _step, _prev = abs(_max - _min)/10, _min
+                
+                for _next in np.arange(_min + _step, _max + 1e-3, _step):
+                    key = _prev, _next
+                    
+                    if key not in self._probabilities[attr.name]:
+                        self._probabilities[attr.name][key] = [0, 0]
+                    
+                    _prev = _next
+            elif attr.is_discrete:
+                for key in set(int(value) for value in col_values):
+                    self._probabilities[attr.name][key] = [0, 0]
+            else:
+                raise ValueError
+        
+        for instance in train_data:
+            status = instance.get_class().value
+            for attr in instance.domain.attributes:
+                value = instance[attr.name]._value
+                if np.isnan(value):  # Missing attribute
+                    continue
+                
+                if attr.is_continuous:
+                    for key in self._probabilities[attr.name]:
+                        lowerbound, upperbound = key
+                        if lowerbound < value <= upperbound:
+                            self._probabilities[attr.name][key][1] += 1
+                            if status == 'DEAD':
+                                self._probabilities[attr.name][key][0] += 1
+                            break
+                
+                elif attr.is_discrete:
+                    value = int(value)
+                    self._probabilities[attr.name][value][1] += 1
+                    if status == 'DEAD':
+                        self._probabilities[attr.name][value][0] += 1
+                
+                else:
+                    raise ValueError
+        
+        def classifier(test_data):
+            _p = list()
+            for instance in test_data:
+                p = 1  # P(DOA)
+                for attr in instance.domain.attributes:
+                    value = instance[attr.name]._value
+                    if np.isnan(value):  # Missing attribute
+                        continue
+                    
+                    if attr.is_continuous:
+                        for key in self._probabilities[attr.name]:
+                            lowerbound, upperbound = key
+                            if lowerbound < value <= upperbound:
+                                n_doa, n_lost = \
+                                    self._probabilities[attr.name][key]
+                                assert n_doa <= n_lost
+                                if n_lost > 0:
+                                    p *= n_doa/n_lost
+                                break
+                    
+                    elif attr.is_discrete:
+                        value = int(value)
+                        n_doa, n_lost = self._probabilities[attr.name].get(
+                            value, (1, 1))
+                        assert n_doa <= n_lost
+                        if n_lost > 0:
+                            p *= n_doa/n_lost
+                    
+                    else:
+                        raise ValueError
+                else:
+                    _p.append(p)
+            else:
+                return np.array([class_names['ALIVE'] if p < 0.025 
+                    else class_names['DEAD'] for p in _p])
+        
+        return classifier
 
 
 def cross_validate(data, learner, folds=10):
@@ -45,7 +155,7 @@ def cross_validate(data, learner, folds=10):
 
 def get_class_names(data):
     classes = set(instance.get_class() for instance in data)
-    return {class_type.value: class_type._value for class_type in classes}
+    return {class_type.value: int(class_type._value) for class_type in classes}
 
 
 def get_confusion_matrix(data, learner, folds=10):
@@ -87,15 +197,21 @@ def print_statistics(data, learner, folds=10, _file=sys.stdout):
     ), file=_file)
 
 
-data = Orange.data.Table('ISRID')
+def main():
+    data = Orange.data.Table('ISRID')
+    
+    # Restrict cases
+    # indices = list()
+    # for index, case in enumerate(data):
+    #     if sum(np.isnan(value) for value in case.attributes()) <= 2:
+    #         indices.append(index)
+    # data = Orange.data.Table.from_table_rows(data, indices)
+    
+    learner = BaselineLearner
+    print_statistics(data, learner, folds=5)
+    learner = CaseBasedLearner
+    print_statistics(data, learner, folds=5)
 
-indices = list()
 
-for index, case in enumerate(data):
-    if sum(np.isnan(value) for value in case.attributes()) <= 1:
-        indices.append(index)
-
-data = Orange.data.Table.from_table_rows(data, indices)
-
-learner = Orange.classification.NaiveBayesLearner
-print_statistics(data, learner)
+if __name__ == '__main__':
+    main()

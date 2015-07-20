@@ -60,3 +60,4 @@ target/
 *.tab
 *.bak
 trash/*
+*.yaml
