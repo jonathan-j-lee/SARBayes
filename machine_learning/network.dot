@@ -1,18 +1,13 @@
 // SARbayes
-// $ dot network.dot -Tpng -o network.png
+// $ dot network.dot -Tpng -o network.png; display network.png
 
 digraph network {
-    // Subject predictors
-    Age -> Status;
-    Sex -> Status;
-    Category -> Status;
-    
-    // Environmental predictors
-    Hours -> Status;
-    Hours -> "High Temp." -> Status;
-    Hours -> "Low Temp." -> Status;
-    "High Temp." -> Snow -> Status;
-    "Low Temp." -> Rain -> Status;
-    "High Temp." -> Wind -> Status;
-    "Low Temp." -> Wind;
+    age -> status [label="w[0]"];
+    hours -> status [label="w[1]"];
+    hours -> temp_max [label="w[2]"];
+    temp_max -> status [label="w[3]"];
+    hours -> temp_min [label="w[4]"];
+    temp_min -> status[label="w[5]"];
+    snow ->status [label="w[6]"];
+    rain -> status [label="w[7]"];
 }

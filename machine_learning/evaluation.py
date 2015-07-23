@@ -126,7 +126,7 @@ class CaseBasedLearner(Orange.base.Learner):
                 else:
                     _p.append(p)
             else:
-                return np.array([class_names['ALIVE'] if p < 0.025 
+                return np.array([class_names['ALIVE'] if p < 0.025  # Threshold
                     else class_names['DEAD'] for p in _p])
         
         return classifier
@@ -201,16 +201,16 @@ def main():
     data = Orange.data.Table('ISRID')
     
     # Restrict cases
-    # indices = list()
-    # for index, case in enumerate(data):
-    #     if sum(np.isnan(value) for value in case.attributes()) <= 2:
-    #         indices.append(index)
-    # data = Orange.data.Table.from_table_rows(data, indices)
+    indices = list()
+    for index, case in enumerate(data):
+        if sum(np.isnan(value) for value in case.attributes()) <= 0:
+            indices.append(index)
+    data = Orange.data.Table.from_table_rows(data, indices)
     
     learner = BaselineLearner
     print_statistics(data, learner, folds=5)
-    learner = CaseBasedLearner
-    print_statistics(data, learner, folds=5)
+    learner = Orange.classification.LogisticRegressionLearner
+    print_statistics(data, learner, folds=10)
 
 
 if __name__ == '__main__':
