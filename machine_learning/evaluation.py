@@ -201,11 +201,13 @@ def main():
     data = Orange.data.Table('ISRID')
     
     # Restrict cases
+    """
     indices = list()
     for index, case in enumerate(data):
         if sum(np.isnan(value) for value in case.attributes()) <= 0:
             indices.append(index)
     data = Orange.data.Table.from_table_rows(data, indices)
+    """
     
     learner = BaselineLearner
     print_statistics(data, learner, folds=5)
