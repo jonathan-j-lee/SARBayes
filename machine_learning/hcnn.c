@@ -23,35 +23,44 @@ double sigmoid(double y) {
 }
 
 
-double calc_error(double *weights, table *data, size_t feature_count, 
-        size_t *feature_indices, size_t class_index) {
-    double input, sum, output, actual, error;
-    size_t i, j, feature_index;
-    instance inst;
+double run_network(double *weights, instance inst, size_t feature_count, 
+        size_t *feature_indices, size_t class_index, double learning_rate) {
+    double input, sum = weights[0], output, actual, error, delta;
+    size_t index, feature_index;
     
-    error = 0.0;
-    for(i = 0; i < data->length; i++) {
-        instance inst = data->instances[i];
-        sum = weights[0];  // bias
-        
-        for(j = 0; j < feature_count; j++) {
-            feature_index = feature_indices[j];
-            input = *((double *)inst[feature_index]);
-            if(!isnan(input)) {
-                sum += weights[j + 1] * input;
-            }
+    for(index = 0; index < feature_count; index++) {
+        feature_index = feature_indices[index];
+        input = *((double *)inst[feature_index]);
+        if(!isnan(input)) {
+            sum += weights[index + 1] * input;
         }
-        
-        output = sigmoid(sum);
-        actual = (double)(((char *)inst[class_index])[0] == 'D');
-        error += pow(actual - output, 2);
     }
     
-    return 0.5 * error;
+    output = sigmoid(sum);
+    actual = (double)(((char *)inst[class_index])[0] == 'D');
+    error = 0.5*pow(output - actual, 2);
+    
+    for(index = 0; index < feature_count + 1; index++) {
+        if(index == 0) {
+            input = 1;
+        }
+        else {
+            feature_index = feature_indices[index - 1];
+            input = *((double *)inst[feature_index]);
+        }
+        
+        // delta = learning_rate*input*(1 - input)*(input - output);
+        delta = learning_rate*input*(actual - output)*output*(1 - output);
+        if(!isnan(delta)) {
+            weights[index] += delta;
+        }
+    }
+    
+    return error;
 }
 
 
-void run_simulation(table *data, double delta) {
+void run_simulation(table *data) {
     FILE *fout = fopen("epoch-error.txt", "w+");
     
     size_t *feature_indices = malloc(data->column_count * sizeof(double));
@@ -66,37 +75,35 @@ void run_simulation(table *data, double delta) {
     }
     
     feature_indices = realloc(feature_indices, feature_count * sizeof(double));
-    double *new_weights = calloc(feature_count + 1, sizeof(double));
     double *weights = calloc(feature_count + 1, sizeof(double));
-    double new_error, error = calc_error(
-        weights, data, feature_count, feature_indices, class_index);
+    double learning_rate = 0.000005, error = 99999;
+    /*
+    weights[0] = -2.135869;
+    weights[1] = 0.005530;
+    weights[2] = 0.015483;
+    weights[3] = -0.040691;
+    weights[4] = 0.038882;
+    weights[5] = -0.007324;
+    weights[6] = -0.156527;
+    weights[7] = -0.219943;
+    */
     
-    long iteration = 0;
-    while(error > 600) {
-        printf("Epoch %lu: ", iteration);
-        for(index = 0; index < feature_count + 1; index++) {
-            printf("%f ", weights[index]);
-            memcpy(new_weights, weights, (feature_count + 1) * sizeof(double));
-            
-            new_weights[index] += delta;
-            new_error = calc_error(
-                new_weights, data, feature_count, feature_indices, class_index);
-            
-            if(new_error < error) {
-                error = new_error;
-                weights[index] += delta;
-            }
-            else {
-                weights[index] -= delta;
-                error = calc_error(new_weights, data, 
-                    feature_count, feature_indices, class_index);
-            }
+    long epoch = 0;
+    while(error > 200) {
+        error = 0.0;
+        for(index = 0; index < data->length; index++) {
+            error += run_network(weights, data->instances[index], 
+                feature_count, feature_indices, class_index, learning_rate);
         }
         
-        // sleep(1);
-        printf("-> E = %f\n", error);
+        printf("Epoch %lu: W -> ", epoch);
+        for(index = 0; index < feature_count + 1; index++) {
+            printf("%.8f ", weights[index]);
+        }
+        printf(" E -> %f\n", error);
         fprintf(fout, "%f\n", error);
-        iteration++;
+        
+        epoch++;
     }
     
     fclose(fout);
@@ -109,9 +116,10 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
     
+    srand(time(NULL));
     char *filename = argv[1];
     table *data = read_table(filename);
-    run_simulation(data, 0.000001);
+    run_simulation(data);
     
     return EXIT_SUCCESS;
 }
