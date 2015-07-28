@@ -200,19 +200,13 @@ def print_statistics(data, learner, folds=10, _file=sys.stdout):
 def main():
     data = Orange.data.Table('ISRID')
     
-    # Restrict cases
-    """
-    indices = list()
-    for index, case in enumerate(data):
-        if sum(np.isnan(value) for value in case.attributes()) <= 0:
-            indices.append(index)
-    data = Orange.data.Table.from_table_rows(data, indices)
-    """
-    
     learner = BaselineLearner
-    print_statistics(data, learner, folds=5)
+    print_statistics(data, learner, folds=1)
+    
     learner = Orange.classification.LogisticRegressionLearner
     print_statistics(data, learner, folds=10)
+    
+    import hcnn
 
 
 if __name__ == '__main__':

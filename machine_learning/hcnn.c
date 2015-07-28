@@ -77,6 +77,7 @@ void run_simulation(table *data) {
     feature_indices = realloc(feature_indices, feature_count * sizeof(double));
     double *weights = calloc(feature_count + 1, sizeof(double));
     double learning_rate = 0.000005, error = 99999;
+    
     /*
     weights[0] = -2.135869;
     weights[1] = 0.005530;
@@ -89,7 +90,7 @@ void run_simulation(table *data) {
     */
     
     long epoch = 0;
-    while(error > 200) {
+    while(error > 200 && epoch < 200) {
         error = 0.0;
         for(index = 0; index < data->length; index++) {
             error += run_network(weights, data->instances[index], 
@@ -107,6 +108,27 @@ void run_simulation(table *data) {
     }
     
     fclose(fout);
+    
+    size_t i, j;
+    double input, sum, output, actual;
+    size_t feature_index;
+    instance inst;
+    
+    for(j = 0; j < data->length; j++) {
+        inst = data->instances[j];
+        sum = weights[0];
+        for(i = 0; i < feature_count; i++) {
+            feature_index = feature_indices[i];
+            input = *((double *)inst[feature_index]);
+            if(!isnan(input)) {
+                sum += weights[index + 1] * input;
+            }
+        }
+        
+        output = sigmoid(sum);
+        actual = (double)(((char *)inst[class_index])[0] == 'D');
+        printf("%f %f\n", actual, output);
+    }
 }
 
 

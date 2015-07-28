@@ -52,16 +52,19 @@ def main():
                         if attribute['name'] == 'sex':
                             value = value[0]
                         elif attribute['name'] == 'status':
-                            value = (
-                                'DEAD' if 'DOA' in value.upper() else 'ALIVE')
+                            value = value.strip()
+                            if 'DOA' in value.upper():
+                                value = 'DEAD'
+                            elif value:
+                                value = 'ALIVE'
                     
                     attributes[attribute['name']] = value
                 except (TypeError, ValueError):
                     pass
             
-            if not attributes['status'] or sum(str(value) != '' 
-                    for name, value in attributes.items() if name not in (
-                    'key', 'status')) < 4:
+            if not attributes['status'] or not attributes['key']:  # or \
+                #    sum(str(value) != '' for name, value in attributes.items() 
+                #    if name not in ('key', 'status')) < 3:
                 continue
             print('\t'.join(str(attributes[attribute['name']]) 
                 for attribute in settings['columns']), file=tab_file)
