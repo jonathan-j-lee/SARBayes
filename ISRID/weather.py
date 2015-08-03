@@ -64,6 +64,7 @@ def request_data(endpoint, safe=':,', **parameters):
         return raw_data
     except urllib.error.HTTPError:
         _token_index += 1
+        util.log('Changing tokens ({}) ... '.format(_token_index))
         return request_data(endpoint, safe=safe, **parameters)
     except IndexError:
         util.log('Error: No more requests allowed.')

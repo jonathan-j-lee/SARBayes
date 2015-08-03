@@ -2,12 +2,11 @@
 // $ dot network.dot -Tpng -o network.png; display network.png
 
 digraph network {
-    age -> status [label="w[0]"];
-    hours -> status [label="w[1]"];
-    hours -> temp_max [label="w[2]"];
-    temp_max -> status [label="w[3]"];
-    hours -> temp_min [label="w[4]"];
-    temp_min -> status[label="w[5]"];
-    snow ->status [label="w[6]"];
-    rain -> status [label="w[7]"];
+    age -> status;
+    hours -> status;
+    temp_max -> status;
+    temp_min -> status;
+    wind_speed -> status;
+    snow -> status;
+    rain -> status;
 }

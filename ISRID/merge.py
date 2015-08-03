@@ -25,7 +25,7 @@ def resolve_conflicts(row1, row2, output_worksheet, styles):
                     try:
                         value = float(cell2)
                     except TypeError:
-                        print(cell1)
+                        # print(cell1)
                         value = cell1
             else:
                 value = cell2

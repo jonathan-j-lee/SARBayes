@@ -50,6 +50,7 @@ double run_network(double *weights, instance inst, size_t feature_count,
         }
         
         // delta = learning_rate*input*(1 - input)*(input - output);
+        // Delta rule (special case of backpropogation)
         delta = learning_rate*input*(actual - output)*output*(1 - output);
         if(!isnan(delta)) {
             weights[index] += delta;
@@ -76,9 +77,10 @@ void run_simulation(table *data) {
     
     feature_indices = realloc(feature_indices, feature_count * sizeof(double));
     double *weights = calloc(feature_count + 1, sizeof(double));
-    double learning_rate = 0.000005, error = 99999;
+    double learning_rate = 0.00002, error = 99999;
     
     /*
+    // Approximate weights
     weights[0] = -2.135869;
     weights[1] = 0.005530;
     weights[2] = 0.015483;
@@ -90,7 +92,7 @@ void run_simulation(table *data) {
     */
     
     long epoch = 0;
-    while(error > 200 && epoch < 200) {
+    while(error > 10 && epoch < 1000000) {
         error = 0.0;
         for(index = 0; index < data->length; index++) {
             error += run_network(weights, data->instances[index], 
@@ -109,6 +111,7 @@ void run_simulation(table *data) {
     
     fclose(fout);
     
+    /*
     size_t i, j;
     double input, sum, output, actual;
     size_t feature_index;
@@ -129,6 +132,7 @@ void run_simulation(table *data) {
         actual = (double)(((char *)inst[class_index])[0] == 'D');
         printf("%f %f\n", actual, output);
     }
+    */
 }
 
 

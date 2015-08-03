@@ -22,17 +22,6 @@ STATS_TEMPLATE = '''Statistics:
 '''
 
 
-class BaselineLearner(Orange.base.Learner):
-    """ Dud Learner """
-    name = 'baseline learner'
-    
-    def __call__(self, train_data):
-        def classifier(test_data):
-            class_names = get_class_names(test_data)
-            return np.full(len(test_data), class_names['ALIVE'])
-        return classifier
-
-
 class CaseBasedLearner(Orange.base.Learner):
     """ Case-Based Learner """
     name = 'case-based learner'
@@ -132,6 +121,38 @@ class CaseBasedLearner(Orange.base.Learner):
         return classifier
 
 
+class LinearRegressionLearner(Orange.base.Learner):
+    name = 'linear regression learner'
+    
+    def __init__(self):
+        self.coefficients = {
+            'HighTemp': (0.2149, 86.18), 
+            'LowTemp': (0.2416, 88.37), 
+            'WindSpeed': (-0.03717, 90.77)
+        }
+    
+    def __call__(self, training_data):
+        def classifier(testing_data):
+            states = []
+            
+            for instance in testing_data:
+                p = []
+                for name, (m, b) in self.coefficients.items():
+                    if not np.isnan(instance[name]):
+                        p.append(m*instance[name] + b)
+                if len(p) == 0:
+                    states.append(0.0)  # ALIVE
+                else:
+                    if np.mean(p)/100 < 0.88:
+                        states.append(1.0)  # DEAD
+                    else:
+                        states.append(0.0)  # ALIVE
+            
+            return states
+        
+        return classifier
+
+
 def cross_validate(data, learner, folds=10):
     rounded = int(np.ceil(len(data)/folds)*folds)
     increment = rounded // folds
@@ -198,15 +219,13 @@ def print_statistics(data, learner, folds=10, _file=sys.stdout):
 
 
 def main():
-    data = Orange.data.Table('ISRID')
+    data = Orange.data.Table('ISRID-NY')
     
-    learner = BaselineLearner
+    learner = Orange.classification.MajorityLearner
     print_statistics(data, learner, folds=1)
     
-    learner = Orange.classification.LogisticRegressionLearner
+    learner = LinearRegressionLearner
     print_statistics(data, learner, folds=10)
-    
-    import hcnn
 
 
 if __name__ == '__main__':

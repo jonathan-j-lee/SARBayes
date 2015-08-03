@@ -62,9 +62,9 @@ def main():
                 except (TypeError, ValueError):
                     pass
             
-            if not attributes['status'] or not attributes['key']:  # or \
-                #    sum(str(value) != '' for name, value in attributes.items() 
-                #    if name not in ('key', 'status')) < 3:
+            if not attributes['status'] or not attributes['key'] or \
+                    sum(str(value) == '' for name, value in attributes.items() 
+                    if name not in ('key', 'status')) > 0:
                 continue
             print('\t'.join(str(attributes[attribute['name']]) 
                 for attribute in settings['columns']), file=tab_file)

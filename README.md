@@ -4,6 +4,7 @@ WiSAR (Wilderness Search-and-Rescue) survival rate prediction.
 
 Tasks: 
   - [x] [Clean data](ISRID/)
+  - [ ] [Merge data](ISRID/)
   - [ ] [Create model](machine_learning/)
 
 Tools: 
