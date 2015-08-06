@@ -77,7 +77,8 @@ void run_simulation(table *data) {
     
     feature_indices = realloc(feature_indices, feature_count * sizeof(double));
     double *weights = calloc(feature_count + 1, sizeof(double));
-    double learning_rate = 0.00002, error = 99999;
+    double learning_rate = 0.0005, error = 99999;
+    // 0.0005 -> 373.7
     
     /*
     // Approximate weights

@@ -11,12 +11,12 @@ import numpy as np
 import Orange
 
 
-data = Orange.data.Table('ISRID-NY')
+data = Orange.data.Table('ISRID-survival')
 print(len(data))
 
 _X, _Y = [], []
 for instance in data:
-    temp_high = instance['Age']
+    temp_high = instance['rain']
     status = instance.get_class()
     if not math.isnan(temp_high):
         _X.append(float(temp_high))
@@ -24,7 +24,7 @@ for instance in data:
 
 print(len(_X), len(_Y))
 
-n_bins = 20
+n_bins = 100
 X, Y, W = [], [], []
 
 x_bounds = np.linspace(min(_X), max(_X) + 0.1, n_bins + 1)
@@ -54,6 +54,6 @@ plt.xlabel('Age (years)')
 plt.scatter(X, Y, W)
 plt.plot(X, reg_fn(np.array(X)))
 plt.ylim(0, 100)
-# Use for snowfall, rainfall
-plt.xlim(0, plt.xlim()[1])
+# Use for age, snowfall, rainfall
+# plt.xlim(0, plt.xlim()[1])
 plt.show()

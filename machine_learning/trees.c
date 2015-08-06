@@ -1,7 +1,7 @@
 #include "data.h"
 
 
-void simulated_annealing(table *data) {
+void make_tree(table *data) {
     
 }
 
@@ -14,8 +14,7 @@ int main(int argc, char **argv) {
     
     char *filename = argv[1];
     table *data = read_table(filename);
-    simulated_annealing(data);
-    free_table(data);
+    make_tree(data);
     
     return EXIT_SUCCESS;
 }

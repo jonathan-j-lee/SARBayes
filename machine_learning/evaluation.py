@@ -166,7 +166,7 @@ def cross_validate(data, learner, folds=10):
         test_data = Orange.data.Table(data[lowerbound:upperbound])
         assert len(train_data) + len(test_data) == len(data)
         
-        classifier = learner()(train_data)
+        classifier = learner(min_samples_leaf=1)(train_data)
         _predictions = classifier(test_data)
         for _index, _value in enumerate(_predictions):
             predictions[index + _index] = _value
@@ -179,8 +179,7 @@ def get_class_names(data):
     return {class_type.value: int(class_type._value) for class_type in classes}
 
 
-def get_confusion_matrix(data, learner, folds=10):
-    predictions = cross_validate(data, learner, folds)
+def get_confusion_matrix(data, predictions):
     class_names = get_class_names(data)
     n_classes = len(class_names)
     confusion_matrix = np.zeros((n_classes, n_classes))
@@ -192,9 +191,8 @@ def get_confusion_matrix(data, learner, folds=10):
         return confusion_matrix
 
 
-def print_statistics(data, learner, folds=10, _file=sys.stdout):
+def print_statistics(data, learner, confusion_matrix, _file=sys.stdout):
     start = time.time()
-    confusion_matrix = get_confusion_matrix(data, learner, folds)
     end = time.time()
     class_names = get_class_names(data)
     
@@ -219,13 +217,35 @@ def print_statistics(data, learner, folds=10, _file=sys.stdout):
 
 
 def main():
-    data = Orange.data.Table('ISRID-NY')
+    data = Orange.data.Table('ISRID-survival')
     
-    learner = Orange.classification.MajorityLearner
-    print_statistics(data, learner, folds=1)
+    #learner = Orange.classification.MajorityLearner
+    #print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
     
-    learner = LinearRegressionLearner
-    print_statistics(data, learner, folds=10)
+    #learner = Orange.classification.RandomForestLearner
+    learner = Orange.classification.TreeLearner
+    print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
+    
+    """
+    final_predictions = np.empty(len(data))
+    predictions = tuple(
+        cross_validate(data, learner) for learner in (
+            Orange.classification.LogisticRegressionLearner, 
+            Orange.classification.NaiveBayesLearner, 
+            Orange.classification.TreeLearner, 
+            CaseBasedLearner
+        )
+    )
+    
+    for index, instance in enumerate(data):
+        s = sum(prediction[index] for prediction in predictions)
+        final_predictions[index] = 1.0 if s >= 1 else 0.0
+        
+        # p = tuple(prediction[index] for prediction in predictions)
+        # final_predictions[index] = max(set(p), key=p.count)
+    
+    print_statistics(data, Orange.classification.TreeLearner, get_confusion_matrix(data, final_predictions))
+    """
 
 
 if __name__ == '__main__':
