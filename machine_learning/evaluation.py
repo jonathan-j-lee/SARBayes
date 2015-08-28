@@ -2,8 +2,10 @@
 # SARbayes/machine_learning/evaluate.py
 
 
+import copy
 import numpy as np
 import Orange, Orange.base
+import random
 import sys
 import time
 
@@ -166,7 +168,8 @@ def cross_validate(data, learner, folds=10):
         test_data = Orange.data.Table(data[lowerbound:upperbound])
         assert len(train_data) + len(test_data) == len(data)
         
-        classifier = learner(min_samples_leaf=1)(train_data)
+        #classifier = learner(min_samples_leaf=150)(train_data)
+        classifier = learner()(train_data)
         _predictions = classifier(test_data)
         for _index, _value in enumerate(_predictions):
             predictions[index + _index] = _value
@@ -219,12 +222,22 @@ def print_statistics(data, learner, confusion_matrix, _file=sys.stdout):
 def main():
     data = Orange.data.Table('ISRID-survival')
     
-    #learner = Orange.classification.MajorityLearner
+    #indices = np.array([index for index, instance in enumerate(data) 
+    #    if instance.get_class()._value == 1.0 or random.random() < 0.1])
+    #data = Orange.data.Table.from_table_rows(data, indices)
+    
+    learner = Orange.classification.MajorityLearner
+    print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
+    
+    learner = Orange.classification.TreeLearner
     #print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
     
-    #learner = Orange.classification.RandomForestLearner
-    learner = Orange.classification.TreeLearner
-    print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
+    classifier = learner(data)
+    print(cross_validate(data, learner))
+    #print_statistics(data, learner, get_confusion_matrix(data, classifier(data)))
+    
+    #learner = learner()(data)
+    #print(learner)
     
     """
     final_predictions = np.empty(len(data))

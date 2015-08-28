@@ -61,3 +61,6 @@ target/
 *.bak
 trash/*
 *.yaml
+*.csv
+machine_learning/logreg
+*tree*

@@ -27,39 +27,45 @@ with open('ISRID-survival.tab', 'w+') as tab_file:
     
     print('\t'.join([
         'status', 
-        'category', 
-        'sex', 
-        'age', 
+        #'category', 
+        #'sex', 
+        #'age', 
         'hours', 
-        'temp_high', 
-        'temp_low', 
-        'wind_speed', 
-        'snow', 
-        'rain'
+        #'temp_high', 
+        #'temp_low', 
+        #'wind_speed', 
+        #'snow', 
+        #'rain', 
+        'hdd', 
+        'cdd'
     ]), file=tab_file)
     
     print('\t'.join([
         'discrete', 
-        'discrete', 
-        'discrete', 
+        #'discrete', 
+        #'discrete', 
+        #'continuous', 
         'continuous', 
-        'continuous', 
-        'continuous', 
-        'continuous', 
-        'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
         'continuous', 
         'continuous'
     ]), file=tab_file)
     
     print('\t'.join([
         'class', 
+        #'', 
+        #'', 
+        #'', 
         '', 
-        '', 
-        '', 
-        '', 
-        '', 
-        '', 
-        '', 
+        #'', 
+        #'', 
+        #'', 
+        #'', 
+        #'', 
         '', 
         ''
     ]), file=tab_file)
@@ -139,20 +145,27 @@ with open('ISRID-survival.tab', 'w+') as tab_file:
             else:
                 hdd, cdd = '', ''
             
+            category = category.strip().upper() if type(category) is str else ''
+            if category:
+                pass
+                #print(category)
+            
             values = (
                 status, 
-                category.strip().upper() if type(category) is str else '', 
-                sex, 
-                age, 
+                #category, 
+                #sex, 
+                #age, 
                 incident_duration, 
-                temp_max, 
-                temp_min, 
-                wind_speed, 
-                snow, 
-                rain
+                #temp_max, 
+                #temp_min, 
+                #wind_speed, 
+                #snow, 
+                #rain, 
+                hdd, 
+                cdd
             )
             
-            if sum(1 for value in values if value) - 1 >= 3:
+            if sum(1 for value in values if value) - 1 >= 2:
             # if sum(1 for value in values[3:] if value) >= 3:
                 print('\t'.join(values), file=tab_file)
                 if values[0] == 'DEAD':

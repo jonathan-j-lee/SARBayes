@@ -78,8 +78,8 @@ with open(tab_filename, 'w+') as tab_file:
         if sex is None:
             sex = ''
         else:
-            assert sex.upper() in ('M', 'F')
             sex = sex.upper()
+            assert sex in ('M', 'F')
         
         if category:
             category = category.upper().strip()

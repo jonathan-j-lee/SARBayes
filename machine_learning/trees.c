@@ -1,6 +1,11 @@
 #include "data.h"
 
 
+typedef struct {
+    
+};
+
+
 void make_tree(table *data) {
     
 }
