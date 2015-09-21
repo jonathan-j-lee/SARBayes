@@ -62,5 +62,7 @@ target/
 trash/*
 *.yaml
 *.csv
-machine_learning/logreg
+summer-analysis/machine_learning/logreg
 *tree*
+*.sql*
+*.docx

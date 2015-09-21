@@ -229,11 +229,12 @@ def main():
     learner = Orange.classification.MajorityLearner
     print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
     
-    learner = Orange.classification.TreeLearner
+    learner = Orange.classification.RandomForestLearner
+    print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
     #print_statistics(data, learner, get_confusion_matrix(data, cross_validate(data, learner)))
     
-    classifier = learner(data)
-    print(cross_validate(data, learner))
+    #classifier = learner(data)
+    #print(cross_validate(data, learner))
     #print_statistics(data, learner, get_confusion_matrix(data, classifier(data)))
     
     #learner = learner()(data)
