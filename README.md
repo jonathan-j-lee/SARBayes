@@ -2,10 +2,7 @@
 
 WiSAR (Wilderness Search-and-Rescue) survival rate prediction.
 
-Tasks: 
-  - [x] [Clean data](ISRID/)
-  - [ ] [Merge data](ISRID/)
-  - [ ] [Create model](machine_learning/)
+Note: All materials created before 2015-09-21 have been moved to `summer-analysis`. Everything on and after that date has been either cleaned or refactored for better maintainability.
 
 Tools: 
   * Python (preferably version `3.2+`)

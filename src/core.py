@@ -6,7 +6,7 @@ import database
 
 
 def main():
-    print(database.cleansing)
+    pass
 
 
 if __name__ == '__main__':

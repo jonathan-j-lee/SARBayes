@@ -59,10 +59,10 @@ target/
 *.xlsx*
 *.tab
 *.bak
-trash/*
+trash/
 *.yaml
 *.csv
 summer-analysis/machine_learning/logreg
 *tree*
-*.sql*
 *.docx
+data/
