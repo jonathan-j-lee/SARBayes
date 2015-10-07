@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SARbayes/src/database/__init__.py
 
 """
 database -- An SQLite 3 extension
@@ -15,4 +16,4 @@ Warning:
 """
 
 
-from . import schema
+from . import cleansing, schema
