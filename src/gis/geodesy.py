@@ -116,3 +116,40 @@ def to_utm(latitude: float, longitude: float) -> (float, float, int, int):
     easting = easting_ + k0*A*(eta_ + 0)
     northing = northing_ + k0*A*(xi_ + 0)
     return 1000*easting, 1000*northing, zone, hemisphere
+
+
+def from_dms(degrees: float, minutes: float, seconds: float,
+        sign: int =1) -> (float):
+    """
+    Converts degree, minute, and second components to a decimal angle.
+
+    Keyword Arguments:
+        degrees: The number of degrees.
+        minutes: The number of minutes.
+        seconds: The number of seconds.
+        sign: A positive or negative integer indicating the sign of the angle.
+
+    Returns:
+        decimal: The number of degrees as as single decimal.
+    """
+    sign = -1 if sign < 0 else 1
+    return sign*(abs(degrees) + abs(minutes)/60.0 + abs(seconds)/3600.0)
+
+
+def to_dms(decimal: float) -> (float, float, float, int):
+    """
+    Converts a decimal angle to degree, minute, and second components.
+
+    Keyword Arguments:
+        decimal: The number of degrees as as single decimal.
+
+    Returns:
+        degrees: The number of degrees.
+        minutes: The number of minutes.
+        seconds: The number of seconds.
+        sign: A positive or negative integer indicating the sign of the angle.
+    """
+    sign, decimal = (-1 if decimal < 0 else 1), abs(decimal)
+    degrees, minutes = decimal//1.0, 60*(decimal%1.0)
+    minutes, seconds = minutes//1.0, 60*(minutes%1.0)
+    return degrees, minutes, seconds, sign

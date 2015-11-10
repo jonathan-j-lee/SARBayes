@@ -16,7 +16,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
@@ -215,4 +215,4 @@ trash/
 summer-analysis/machine_learning/logreg
 *tree*
 *.docx
-data/
+# data/
