@@ -6,18 +6,15 @@
 
 # Recursively generate PDF files for LaTeX source files.
 # The name of the PDF file will be the same as that of the LaTeX file.
-# Any BibTeX files must have the same name as the LaTeX file.
+# Any BibTeX file must have the same name as its corresponding LaTeX file.
 all: $(patsubst %.tex,%.pdf,$(shell find -name "*.tex"))
 
-# Delete any intermediary files.
+# Delete any output files.
 clean:
 	find . -type f -name "*.aux" -delete
 	find . -type f -name "*.bbl" -delete
 	find . -type f -name "*.blg" -delete
 	find . -type f -name "*.log" -delete
-
-# Delete any PDF files.
-scrub:
 	find . -type f -name "*.pdf" -delete
 
 %.pdf:
