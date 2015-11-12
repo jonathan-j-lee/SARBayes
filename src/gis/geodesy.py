@@ -153,3 +153,22 @@ def to_dms(decimal: float) -> (float, float, float, int):
     degrees, minutes = decimal//1.0, 60*(decimal%1.0)
     minutes, seconds = minutes//1.0, 60*(minutes%1.0)
     return degrees, minutes, seconds, sign
+
+
+def bounding_box(latitude: float, longitude: float, side: float) -> (
+        float, float, float, float):
+    """
+    Calculate the southwest and northeast coordinates of a bounding box.
+
+    Keyword Arguments:
+        latitude: The latitude, in decimal degrees, of the center of the box.
+        longitude: The longitude, in decimal degrees, of the center of the box.
+        side: The length of each side of the box.
+
+    Returns:
+        south: The latitude of the southern bound of the box.
+        west: The longitude of the western bound of the box.
+        north: The latitude of the northern bound of the box.
+        east: The longitude of the eastern bound of the box.
+    """
+    raise NotImplementedError
