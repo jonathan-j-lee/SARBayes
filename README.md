@@ -1,4 +1,4 @@
-# SARbayes
+# SARBayes
 
 WiSAR (Wilderness Search-and-Rescue) survival rate prediction.
 
