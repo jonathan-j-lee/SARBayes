@@ -1,15 +1,3 @@
 # SARbayes
 
-WiSAR (Wilderness Search-and-Rescue) survival rate prediction.
-
-Tasks: 
-  - [x] [Clean data](ISRID/)
-  - [ ] [Merge data](ISRID/)
-  - [ ] [Create model](machine_learning/)
-
-Tools: 
-  * Python (preferably version `3.2+`)
-  * Orange
-  * `statsmodels`
-  * `matplotlib`
-  * `geopy`
+Predicting lost person survival rates using wilderness search-and-rescue (WiSAR) data.

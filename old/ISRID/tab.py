@@ -30,14 +30,18 @@ with open('ISRID-survival.tab', 'w+') as tab_file:
         #'category', 
         #'sex', 
         #'age', 
-        'hours', 
+        #'hours', 
         #'temp_high', 
         #'temp_low', 
         #'wind_speed', 
         #'snow', 
         #'rain', 
-        'hdd', 
-        'cdd'
+        #'hdd', 
+        #'cdd', 
+        'height', 
+        #'weight', 
+        #'bmi', 
+        #'cdd'
     ]), file=tab_file)
     
     print('\t'.join([
@@ -45,14 +49,16 @@ with open('ISRID-survival.tab', 'w+') as tab_file:
         #'discrete', 
         #'discrete', 
         #'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
+        #'continuous', 
         'continuous', 
         #'continuous', 
         #'continuous', 
-        #'continuous', 
-        #'continuous', 
-        #'continuous', 
-        'continuous', 
-        'continuous'
+        #'continuous'
     ]), file=tab_file)
     
     print('\t'.join([
@@ -60,14 +66,16 @@ with open('ISRID-survival.tab', 'w+') as tab_file:
         #'', 
         #'', 
         #'', 
+        #'', 
+        #'', 
+        #'', 
+        #'', 
+        #'', 
+        #'', 
         '', 
         #'', 
         #'', 
-        #'', 
-        #'', 
-        #'', 
-        '', 
-        ''
+        #''
     ]), file=tab_file)
     
     temp_base = 18
@@ -150,24 +158,36 @@ with open('ISRID-survival.tab', 'w+') as tab_file:
                 pass
                 #print(category)
             
+            if type(height) is str:
+                continue
+            
+            bmi = None
+            if height is not None and weight is not None:
+                bmi = round(weight/pow(height/100, 2), 3)
+            
             values = (
                 status, 
                 #category, 
                 #sex, 
                 #age, 
-                incident_duration, 
+                #incident_duration, 
                 #temp_max, 
                 #temp_min, 
                 #wind_speed, 
                 #snow, 
                 #rain, 
-                hdd, 
-                cdd
+                #hdd, 
+                cdd, 
+                str(float(height)) if height is not None else '', 
+                str(float(weight)) if weight is not None else '', 
+                str(bmi) if bmi is not None else '', 
+                incident_duration
             )
             
-            if sum(1 for value in values if value) - 1 >= 2:
+            if 5 > sum(1 for value in values if value is not None and value != '') - 1 and (height != '' and height is not None) and age and float(age) >= 16:
             # if sum(1 for value in values[3:] if value) >= 3:
-                print('\t'.join(values), file=tab_file)
+                print('{}\t{}'.format(status, height), file=tab_file)
+                #print('\t'.join(values), file=tab_file)
                 if values[0] == 'DEAD':
                     doa += 1
                 count += 1

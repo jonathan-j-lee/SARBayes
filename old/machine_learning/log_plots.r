@@ -1,32 +1,32 @@
 # SARbayes
 
 data_frame = read.table("ISRID-survival.tab", sep="\t", quote="", skip=3, 
-    col.names = c("status", "hours", "hdd", "cdd"), 
-    colClasses=c(rep("character", 1), rep("numeric", 3)))
+    col.names = c("status", "bmi"), 
+    colClasses=c(rep("character", 1), rep("numeric", 1)))
 
-keeps = c("cdd", "status")
+keeps = c("status", "bmi")
 data_frame = data_frame[keeps]
 data_frame = data_frame[complete.cases(data_frame),]
 data_frame = transform(data_frame, status=ifelse(status == "DEAD", 0, 1))
 #data_frame = data_frame[data_frame$hdd < 10000000,]
 summary(data_frame)
 
-logit = glm(status ~ cdd, data=data_frame, family="binomial")
+logit = glm(status ~ bmi, data=data_frame, family="binomial")
 summary(logit)
 confint(logit)
 
-png('cdd.png')
+png('bmi-25.png')
 
 plot(
-    data_frame$cdd, 
+    data_frame$bmi, 
     data_frame$status, 
-    xlab="Cooling Degree Days (degrees C)", 
+    xlab="BMI (kg/m^2)", 
     ylab="Probability of Survival", 
-    main="Probability of Survival vs. Cooling Degree Days"
+    main="Probability of Survival vs. BMI"
 )
 
 curve(
-    predict(logit, data.frame(cdd=x), type="resp"), add=TRUE
+    predict(logit, data.frame(bmi=x), type="resp"), add=TRUE
 )
 
 #curve(fitted, add=TRUE)

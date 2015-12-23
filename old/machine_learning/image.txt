@@ -1,0 +1,114 @@
+Python 3.3.2+ (default, Feb 28 2014, 00:52:16) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 0.13.2 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]: import openpyxl
+
+In [2]: workbook = openpyxl.load_workbook('ISRID-survival.xlsx', read_only=True)
+
+In [3]: worksheet = workbook.active
+
+In [4]: worksheet[0][3].value
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-4-f553f00fadd2> in <module>()
+----> 1 worksheet[0][3].value
+
+/usr/local/lib/python3.3/dist-packages/openpyxl/worksheet/worksheet.py in __getitem__(self, key)
+    394         if isinstance(key, slice):
+    395             return self.iter_rows("{0}:{1}".format(key.start, key.stop))
+--> 396         if ":" in key:
+    397             return self.iter_rows(key)
+    398         return self._get_cell(key)
+
+TypeError: argument of type 'int' is not iterable
+
+In [5]: worksheet[0][3].value
+KeyboardInterrupt
+
+In [5]: sexes = {'M': [], 'F': []}
+
+In [6]: for index, instance in enumerate(worksheet):
+   ...:     if index == 0:
+   ...:         continue
+   ...:     row = [_.value for _ in instance]
+   ...:     sex, status = row[7], row[10]
+   ...:     try:
+   ...:         sex = sex.strip().upper()
+   ...:         sexes[sex].append(status)
+   ...:     except:
+   ...:         pass
+   ...:     
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-6-55b93e777d02> in <module>()
+----> 1 for index, instance in enumerate(worksheet):
+      2     if index == 0:
+      3         continue
+      4     row = [_.value for _ in instance]
+      5     sex, status = row[7], row[10]
+
+/usr/local/lib/python3.3/dist-packages/openpyxl/worksheet/worksheet.py in __getitem__(self, key)
+    394         if isinstance(key, slice):
+    395             return self.iter_rows("{0}:{1}".format(key.start, key.stop))
+--> 396         if ":" in key:
+    397             return self.iter_rows(key)
+    398         return self._get_cell(key)
+
+TypeError: argument of type 'int' is not iterable
+
+In [7]: for index, instance in enumerate(worksheet.rows):
+    if index == 0:
+        continue
+    row = [_.value for _ in instance]
+    sex, status = row[7], row[10]
+    try:
+        sex = sex.strip().upper()
+        sexes[sex].append(status)
+    except:
+        pass
+   ...:     
+
+In [8]: sum(1 for _ in sexes['M'])
+Out[8]: 14509
+
+In [9]: sum(1 for _ in sexes['M'] if _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['M'])
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-9-5ba17408af5a> in <module>()
+----> 1 sum(1 for _ in sexes['M'] if _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['M'])
+
+<ipython-input-9-5ba17408af5a> in <genexpr>(.0)
+----> 1 sum(1 for _ in sexes['M'] if _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['M'])
+
+AttributeError: 'NoneType' object has no attribute 'upper'
+
+In [10]: sum(1 for _ in sexes['M'] if _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['M'])
+KeyboardInterrupt
+
+In [10]: sexes['M'][:10]
+Out[10]: 
+['DOA',
+ 'Well',
+ 'Well',
+ 'Well',
+ 'Well',
+ 'Well',
+ 'Injured',
+ 'DOA',
+ 'Well',
+ 'Injured']
+
+In [11]: sum(1 for _ in sexes['M'] if _ is not None and _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['M'])
+Out[11]: 0.10297056999104004
+
+In [12]: 1 - sum(1 for _ in sexes['M'] if _ is not None and _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['M'])
+Out[12]: 0.89702943000896
+
+In [13]: 1 - sum(1 for _ in sexes['F'] if _ is not None and _.upper().strip() in ('SUSPENDED', 'DOA')) / len(sexes['F'])
+Out[13]: 0.9358161648177497
