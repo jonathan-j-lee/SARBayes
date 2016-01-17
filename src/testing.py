@@ -6,6 +6,8 @@ testing
 
 import unittest
 
+from sqlalchemy.exc import IntegrityError
+
 import database
 from database.models import Subject, Group, Incident
 
@@ -23,13 +25,11 @@ class ModelTests(unittest.TestCase):
             self.session.add(subject)
         self.session.commit()
 
-    def test_invalid_attributes(self):
+    def _test_invalid_values(self):
         with self.assertRaises(ValueError):
             subject = Subject(age=-1)
         with self.assertRaises(ValueError):
             subject = Subject(height=0)
-        with self.assertRaises(ValueError):
-            subject = Subject(sex=3)
 
     def test_back_population(self):
         self.assertEqual(self.incident.group, self.group)
@@ -38,6 +38,8 @@ class ModelTests(unittest.TestCase):
         for subject in self.subjects:
             self.assertTrue(subject in self.group.subjects)
             self.assertEqual(subject.group, self.group)
+
+        self.assertEqual(self.group.size, len(self.subjects))
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
