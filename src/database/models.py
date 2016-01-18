@@ -2,7 +2,9 @@
 database.models
 """
 
-__all__ = ['Subject']
+__all__ = ['Subject', 'Group', 'Point', 'Location', 'Weather', 'Incident']
+
+import re
 
 from sqlalchemy import (Column, Integer, SmallInteger, Float, Interval,
                         DateTime, Boolean, Text, Enum, ForeignKey)
@@ -85,8 +87,6 @@ class Location(Base):
     name = Column(Text)
     city = Column(Text)
     county = Column(Text)
-    region = Column(Text)
-    country = Column(Text)
     eco_domain = Column(Enum('polar', 'temperate', 'dry', 'tropical',
                              name='eco_domain_types'))
     eco_division = Column(Enum('110', 'M110', '120', 'M120', '130',
@@ -112,11 +112,57 @@ class Location(Base):
     incident = relationship('Incident', back_populates='location',
                             uselist=False)
 
+    @property
+    def region(self):
+        try:
+            result = re.search('-([A-Z]+)', self.incident.source)
+            return result.group(1)
+        except AttributeError:
+            return None
+
+    @property
+    def country(self):
+        try:
+            result = re.search(r'^([A-Z]{1,2})-', self.incident.source)
+            return result.group(1)
+        except AttributeError:
+            return None
+
+
+class Weather(Base):
+    __tablename__ = 'weather'
+    base_temp = 18  # Measured in degrees C
+    id = Column(Integer, primary_key=True)
+    high_temp = Column(Float)
+    low_temp = Column(Float)
+    wind_speed = Column(Float)  # Measured in km/h
+    rain = Column(Float)  # Measured in mm
+    snow = Column(Float)  # Measured in mm
+    daylight = Column(Interval)
+    description = Column(Text)
+    incident_id = Column(Integer, ForeignKey('incidents.id'))
+    incident = relationship('Incident', back_populates='weather',
+                            uselist=False)
+
+    @property
+    def avg_temp(self):
+        return (self.high_temp + self.low_temp)/2
+
+    @property
+    def hdd(self):
+        hdd_ = base_temp - avg_temp
+        return hdd_ if hdd_ > 0 else None
+
+    @property
+    def cdd(self):
+        cdd_ = avg_temp - base_temp
+        return cdd_ if cdd_ > 0 else None
+
 
 class Incident(Base):
     __tablename__ = 'incidents'
     id = Column(Integer, primary_key=True)
-    source = Column(Enum('AU', 'CA-BC', 'CA-HC', 'CA-NB', 'CA-NS', 'CA-Qn',
+    source = Column(Enum('AU', 'CA-BC', 'CA-HC', 'CA-NB', 'CA-NS', 'CA-ON',
                          'CA-QU', 'CH', 'ES', 'IS', 'I-SRG', 'I-GEOS', 'NZ',
                          'PL', 'SA', 'UK', 'UK-P', 'US-AF', 'US-AFK',
                          'US-NOAA', 'US-NPS', 'US-NPSyo', 'US-FEMA', 'US-AK',
@@ -143,3 +189,11 @@ class Incident(Base):
                                 name='disaster_type_types'))
     disaster_type_details = Column(Text)
     group = relationship('Group', back_populates='incident', uselist=False)
+    notify_hours = Column(Interval)
+    search_hours = Column(Interval)
+    total_hours = Column(Interval)
+    weather = relationship('Weather', back_populates='incident', uselist=False)
+
+    @property
+    def lost_hours(self):
+        return self.notify_hours + self.search_hours
