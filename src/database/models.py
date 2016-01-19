@@ -64,6 +64,23 @@ class Group(Base):
                                  'send_beacon', 'pers', 'cell_phone', 'radio',
                                  'distress_signal',
                                  name='contact_method_types'))
+    scenario = Column(Enum('avalanche', 'criminal', 'despondent', 'disaster',
+                           'evading', 'investigative', 'lost', 'medical',
+                           'drowning', 'overdue', 'stranded', 'trauma',
+                           name='scenario_types'))
+    detectability = Column(Enum('excellent', 'good', 'fair', 'poor',
+                                name='detectability_types'))
+    mobile = Column(Boolean)
+    responsive = Column(Boolean)
+    lost_strategy = Column(Enum('back_tracking', 'contouring',
+                                'direction_sampling', 'direction_travelling',
+                                'downhill', 'evasive', 'folk_wisdom',
+                                'followed_travel_aid', 'landmark', 'panicked',
+                                'nothing', 'route_sampling', 'stayed_put',
+                                'view_enhancing', 'other',
+                                name='lost_strategy_types'))
+    lost_strategy_details = Column(Text)
+    mobile_hours = Column(Interval)
     subjects = relationship('Subject', back_populates='group')
     incident_id = Column(Integer, ForeignKey('incidents.id'))
     incident = relationship('Incident', back_populates='group', uselist=False)
@@ -129,6 +146,73 @@ class Location(Base):
             return None
 
 
+class Operation(Base):
+    __tablename__ = 'operations'
+    id = Column(Integer, primary_key=True)
+    ipp_type = Column(Enum('airport', 'beacon', 'building', 'field',
+                           'radar_contact', 'residence', 'road', 'signal',
+                           'trail', 'trailhead', 'vehicle', 'water',
+                           'forested_area', 'perennial_ice', 'rock', 'shrub',
+                           'wetland', name='ipp_type_types'))
+    ipp_class = Column(Enum('pls', 'lkp', name='ipp_class_types'))
+    ipp_id = Column(Integer, ForeignKey('points.id'))
+    ipp = relationship('Point', foreign_keys=[ipp_id])
+    ipp_accuracy = Column(Enum('1000', '100', '10', '1',
+                               name='ipp_accuracy_types'))  # Measured in m
+    idot = Column(Enum('intended_destination', 'circuit', 'physical_clue',
+                       'sighting', 'tracks', 'radar_tracks', 'tracking_dogs',
+                       'other', name='idot_types'))
+    idot_details = Column(Text)
+    dest_id = Column(Integer, ForeignKey('points.id'))
+    dest = relationship('Point', foreign_keys=[dest_id])
+    revised_point_id = Column(Integer, ForeignKey('points.id'))
+    revised_point = relationship('Point', foreign_keys=[revised_point_id])
+    revision_reason = Column(Text)
+    incident_id = Column(Integer, ForeignKey('incidents.id'))
+    incident = relationship('Incident', back_populates='operation',
+                            uselist=False)
+
+
+class Outcome(Base):
+    __tablename__ = 'outcomes'
+    id = Column(Integer, primary_key=True)
+    dec_point_id = Column(Integer, ForeignKey('points.id'))
+    dec_point = relationship('Point', foreign_keys=[dec_point_id])
+    dec_point_type = Column(Enum('saddle', 'shortcut', 'trail_animal',
+                                 'trail_junction', 'trail_social',
+                                 'trail_turnoff', 'other',
+                                 name='dec_point_type_types'))
+    dec_point_type_details = Column(Text)
+    conclusion = Column(Enum('open', 'closed', 'suspended',
+                             'closed_post_suspension',
+                             name='conclusion_types'))
+    invest_find = Column(Boolean)
+    invest_find_reason = Column(Enum('took_transportation', 'with_friend',
+                                     'with_family', 'bastard_case', 'in_jail',
+                                     'in_hospital', 'in_shelter', 'runaway',
+                                     'staged', 'other',
+                                     name='invest_find_reason_types'))
+    invest_find_details = Column(Text)
+    find_point_id = Column(Integer, ForeignKey('points.id'))
+    find_point = relationship('Point', foreign_keys=[find_point_id])
+    # Measured in m
+    find_point_accuracy = Column(Enum('1000', '100', '10', '1',
+                                      name='find_point_accuracy_types'))
+    dist_from_ipp = Column(Float)  # Measured in km
+    find_bearing = Column(Float)  # Measured in degrees from true North
+    find_feature = Column(Enum('aiport', 'building', 'field', 'structure',
+                               'road', 'trail', 'trailhead', 'vehicle',
+                               'water', 'forested_area', 'perennial_ice',
+                               'rock', 'shrub', 'wetland',
+                               name='find_feature_types'))
+    find_feature_details = Column(Text)
+    track_offset = Column(Float)  # Measured in m
+    elevation_change = Column(Float)  # Measured in m
+    incident_id = Column(Integer, ForeignKey('incidents.id'))
+    incident = relationship('Incident', back_populates='outcome',
+                            uselist=False)
+
+
 class Weather(Base):
     __tablename__ = 'weather'
     base_temp = 18  # Measured in degrees C
@@ -150,12 +234,12 @@ class Weather(Base):
 
     @property
     def hdd(self):
-        hdd_ = base_temp - avg_temp
+        hdd_ = self.__class__.base_temp - avg_temp
         return hdd_ if hdd_ > 0 else None
 
     @property
     def cdd(self):
-        cdd_ = avg_temp - base_temp
+        cdd_ = avg_temp - self.__class__.base_temp
         return cdd_ if cdd_ > 0 else None
 
 
@@ -182,17 +266,28 @@ class Incident(Base):
                        'recovery', 'aircraft', 'false_report', 'standby',
                        'assist', 'attempt_to_locate', 'evidence',
                        name='type_types'))
+    disaster_related = Column(Boolean)
     disaster_type = Column(Enum('cbrne', 'dam', 'earthquake', 'fire',
                                 'flooding', 'hurricane', 'landslide',
                                 'tornado', 'tsunami', 'volcano',
-                                'winter_storm', 'none', 'other',
+                                'winter_storm', 'other',
                                 name='disaster_type_types'))
     disaster_type_details = Column(Text)
     group = relationship('Group', back_populates='incident', uselist=False)
     notify_hours = Column(Interval)
     search_hours = Column(Interval)
     total_hours = Column(Interval)
+    operation = relationship('Operation', back_populates='incident',
+                             uselist=False)
     weather = relationship('Weather', back_populates='incident', uselist=False)
+    outcome = relationship('Outcome', back_populates='incident', uselist=False)
+    cause = Column(Enum('avalanche', 'darkness', 'decision_point',
+                        'despondent', 'drowning', 'environment', 'fitness',
+                        'medical', 'overdue', 'poor_supervision',
+                        'poor_trails', 'poor_equipment', 'poor_map', 'runaway',
+                        'accidental_separation', 'intentional_separation',
+                        'shortcut', 'intoxication', 'trauma', 'violence',
+                        'wandered_away', name='cause_types'))
 
     @property
     def lost_hours(self):
