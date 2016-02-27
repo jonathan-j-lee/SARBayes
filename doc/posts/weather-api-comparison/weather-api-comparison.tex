@@ -22,12 +22,14 @@
     online application programming interfaces (APIs) to fill in missing values
     for weather conditions such as temperature and precipitation.
 
-    The two historical weather data sources we considered are the National
-    Oceanic and Atmospheric Administration's (NOAA) Climate Data Online Web
-    Service and Weather Services International's (WSI) Cleaned Observation API.
-    This post presents how closely the measurements provided by these two
-    services approximated the values observed by search-and-rescue personnel on
-    the ground and recorded in the database.
+    We considered two historical weather data sources: the National Oceanic and
+    Atmospheric Administration's (NOAA) Climate Data Online Web Service and
+    Weather Services International's (WSI) Cleaned Observation API. This post
+    presents how closely the measurements provided by these two services
+    matched the values observed by search-and-rescue personnel on the ground
+    and recorded in the database. On average, WSI had better coverage and was
+    \(2 \degree C\), \(1 \degree C\), and \(3 km/h\) closer in maximum
+    temperature, minimum temperature, and wind speed, respectively.
 
   \section{Methods}
     \subsection{Error Calculation}
@@ -35,7 +37,7 @@
       temperature, and wind speed. We found no quantitative measurements for
       snow or rain in ISRID, and excluded these features from the test. For
       each case with a valid date and latitude and longitude coordinates, we
-      pulled "experimental" values from each API. If both an observed value and
+      pulled ``experimental" values from each API. If both an observed value and
       an experimental value for a particular feature were available, we
       calculated the error of that API's feature as
 
@@ -51,9 +53,9 @@
       where the high temperature was exactly the same as the low temperature,
       which may be an entry error. However, given how many cases occur in areas
       where conditions may vary greatly across small distances, such as
-      mountainous terrain, the data collected by searchers near the exact site
-      of the incident probably come closest to describing the actual conditions
-      the lost person experienced.
+      mountainous terrain, we assume the data collected by searchers near the
+      exact site of the incident best describe the actual conditions the lost
+      person experienced.
 
     \subsection{API Access Implementation}
       Readers willing to trust the validity of our data collection process are
@@ -85,7 +87,7 @@
         To obtain the actual measurements, we sent the date, set of station
         identifiers, and set of needed datatypes to the \texttt{data} endpoint.
         If the service reported more than one value per data type, we took a
-        simple average. Each case consumeed two requests, at most.
+        simple average. Each case consumed two requests, at most.
 
       \subsubsection{WSI}
         Users may access the Cleaned Observation API \cite{wsi} by sending
@@ -147,8 +149,8 @@
     For each feature, we also sorted the signed error values into 50
     evenly-sized bins and charted the frequency of the bins as histograms.
     The normal distributions for each list of error values are overlaid on the
-    plots as dashed curves. Distributions tightly clustered around 0, where
-    there is no error, indicate better conformance to the observed values.
+    plots as dashed curves. Distributions tightly clustered around 0, no error,
+    indicate better conformance to the observed values.
 
     \includesvg[width=\textwidth]{daily-max-temp-error}
     \includesvg[width=\textwidth]{daily-min-temp-error}
@@ -158,7 +160,7 @@
     than minimum temperature estimates; perhaps we can attribute this behavior
     to the aforementioned cases where the maximum temperature may have been
     carried over into the minimum temperature field. Interestingly, for both
-    temperature features, NOAA has a noticable "tail" of high-error cases on
+    temperature features, NOAA has a noticable ``tail" of high-error cases on
     the right where many estimates were off by more than 20 degrees Celsius.
 
     \includesvg[width=\textwidth]{daily-avg-wind-speed-error}
@@ -168,8 +170,7 @@
 
   \section{Conclusion}
     For the purpose of populating ISRID, WSI is the better of the two services,
-    offering nearly universal coverage, marginally lower error, and greater
-    ease-of-use.
+    offering nearly universal coverage, lower error, and greater ease-of-use.
 
     NOAA may have underperformed because the cases we sampled were not
     representative of the entire database. Searchers in different geographic
@@ -182,11 +183,12 @@
     the API's accuracy. An average weighted on distance from the IPP can remedy
     this issue.
 
-    Future work may involve importing geospatial data and using the IPP and
-    found point to automate populating fields such as elevation change and
-    track offset. Also, survival models may benefit from measurements made
-    closer to the time of the incident by using an hourly, rather than daily,
-    resolution.
+    \subsection{Future Work}
+      Future work may include importing geospatial data and using the IPP and
+      find location to populate fields such as elevation change and track
+      offset. Also, survival models may benefit from measurements made closer
+      to the time of the incident by using an hourly, rather than daily,
+      resolution.
 
   \bibliography{weather-api-comparison}
   \bibliographystyle{unsrt}
