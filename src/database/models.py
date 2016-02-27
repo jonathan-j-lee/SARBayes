@@ -5,6 +5,7 @@ database.models
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
            'Weather', 'Search', 'Incident']
 
+import numbers
 import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
@@ -45,9 +46,14 @@ class Subject(Base):
 
     @property
     def dead_on_arrival(self):
-        status = self.status.casefold()
-        types = self.__class__.DEAD_ON_ARRIVAL_TYPES
-        return any(status == status_type.casefold() for status_type in types)
+        if isinstance(self.status, str):
+            status = self.status.casefold()
+            types = self.__class__.DEAD_ON_ARRIVAL_TYPES
+            return any(status == type_.casefold() for type_ in types)
+
+    @property
+    def survived(self):
+        return not self.dead_on_arrival
 
     @validates('age', 'weight', 'height')
     def validate_sign(self, key, value):
@@ -57,9 +63,12 @@ class Subject(Base):
             raise ValueError("'{}' must be a positive number".format(key))
 
     @validates('sex')
-    def validate_code(self, key, value):
-        if value in self.__class__.SEX_CODES:
-            return value
+    def validate_sex_code(self, key, value):
+        for code, sex in self.__class__.SEX_CODES.items():
+            if value == code:
+                return value
+            elif value == sex:
+                return code
         else:
             raise ValueError("invalid code for '{}'".format(key))
 
@@ -208,6 +217,19 @@ class Weather(Base):
     def cdd(self):
         cdd = self.avg_temp - self.__class__.BASE_TEMP
         return cdd if cdd >= 0 else None
+
+    @validates('high_temp', 'low_temp')
+    def validate_bounds(self, key, value):
+        lowerbound, upperbound = float('-inf'), float('inf')
+        if key == 'high_temp' and isinstance(self.low_temp, numbers.Real):
+            lowerbound = self.low_temp
+        elif isinstance(self.high_temp, numbers.Real):
+            upperbound = self.high_temp
+
+        if lowerbound <= value <= upperbound:
+            return value
+        else:
+            raise ValueError("'high_temp' must be greater than 'low_temp'")
 
     @validates('wind_speed', 'rain', 'snow', 'solar_radiation')
     def validate_sign(self, key, value):
