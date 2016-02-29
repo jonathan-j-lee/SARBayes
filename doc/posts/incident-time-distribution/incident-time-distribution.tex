@@ -1,0 +1,105 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{svg}
+\usepackage{url}
+
+\setsvg{svgpath = ../../figures/incident-time-distribution/}
+
+\begin{document}
+  \title{Fitting Incident Time to a Distribution}
+  \author{Jonathan Lee}
+  \date{January 27, 2016}
+  \maketitle
+
+  \section{Introduction}
+    A goal of the SARBayes project is to forecast the probability of survival
+    for lost persons. Researchers can use these predictions when generating
+    probability maps of the lost person's location. To accomplish this, we are
+    analyzing data from the International Search \& Rescue Incident Database
+    (ISRID) \cite{isrid} to describe the probability of survival as a function
+    of various features, such as age or temperature.
+
+    Intuitively, a lost person should stand a better chance of survival when
+    his or her absence is noticed and reported early. Therefore, one feature we
+    have chosen to examine is the time at which an incident is reported—the
+    incident time. Here, we present how we modeled the frequency of incidents
+    as a function of the time of day.
+
+  \section{Methods}
+    \subsection{The Data}
+      In ISRID, the date and time of the incident are recorded together in the
+      incident date field. When the time is missing, the spreadsheet library
+      reading the field provides a default time of midnight, 12:00 AM.
+      Therefore, we confined our analysis to the \(N = 6356\) instances of
+      incident time that were not at midnight. When these times are organized
+      into half-hour bins, we can calculate the frequency of each bin and
+      display the data in a histogram.
+
+      \includesvg[width=\textwidth]{time-distribution-actual}
+
+      The incident frequency, as shown above, roughly follows a bell-shaped
+      distribution. As expected, fewer incidents are reported in the early
+      hours of the morning, and a surge of incidents occurs late in the
+      afternoon. The surge appears to be centered around hour 17 or
+      18---roughly 5:30 PM.
+
+    \subsection{Parameter Estimation}
+      Because incident time wraps around (e.g.\ hour 0 is the same as hour 24),
+      we chose to fit incident time to the circular von Mises distribution,
+      which is on \([-\pi, \pi]\). This section summarizes how to fit the
+      parameters of our von Mises distribution. Readers willing to take that
+      step on faith may safely skip to the Results section.
+
+      The two parameters of a von Mises distribution are \(\mu\), a real number
+      describing the mean, and \(\kappa\), a positive real number describing
+      the distribution's concentration. As \(\kappa\) increases, the closer the
+      values cluster around \(\mu\). We converted each time on the \((0, 24)\)
+      hour range to radians on \((-\pi, \pi)\), and stored the results in a
+      list \(\theta\). If we think of each time as a complex number, we can
+      compute an average, \(\bar{z}\), of the times.
+
+      \[\bar{z} = \frac{1}{N} \sum_{k=1}^N (\cos \theta_k + i \sin \theta_k)\]
+
+      \pagebreak
+
+      According to a derivation given by the von Mises Wikipedia article
+      \cite{von_mises}, the argument of \(\bar{z}\) is a biased estimator of
+      \(\mu\).
+
+      \[\mu = \arg (\bar{z})\]
+
+      Using another equation from the article, the expectation value of the
+      square of the modulus of \(\bar{z}\) is
+
+      \[\langle |\bar{z}|^2 \rangle = \frac{1}{N} + \left(\frac{N - 1}{N}
+      \right) \left(\frac{I_1(\kappa)}{I_0(\kappa)} \right)^2\]
+
+      where \(I_\alpha\) is the modified Bessel function of order \(\alpha\).
+      To estimate \(\kappa\), we iterated in increments of \(10^{-4}\) to find
+      a value that best satisfied
+
+      \[\sqrt{\left(\frac{N}{N - 1} \right) \left(|\bar{z}|^2 - \frac{1}{N}
+      \right)} = \frac{I_1(\kappa)}{I_0(\kappa)}\]
+
+  \section{Results}
+    We found \(|\bar{z}|^2 = 0.0351\), \(\kappa = 0.3805\), and \(\mu =
+    1.3945\). When converted back to the time of day, \(\mu\) is equivalent to
+    5:20 PM. Using these parameters, we also sampled \(10^6\) values from the
+    distribution. The frequency of the these values are shown below in another
+    histogram. Although the curve is smoother, this fitted distribution
+    approximates the actual data fairly well.
+
+    \includesvg[width=\textwidth]{time-distribution-fitted}
+
+  \section{Conclusion}
+    The vast majority of the 80000-some cases in our copy of ISRID do not have
+    an incident time. Sampling a distribution with the parameters found here
+    can provide fill-in values when using incident time as a feature in the
+    survival model. Probability maps can also take incident time into account,
+    as lost person behavior may depend on the time of day and how much sunlight
+    is available.
+
+  \bibliography{incident-time-distribution}
+  \bibliographystyle{unsrt}
+\end{document}
