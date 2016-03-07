@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 """
-testing -- Database and Module Testing
+tests
+=====
+Unit Testing
 """
 
 import unittest
 
-from sqlalchemy.exc import IntegrityError
-
 import database
+from database.cleaning import extract_number
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
 
@@ -113,6 +114,17 @@ class ModelTests(unittest.TestCase):
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
+
+
+class CleansingTests(unittest.TestCase):
+    def test_extract_number(self):
+        self.assertEqual(extract_number('2.3'), 2.3)
+        self.assertEqual(extract_number('5 people'), 5)
+        self.assertEqual(extract_number('count to 10'), 10)
+        self.assertEqual(extract_number('-3.35'), -3.35)
+        self.assertEqual(extract_number('.5'), 0.5)
+        self.assertEqual(extract_number('-.10'), -0.1)
+        self.assertEqual(extract_number('no number'), None)
 
 
 if __name__ == '__main__':

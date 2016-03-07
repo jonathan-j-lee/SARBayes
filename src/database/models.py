@@ -1,5 +1,6 @@
 """
 database.models
+===============
 """
 
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
@@ -9,7 +10,7 @@ import numbers
 import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
-from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text
+from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
 from sqlalchemy.orm import relationship, validates
 
 from . import Base
@@ -147,7 +148,7 @@ class Location(Base):
     @property
     def region(self):
         if isinstance(self.incident.source, str):
-            result = re.search('-([A-Z]+)', self.incident.source)
+            result = re.search(r'-([A-Z]+)', self.incident.source)
             if result:
                 return result.group(1)
 
@@ -323,7 +324,7 @@ class Incident(Base):
     outcome = relationship('Outcome', back_populates='incident', uselist=False)
     cause = Column(Text)
     search = relationship('Search', back_populates='incident', uselist=False)
-    other = Column(Text)  # Strictly for holding legacy data: key="value"
+    other = Column(PickleType)  # Dictionary strictly for holding legacy data
     comments = Column(Text)
 
     @property

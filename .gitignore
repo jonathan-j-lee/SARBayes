@@ -211,7 +211,6 @@ pythontex-files-*/
 *.tab
 *.bak
 trash/
-*.yaml
 *.csv
 summer-analysis/machine_learning/logreg
 *tree*

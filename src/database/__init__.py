@@ -1,8 +1,9 @@
 """
 database
+========
 """
 
-__all__ = ['Base', 'models', 'initialize', 'terminate']
+__all__ = ['Base', 'cleaning', 'models', 'initialize', 'terminate']
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -10,7 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-from . import models
+from . import cleaning, models
 
 
 def initialize(url='sqlite://'):
