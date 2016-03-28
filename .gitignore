@@ -219,3 +219,5 @@ summer-analysis/machine_learning/logreg
 .~lock*
 *.pdf
 *.pdf_tex
+*.db
+*.sqlite*

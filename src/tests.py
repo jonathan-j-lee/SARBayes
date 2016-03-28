@@ -9,7 +9,7 @@ Unit Testing
 import unittest
 
 import database
-from database.cleaning import extract_number
+from database.cleaning import extract_numbers
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
 
@@ -46,7 +46,7 @@ class ModelTests(unittest.TestCase):
             subject = Subject(age=-1)
 
         with self.assertRaises(ValueError):
-            subject = Subject(height=0)
+            subject = Subject(height=-0.01)
 
         with self.assertRaises(ValueError):
             self.subject.weight = -1
@@ -118,13 +118,10 @@ class ModelTests(unittest.TestCase):
 
 class CleansingTests(unittest.TestCase):
     def test_extract_number(self):
-        self.assertEqual(extract_number('2.3'), 2.3)
-        self.assertEqual(extract_number('5 people'), 5)
-        self.assertEqual(extract_number('count to 10'), 10)
-        self.assertEqual(extract_number('-3.35'), -3.35)
-        self.assertEqual(extract_number('.5'), 0.5)
-        self.assertEqual(extract_number('-.10'), -0.1)
-        self.assertEqual(extract_number('no number'), None)
+        self.assertEqual(list(extract_numbers('2 people')), [2])
+        self.assertEqual(list(extract_numbers('1, 2.2, 3., -.4')),
+                         [1, 2.2, 3, -0.4])
+        self.assertEqual(list(extract_numbers('no numbers')), [])
 
 
 if __name__ == '__main__':

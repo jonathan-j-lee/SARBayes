@@ -58,13 +58,15 @@ class Subject(Base):
 
     @validates('age', 'weight', 'height')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
 
     @validates('sex')
     def validate_sex_code(self, key, value):
+        if value is None:
+            return value
         for code, sex in self.__class__.SEX_CODES.items():
             if value == code:
                 return value
@@ -121,10 +123,13 @@ class Point(Base):
         else:
             lowerbound, upperbound = cls.MIN_LONGITUDE, cls.MAX_LONGITUDE
 
-        if lowerbound <= value <= upperbound:
+        if value is None or lowerbound <= value <= upperbound:
             return value
         else:
             raise ValueError("invalid bounds for '{}'".format(key))
+
+    def __str__(self):
+        return '({}, {})'.format(self.latitude, self.longitude)
 
 
 class Location(Base):
@@ -180,9 +185,9 @@ class Operation(Base):
     incident = relationship('Incident', back_populates='operation',
                             uselist=False)
 
-    @validates('ipp_accuracy', 'idot')
+    @validates('ipp_accuracy')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value > 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -227,14 +232,14 @@ class Weather(Base):
         elif isinstance(self.high_temp, numbers.Real):
             upperbound = self.high_temp
 
-        if lowerbound <= value <= upperbound:
+        if value is None or lowerbound <= value <= upperbound:
             return value
         else:
             raise ValueError("'high_temp' must be greater than 'low_temp'")
 
     @validates('wind_speed', 'rain', 'snow', 'solar_radiation')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -255,6 +260,7 @@ class Outcome(Base):
     distance_from_ipp = Column(Float)  # Measured in km
     find_bearing = Column(Float)  # Measured in degrees from true North
     find_feature = Column(Text)
+    find_feature_secondary = Column(Text)
     track_offset = Column(Float)  # Measured in m
     elevation_change = Column(Float)  # Measured in m
     incident_id = Column(Integer, ForeignKey('incidents.id'))
@@ -262,9 +268,9 @@ class Outcome(Base):
                             uselist=False)
 
     @validates('find_point_accuracy', 'distance_from_ipp', 'find_bearing',
-               'track_offset', 'elevation_change')
+               'track_offset')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -285,6 +291,7 @@ class Search(Base):
     emergent_count = Column(SmallInteger)
     vehicle_count = Column(SmallInteger)
     air_hours = Column(Interval)
+    dog_hours = Column(Interval)
     personnel_hours = Column(Interval)
     distance_traveled = Column(Float)  # Measured in km
     lost_equipment = Column(Text)
@@ -295,7 +302,7 @@ class Search(Base):
     @validates('total_tasks', 'air_tasks', 'dog_count', 'air_count',
                'personnel_count', 'emergent_count', 'vehicle_count')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))

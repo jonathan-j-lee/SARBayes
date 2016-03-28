@@ -11,6 +11,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+def __getitem__(self, name):
+    return self.__mapper__.columns[name]
+
+Base.__getitem__ = __getitem__
+
 from . import cleaning, models
 
 

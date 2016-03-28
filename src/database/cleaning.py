@@ -1,16 +1,14 @@
 """
-database.cleansing
-==================
+database.cleaning
+=================
 """
 
-__all__ = ['extract_number']
+__all__ = ['extract_numbers']
 
 import re
 
 NUMBER = re.compile(r'(\-?\d*\.?\d+)')
 
 
-def extract_number(text):
-    result = NUMBER.search(text)
-    if result:
-        return float(result.group(1))
+def extract_numbers(text):
+    yield from map(float, NUMBER.findall(text))
