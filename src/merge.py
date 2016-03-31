@@ -30,6 +30,7 @@ Notes:
 
   - Once the data are added, disable the procedure when running the script in
     the future by adding `enabled=False` to the decorator.
+
 """
 
 import datetime
@@ -210,7 +211,8 @@ def procedure(index, labeled_row, mapping):
                                   personality=personality,
                                   experience=experience,
                                   training=training, equipment=equipment,
-                                  clothing=clothing, status=statuses[index])
+                                  clothing=clothing, status=statuses[index],
+                                  group=group)
 
                 if number_lost == 1:
                     subject.weight = coerce_type(labeled_row['Weight (Kg)'],
@@ -330,6 +332,7 @@ def procedure(index, labeled_row, mapping):
                 empty = False
 
         if not empty:
+            subject.group = group
             yield subject
 
     point_mapping = {

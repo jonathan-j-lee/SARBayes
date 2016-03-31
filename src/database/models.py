@@ -212,7 +212,8 @@ class Weather(Base):
 
     @property
     def avg_temp(self):
-        return (self.high_temp + self.low_temp)/2
+        if self.high_temp is not None and self.low_temp is not None:
+            return (self.high_temp + self.low_temp)/2
 
     @property
     def hdd(self):

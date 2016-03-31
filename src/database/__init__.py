@@ -11,10 +11,18 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+def __bool__(self):
+    for column in self.__mapper__.columns:
+        if not column.primary_key:
+            if getattr(self, column.name) != None:
+                return True
+
+    return False
+
 def __getitem__(self, name):
     return self.__mapper__.columns[name]
 
-Base.__getitem__ = __getitem__
+Base.__bool__, Base.__getitem__ = __bool__, __getitem__
 
 from . import cleaning, models
 

@@ -7,6 +7,7 @@ Unit Testing
 """
 
 import unittest
+import warnings
 
 import database
 from database.cleaning import extract_numbers
@@ -16,7 +17,7 @@ from database.models import Operation, Outcome, Search, Incident
 
 class ModelTests(unittest.TestCase):
     def setUp(self):
-        self.engine, self.session = database.initialize()
+        self.engine, self.session = database.initialize('sqlite:///:memory:')
 
         self.group = Group()
         self.subject = Subject(sex='female', weight=4, height=4,
@@ -116,12 +117,29 @@ class ModelTests(unittest.TestCase):
         database.terminate(self.engine, self.session)
 
 
-class CleansingTests(unittest.TestCase):
+class CleaningTests(unittest.TestCase):
     def test_extract_number(self):
         self.assertEqual(list(extract_numbers('2 people')), [2])
         self.assertEqual(list(extract_numbers('1, 2.2, 3., -.4')),
                          [1, 2.2, 3, -0.4])
         self.assertEqual(list(extract_numbers('no numbers')), [])
+
+
+class DatabaseIntegrityTests(unittest.TestCase):
+    def setUp(self):
+        url = 'sqlite:///../data/isrid-master.db'
+        self.engine, self.session = database.initialize(url)
+
+    def test_unique_cases(self):
+        columns = Incident.key, Incident.mission, Incident.number
+        criteria = map(lambda column: column != None, columns)
+
+        query = self.session.query(*columns).filter(*criteria)
+        identifiers = list(map(frozenset, query))
+        self.assertEqual(len(identifiers), len(set(identifiers)))
+
+    def tearDown(self):
+        database.terminate(self.engine, self.session)
 
 
 if __name__ == '__main__':
