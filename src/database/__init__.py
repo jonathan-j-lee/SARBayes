@@ -3,7 +3,8 @@ database
 ========
 """
 
-__all__ = ['Base', 'cleaning', 'models', 'initialize', 'terminate']
+__all__ = ['Base', 'cleaning', 'models', 'initialize', 'processing',
+           'terminate']
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -24,10 +25,10 @@ def __getitem__(self, name):
 
 Base.__bool__, Base.__getitem__ = __bool__, __getitem__
 
-from . import cleaning, models
+from . import cleaning, models, processing
 
 
-def initialize(url='sqlite://'):
+def initialize(url):
     engine = create_engine(url, convert_unicode=True)
     session = scoped_session(sessionmaker(bind=engine))
     Base.query = session.query_property()

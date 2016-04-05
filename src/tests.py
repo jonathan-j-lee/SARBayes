@@ -20,7 +20,7 @@ class ModelTests(unittest.TestCase):
         self.engine, self.session = database.initialize('sqlite:///:memory:')
 
         self.group = Group()
-        self.subject = Subject(sex='female', weight=4, height=4,
+        self.subject = Subject(sex='female', weight=25, height=100,
                                group=self.group)
 
         self.location = Location()
@@ -96,7 +96,7 @@ class ModelTests(unittest.TestCase):
 
     def test_properties(self):
         self.assertEqual(self.subject.sex_as_str, 'female')
-        self.assertEqual(self.subject.bmi, 0.25)
+        self.assertEqual(self.subject.bmi, 25)
         self.assertEqual(self.subject.dead_on_arrival, None)
         self.subject.status = 'DOA'
         self.assertTrue(self.subject.dead_on_arrival)

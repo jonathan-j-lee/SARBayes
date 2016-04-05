@@ -11,7 +11,9 @@ import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
 from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import and_, not_
+from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
 
@@ -39,22 +41,28 @@ class Subject(Base):
 
     @property
     def sex_as_str(self):
-        return self.__class__.SEX_CODES[self.sex]
+        return self.__class__.SEX_CODES.get(self.sex, None)
 
-    @property
-    def bmi(self):
-        return self.weight/pow(self.height, 2)
-
-    @property
+    @hybrid_property
     def dead_on_arrival(self):
         if isinstance(self.status, str):
             status = self.status.casefold()
             types = self.__class__.DEAD_ON_ARRIVAL_TYPES
             return any(status == type_.casefold() for type_ in types)
 
-    @property
+    @dead_on_arrival.expression
+    def dead_on_arrival(cls):
+        return and_(cls.status != None, cls.status == 'DOA')
+
+    @hybrid_property
     def survived(self):
         return not self.dead_on_arrival
+
+    @survived.expression
+    def survived(cls):
+        return not_(cls.dead_on_arrival)
+
+    bmi = column_property(weight/height/height*1e4)  # Measured in kg/m^2
 
     @validates('age', 'weight', 'height')
     def validate_sign(self, key, value):
