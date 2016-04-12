@@ -6,13 +6,14 @@ database.models
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
            'Weather', 'Search', 'Incident']
 
+from functools import reduce
 import numbers
 import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
 from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import and_, not_
+from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
@@ -21,7 +22,7 @@ from . import Base
 class Subject(Base):
     __tablename__ = 'subjects'
     SEX_CODES = {0: 'unknown', 1: 'male', 2: 'female', 9: 'not_applicable'}
-    DEAD_ON_ARRIVAL_TYPES = ['DOA', 'Suspended']
+    DOA_TYPES = ['DOA', 'Suspended']
 
     id = Column(Integer, primary_key=True)
     age = Column(Float)  # Measured in years
@@ -39,20 +40,23 @@ class Subject(Base):
     group_id = Column(Integer, ForeignKey('groups.id'))
     group = relationship('Group', back_populates='subjects')
 
-    @property
+    @hybrid_property
     def sex_as_str(self):
         return self.__class__.SEX_CODES.get(self.sex, None)
 
+    @sex_as_str.expression
+    def sex_as_str(cls):
+        ...
+
     @hybrid_property
     def dead_on_arrival(self):
-        if isinstance(self.status, str):
-            status = self.status.casefold()
-            types = self.__class__.DEAD_ON_ARRIVAL_TYPES
-            return any(status == type_.casefold() for type_ in types)
+        if self.status is not None:
+            status, types = self.status.casefold(), self.__class__.DOA_TYPES
+            return any(status == doa.casefold() for doa in types)
 
     @dead_on_arrival.expression
     def dead_on_arrival(cls):
-        return and_(cls.status != None, cls.status == 'DOA')
+        return reduce(or_, (cls.status == doa for doa in cls.DOA_TYPES))
 
     @hybrid_property
     def survived(self):

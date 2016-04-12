@@ -3,5 +3,9 @@ database.processing
 ===================
 """
 
+from .models import Subject
+
+
 def survival_rate(subjects):
-    return sum(subject.survived for subject in subjects)/subjects.count()
+    survivals = subjects.filter(Subject.survived == True)
+    return survivals.count()/subjects.count()
