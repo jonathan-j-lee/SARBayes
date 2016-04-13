@@ -13,7 +13,7 @@ import re
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
 from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import and_, or_, not_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
@@ -60,11 +60,11 @@ class Subject(Base):
 
     @hybrid_property
     def survived(self):
-        return not self.dead_on_arrival
+        return self.dead_on_arrival == False
 
     @survived.expression
     def survived(cls):
-        return not_(cls.dead_on_arrival)
+        return cls.dead_on_arrival == False
 
     bmi = column_property(weight/height/height*1e4)  # Measured in kg/m^2
 
