@@ -1,16 +1,20 @@
 """
 database.models
+===============
 """
 
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
            'Weather', 'Search', 'Incident']
 
+from functools import reduce
 import numbers
 import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
-from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
 
@@ -18,7 +22,7 @@ from . import Base
 class Subject(Base):
     __tablename__ = 'subjects'
     SEX_CODES = {0: 'unknown', 1: 'male', 2: 'female', 9: 'not_applicable'}
-    DEAD_ON_ARRIVAL_TYPES = ['DOA', 'Suspended']
+    DOA_TYPES = ['DOA', 'Suspended']
 
     id = Column(Integer, primary_key=True)
     age = Column(Float)  # Measured in years
@@ -36,34 +40,45 @@ class Subject(Base):
     group_id = Column(Integer, ForeignKey('groups.id'))
     group = relationship('Group', back_populates='subjects')
 
-    @property
+    @hybrid_property
     def sex_as_str(self):
-        return self.__class__.SEX_CODES[self.sex]
+        return self.__class__.SEX_CODES.get(self.sex, None)
 
-    @property
-    def bmi(self):
-        return self.weight/pow(self.height, 2)
+    @sex_as_str.expression
+    def sex_as_str(cls):
+        ...
 
-    @property
+    @hybrid_property
     def dead_on_arrival(self):
-        if isinstance(self.status, str):
-            status = self.status.casefold()
-            types = self.__class__.DEAD_ON_ARRIVAL_TYPES
-            return any(status == type_.casefold() for type_ in types)
+        if self.status is not None:
+            status, types = self.status.casefold(), self.__class__.DOA_TYPES
+            return any(status == doa.casefold() for doa in types)
 
-    @property
+    @dead_on_arrival.expression
+    def dead_on_arrival(cls):
+        return reduce(or_, (cls.status == doa for doa in cls.DOA_TYPES))
+
+    @hybrid_property
     def survived(self):
-        return not self.dead_on_arrival
+        return self.dead_on_arrival == False
+
+    @survived.expression
+    def survived(cls):
+        return cls.dead_on_arrival == False
+
+    bmi = column_property(weight/height/height*1e4)  # Measured in kg/m^2
 
     @validates('age', 'weight', 'height')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
 
     @validates('sex')
     def validate_sex_code(self, key, value):
+        if value is None:
+            return value
         for code, sex in self.__class__.SEX_CODES.items():
             if value == code:
                 return value
@@ -120,10 +135,13 @@ class Point(Base):
         else:
             lowerbound, upperbound = cls.MIN_LONGITUDE, cls.MAX_LONGITUDE
 
-        if lowerbound <= value <= upperbound:
+        if value is None or lowerbound <= value <= upperbound:
             return value
         else:
             raise ValueError("invalid bounds for '{}'".format(key))
+
+    def __str__(self):
+        return '({}, {})'.format(self.latitude, self.longitude)
 
 
 class Location(Base):
@@ -147,7 +165,7 @@ class Location(Base):
     @property
     def region(self):
         if isinstance(self.incident.source, str):
-            result = re.search('-([A-Z]+)', self.incident.source)
+            result = re.search(r'-([A-Z]+)', self.incident.source)
             if result:
                 return result.group(1)
 
@@ -179,9 +197,9 @@ class Operation(Base):
     incident = relationship('Incident', back_populates='operation',
                             uselist=False)
 
-    @validates('ipp_accuracy', 'idot')
+    @validates('ipp_accuracy')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value > 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -206,7 +224,8 @@ class Weather(Base):
 
     @property
     def avg_temp(self):
-        return (self.high_temp + self.low_temp)/2
+        if self.high_temp is not None and self.low_temp is not None:
+            return (self.high_temp + self.low_temp)/2
 
     @property
     def hdd(self):
@@ -226,14 +245,14 @@ class Weather(Base):
         elif isinstance(self.high_temp, numbers.Real):
             upperbound = self.high_temp
 
-        if lowerbound <= value <= upperbound:
+        if value is None or lowerbound <= value <= upperbound:
             return value
         else:
             raise ValueError("'high_temp' must be greater than 'low_temp'")
 
     @validates('wind_speed', 'rain', 'snow', 'solar_radiation')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -254,6 +273,7 @@ class Outcome(Base):
     distance_from_ipp = Column(Float)  # Measured in km
     find_bearing = Column(Float)  # Measured in degrees from true North
     find_feature = Column(Text)
+    find_feature_secondary = Column(Text)
     track_offset = Column(Float)  # Measured in m
     elevation_change = Column(Float)  # Measured in m
     incident_id = Column(Integer, ForeignKey('incidents.id'))
@@ -261,9 +281,9 @@ class Outcome(Base):
                             uselist=False)
 
     @validates('find_point_accuracy', 'distance_from_ipp', 'find_bearing',
-               'track_offset', 'elevation_change')
+               'track_offset')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -284,6 +304,7 @@ class Search(Base):
     emergent_count = Column(SmallInteger)
     vehicle_count = Column(SmallInteger)
     air_hours = Column(Interval)
+    dog_hours = Column(Interval)
     personnel_hours = Column(Interval)
     distance_traveled = Column(Float)  # Measured in km
     lost_equipment = Column(Text)
@@ -294,7 +315,7 @@ class Search(Base):
     @validates('total_tasks', 'air_tasks', 'dog_count', 'air_count',
                'personnel_count', 'emergent_count', 'vehicle_count')
     def validate_sign(self, key, value):
-        if value > 0:
+        if value is None or value >= 0:
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -323,7 +344,7 @@ class Incident(Base):
     outcome = relationship('Outcome', back_populates='incident', uselist=False)
     cause = Column(Text)
     search = relationship('Search', back_populates='incident', uselist=False)
-    other = Column(Text)  # Strictly for holding legacy data: key="value"
+    other = Column(PickleType)  # Dictionary strictly for holding legacy data
     comments = Column(Text)
 
     @property

@@ -1,0 +1,149 @@
+ISRIDclean.xlsx:
+  ISRIDclean:
+    Data Source:            incident.source
+    Key#:                   incident.key
+    'Mission #':            incident.mission
+    Incident Date:          incident.datetime
+    City:                   location.city
+    County:                 location.county
+    EcoRegion Domain:       location.eco_domain
+    EcoRegion Division:     location.eco_division
+    Population Density:     location.pop_density
+    Terrain:                location.terrain
+    Incident Type:          incident.type
+    Subject Category:       group.category
+    Subject Sub-Category:   group.subcategory
+    Scenario:               group.scenario
+    Subject Activity:       group.activity
+    Notify hours:           incident.notify_hours
+    Search hours:           incident.search_hours
+    Total hours:            incident.total_hours
+    Temp/H:                 weather.high_temp
+    Temp L:                 weather.low_temp
+    Wind (kph):             weather.wind_speed
+    Weather:                weather.description
+    Snow:                   weather.snow
+    Rain:                   weather.rain
+    Investigative Find:     outcome.invest_find
+    Subject Found feature:  outcome.find_feature
+    Found Secondary:        outcome.find_feature_secondary
+    Find Resource:          search.find_resource
+    Detection:              group.detectability
+    Lost Strategy:          group.lost_strategy
+    Distance IPP (km):      outcome.distance_from_ipp
+    Distance Invest. (km):  search.distance_traveled
+    Mobile (hours):         group.mobile_hours
+    Track Offset (m):       outcome.track_offset
+    Mission Cause:          incident.cause
+    Rescue Method:          group.rescue_method
+    Total Air Hours:        search.air_hours
+    Total Dog Hours:        search.dog_hours
+    Total Personnel:        search.personnel_count
+    Total Man Hours:        search.personnel_hours
+    Total Cost:             search.total_cost
+    Comments:               incident.comments
+
+ISRID 2015 NY cleaned and corrected data 991 cases through 2014-01-06.xlsx:
+  SDF: &common
+    Data Source:                  incident.source
+    Key#:                         incident.key
+    Incident Outcome:             outcome.conclusion
+    Incident Type:                incident.type
+    Incident Date Time:           incident.datetime
+    'Mission #':                  incident.mission
+    'Incident #':                 incident.number
+    Location:                     location.name
+    City:                         location.city
+    County:                       location.county
+    EcoRegion Domain:             location.eco_domain
+    EcoRegion Division:           location.eco_division
+    Population Density:           location.pop_density
+    Terrain:                      location.terrain
+    Land Cover:                   location.land_cover
+    Land Owner:                   location.land_owner
+    Incident Environment:         location.environment
+    Disaster Type:                incident.disaster_type
+    Subject Category:             group.category
+    Subject Sub-Category:         group.subcategory
+    Subject Activity:             group.activity
+    Scenario:                     group.scenario
+    Contact Method:               group.contact_method
+    Notify hours:                 incident.notify_hours
+    Search hours:                 incident.search_hours
+    Total Incident Time:          incident.total_hours
+    IPP Type:                     operation.ipp_type
+    IPP Classification:           operation.ipp_class
+    IPPAccuracy:                  operation.ipp_accuracy
+    Initial Direction of Travel:  operation.idot
+    iDOT Basis:                   operation.idot_basis
+    Reason to Update LKP/PLS:     operation.revision_reason
+    Type Decision Point:          outcome.dec_point_type
+    Temp/H:                       weather.high_temp
+    Temp L:                       weather.low_temp
+    Wind (kph):                   weather.wind_speed
+    Weather:                      weather.description
+    Snow:                         weather.snow
+    Rain:                         weather.rain
+    Investigative Find:           outcome.invest_find
+    Mechansim:                    group.mechanism
+    Injury Type:                  group.injury_type
+    Illness Type:                 group.illness_type
+    Treatment by:                 group.treatment
+    Subject Found feature:        outcome.find_feature
+    Found Secondary:              outcome.find_feature_secondary
+    Find Resource:                search.find_resource
+    Detection:                    group.detectability
+    Lost Strategy:                group.lost_strategy
+    Mobile (hours):               group.mobile_hours
+    Distance IPP (km):            outcome.distance_from_ipp
+    Distance Invest. (km):        search.distance_traveled
+    Track Offset (m):             outcome.track_offset
+    Find Accuracy:                outcome.find_point_accuracy
+    Find Bearing:                 outcome.find_bearing
+    Mission Cause:                incident.cause
+    Rescue Method:                group.rescue_method
+    Signalling:                   group.signaling
+    Injured Searcher:             search.injured_searcher
+    Near Miss Details:            search.near_miss
+    Total Air Hours:              search.air_hours
+    Total Dog Hours:              search.dog_hours
+    Total Personnel:              search.personnel_count
+    '# Aircraft':                 search.air_count
+    Distance Traveled:            search.distance_traveled
+    '# Vehicles':                 search.vehicle_count
+    '# Dogs':                     search.dog_count
+    '# of Tasks':                 search.total_tasks
+    Total Man Hours:              search.personnel_hours
+    Total Cost:                   search.total_cost
+    Comments:                     incident.comments
+
+ISRIDnew-data-20150721.xlsx:
+  AFRCC:    *common
+  AKRCC:    *common
+  AU:       *common
+  CA NS:    *common
+  CA OPP:   *common
+  CA SC:    *common
+  IE:       *common
+  US-NOAA:  *common
+  PL:       *common
+  PLI:      *common
+  UK MREW:  *common
+  US AK:    *common
+  US NH:    *common
+  US NM:    *common
+  US OR:    *common
+  US UT:    *common
+  US WY:    *common
+  CA AB:    *common
+  NZ:       *common
+  US CAm:   *common
+  US YOSE:  *common
+  US MD:    *common
+  US GA:    *common
+  US-KY:    *common
+  US NCMEC: *common
+  US-VT:    *common
+
+combined NPS Data (SEKI and ZION).xlsx:
+  SDF:      *common

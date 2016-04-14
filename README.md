@@ -6,13 +6,13 @@ Predicting lost person survival rates using wilderness search-and-rescue (WiSAR)
 
 * `SARBayes`
     * `data`
-        * `spec`
     * `doc`
         * `figures`
         * `journal`
         * `paper`
         * `poster`
-        * `posts` -- For [SARBayes](http://sarbayes.org)
+        * `posts`
         * `presentation`
+    * `logs`
     * `old`
     * `src`

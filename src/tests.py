@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 
 """
-testing -- Database and Module Testing
+tests
+=====
+Unit Testing
 """
 
 import unittest
-
-from sqlalchemy.exc import IntegrityError
+import warnings
 
 import database
+from database.cleaning import extract_numbers
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
 
 
 class ModelTests(unittest.TestCase):
     def setUp(self):
-        self.engine, self.session = database.initialize()
+        self.engine, self.session = database.initialize('sqlite:///:memory:')
 
         self.group = Group()
-        self.subject = Subject(sex='female', weight=4, height=4,
+        self.subject = Subject(sex='female', weight=25, height=100,
                                group=self.group)
 
         self.location = Location()
@@ -45,7 +47,7 @@ class ModelTests(unittest.TestCase):
             subject = Subject(age=-1)
 
         with self.assertRaises(ValueError):
-            subject = Subject(height=0)
+            subject = Subject(height=-0.01)
 
         with self.assertRaises(ValueError):
             self.subject.weight = -1
@@ -94,7 +96,7 @@ class ModelTests(unittest.TestCase):
 
     def test_properties(self):
         self.assertEqual(self.subject.sex_as_str, 'female')
-        self.assertEqual(self.subject.bmi, 0.25)
+        self.assertEqual(self.subject.bmi, 25)
         self.assertEqual(self.subject.dead_on_arrival, None)
         self.subject.status = 'DOA'
         self.assertTrue(self.subject.dead_on_arrival)
@@ -110,6 +112,31 @@ class ModelTests(unittest.TestCase):
         # HDD and CDD are mutually exclusive
         self.assertEqual(self.weather.hdd, 15.5)
         self.assertEqual(self.weather.cdd, None)
+
+    def tearDown(self):
+        database.terminate(self.engine, self.session)
+
+
+class CleaningTests(unittest.TestCase):
+    def test_extract_number(self):
+        self.assertEqual(list(extract_numbers('2 people')), [2])
+        self.assertEqual(list(extract_numbers('1, 2.2, 3., -.4')),
+                         [1, 2.2, 3, -0.4])
+        self.assertEqual(list(extract_numbers('no numbers')), [])
+
+
+class DatabaseIntegrityTests(unittest.TestCase):
+    def setUp(self):
+        url = 'sqlite:///../data/isrid-master.db'
+        self.engine, self.session = database.initialize(url)
+
+    def test_unique_cases(self):
+        columns = Incident.key, Incident.mission, Incident.number
+        criteria = map(lambda column: column != None, columns)
+
+        query = self.session.query(*columns).filter(*criteria)
+        identifiers = list(map(frozenset, query))
+        self.assertEqual(len(identifiers), len(set(identifiers)))
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
