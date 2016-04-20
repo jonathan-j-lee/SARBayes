@@ -6,6 +6,8 @@ shell
 Interactive database REPL shell (read-eval-print loop).
 """
 
+import matplotlib.pyplot as plt
+import numpy as np
 import readline
 
 import database
