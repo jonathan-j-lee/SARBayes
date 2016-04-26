@@ -12,6 +12,9 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from . import cleaning, models, processing
+
+
 def __bool__(self):
     for column in self.__mapper__.columns:
         if not column.primary_key:
@@ -20,12 +23,18 @@ def __bool__(self):
 
     return False
 
+
 def __getitem__(self, name):
     return self.__mapper__.columns[name]
 
-Base.__bool__, Base.__getitem__ = __bool__, __getitem__
 
-from . import cleaning, models, processing
+def __repr__(self):
+    return '{}(id={})'.format(self.__class__.__name__, self.id)
+
+
+Base.__bool__ = __bool__
+Base.__getitem__ = __getitem__
+Base.__repr__ = Base.__str__ = __repr__
 
 
 def initialize(url):

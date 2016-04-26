@@ -37,4 +37,5 @@ ax.set_xlabel('Age (year)')
 ax.set_ylabel('Height (cm)')
 
 plt.savefig('../doc/figures/age-plots.svg', transparent=True)
+plt.savefig('../doc/figures/age-plots.png', transparent=True)
 plt.show()

@@ -11,8 +11,8 @@ import numpy as np
 import readline
 
 import database
-from database.models import Subject, Group, Point, Location, Weather
-from database.models import Operation, Outcome, Search, Incident
+from database.models import *
+from database.processing import *
 
 
 def loop():
