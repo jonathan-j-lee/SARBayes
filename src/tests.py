@@ -6,11 +6,13 @@ tests
 Unit Testing
 """
 
+import numpy as np
 import unittest
 import warnings
 
 import database
 from database.cleaning import extract_numbers
+from database.processing import survival_rate, as_array
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
 
@@ -85,15 +87,6 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(self.incident.search, self.search)
         self.assertEqual(self.incident, self.search.incident)
 
-    def test_querying(self):
-        query = self.session.query(Subject)
-        self.assertEqual(query.count(), 1)
-
-        self.subject.age = 20
-        self.session.commit()
-        query = self.session.query(Subject).filter(Subject.age > 20)
-        self.assertEqual(query.count(), 0)
-
     def test_properties(self):
         self.assertEqual(self.subject.sex_as_str, 'female')
         self.assertEqual(self.subject.bmi, 25)
@@ -112,6 +105,46 @@ class ModelTests(unittest.TestCase):
         # HDD and CDD are mutually exclusive
         self.assertEqual(self.weather.hdd, 15.5)
         self.assertEqual(self.weather.cdd, None)
+
+    def tearDown(self):
+        database.terminate(self.engine, self.session)
+
+
+class QueryingTests(unittest.TestCase):
+    def setUp(self):
+        self.engine, self.session = database.initialize('sqlite:///:memory:')
+
+        for age in range(1, 11):
+            subject = Subject(age=age)
+            if age < 6:
+                subject.weight = 20
+            self.session.add(subject)
+
+        self.session.commit()
+
+    def test_count(self):
+        results = self.session.query(Subject)
+        self.assertEqual(results.count(), 10)
+
+        results = self.session.query(Subject).filter(Subject.age < 5)
+        self.assertEqual(results.count(), 4)
+
+        results = self.session.query(Subject).filter(Subject.sex != None)
+        self.assertEqual(results.count(), 0)
+
+    def test_tabulation(self):
+        ages = as_array(Subject.age)
+        self.assertEqual(ages.size, 10)
+        self.assertEqual(np.sum(ages), sum(range(1, 11)))
+
+        filters = lambda query: query.filter(Subject.weight != None)
+        weights = as_array(Subject.weight, filters)
+        self.assertEqual(weights.size, 5)
+
+        transform = lambda weight: weight or 0
+        weights = as_array(Subject.weight, transform=transform)
+        self.assertEqual(weights.size, 10)
+        self.assertTrue(np.isfinite(weights.all()))
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
