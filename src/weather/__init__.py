@@ -1,9 +1,8 @@
 """
-weather/__init__.py -- Weather Data Library
+weather
+=======
 """
 
-__all__ = [
-    'history'
-]
+__all__ = ['noaa', 'wsi']
 
-from . import *
+from . import noaa, wsi

@@ -12,7 +12,7 @@ import warnings
 
 import database
 from database.cleaning import extract_numbers
-from database.processing import survival_rate, as_array
+from database.processing import survival_rate
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
 
@@ -131,20 +131,6 @@ class QueryingTests(unittest.TestCase):
 
         results = self.session.query(Subject).filter(Subject.sex != None)
         self.assertEqual(results.count(), 0)
-
-    def test_tabulation(self):
-        ages = as_array(Subject.age)
-        self.assertEqual(ages.size, 10)
-        self.assertEqual(np.sum(ages), sum(range(1, 11)))
-
-        filters = lambda query: query.filter(Subject.weight != None)
-        weights = as_array(Subject.weight, filters)
-        self.assertEqual(weights.size, 5)
-
-        transform = lambda weight: weight or 0
-        weights = as_array(Subject.weight, transform=transform)
-        self.assertEqual(weights.size, 10)
-        self.assertTrue(np.isfinite(weights.all()))
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
