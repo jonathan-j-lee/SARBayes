@@ -53,9 +53,10 @@ def execute():
     bins = np.array(list(range(0, 24, 3)) + list(range(30, 110, 10)))
     data['age'] = np.digitize(data['age'], bins)
 
-    t_max = 2000
+    t_max = 1000
     t = np.linspace(0, t_max, 1001)
 
+    lines = []
     for age, sex in [(x, 1) for x in range(1, 9, 1)]:
         subset = data[(data.age == age) & (data.sex == sex)]
         times = subset['time'].as_matrix()
@@ -82,7 +83,10 @@ def execute():
         alpha_mean, beta_mean = alpha, np.mean(beta_samples)
         print('\u03b1 = {:.3f}, \u03b2 = {:.5f}'.format(alpha_mean, beta_mean))
 
-        plt.plot(t, sigmoid(t, alpha_mean, beta_mean))
+        line, = plt.plot(t, sigmoid(t, alpha_mean, beta_mean), label='{} - {} years old'.format(bins[age - 1], bins[age]))
+        lines.append(line)
+
+    plt.legend(handles=lines)
 
     plt.xlim(0, t_max)
     plt.ylim(0, 1)
