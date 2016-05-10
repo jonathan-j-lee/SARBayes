@@ -6,9 +6,11 @@ shell
 Interactive database REPL shell (read-eval-print loop).
 """
 
+import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import readline
+from sqlalchemy import func
 
 import database
 from database.models import *

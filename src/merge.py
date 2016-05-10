@@ -376,7 +376,7 @@ def procedure(index, labeled_row, mapping):
 
 def execute():
     warnings.filterwarnings('ignore')
-    initialize_logging('../logs/migrate.log', 'a+')
+    initialize_logging('../logs/merge.log', 'a+')
 
     logger = logging.getLogger()
     engine, session = database.initialize('sqlite:///../data/isrid-master.db')
