@@ -6,7 +6,6 @@ database.models
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
            'Weather', 'Search', 'Incident']
 
-from functools import reduce
 import numbers
 import re
 

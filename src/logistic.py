@@ -24,7 +24,7 @@ def sigmoid(x, a=0, b=-1, l=1):
 
 def brier_score(observations, predictions):
     assert len(observations) == len(predictions)
-    return sum(np.pow(observations - predictions, 2))/len(observations)
+    return sum(np.power(observations - predictions, 2))/len(observations)
 
 
 def read_data(url, *columns, not_null=True):
@@ -59,7 +59,7 @@ def fit(data, label, *criteria, verbose=True):
     starting_rate = sum(survivals)/len(survivals)
 
     if len(data) < 100:
-        print('Not enough cases.')
+        raise ValueError('Not enough cases.')
 
     alpha = np.log(1/starting_rate - 1)
     beta = pm.Beta('beta', 1, 2, 1e-3)
@@ -83,15 +83,8 @@ def fit(data, label, *criteria, verbose=True):
 
     return alpha, beta_samples
 
-    """
     # histogram = plt.hist(beta_samples, 100, [0, 0.05], normed=True, alpha=0.6)
     # frequencies, ticks, patches = histogram
-
-    time_ticks = np.linspace(0, time_max, tick_count)
-    line, *_ = plt.plot(time_ticks, sigmoid(time_ticks, alpha, beta_mean),
-                        label=label)
-    return line, beta_mean
-    """
 
 
 def execute():
@@ -99,12 +92,38 @@ def execute():
                      Subject.sex, Incident.search_hours, Subject.survived)
     data = data[data.search_hours > 0]
 
-    # plt.legend(handles=lines)
-    plt.title('Survival Curves Over Time (Male Subjects)')
+    time_max = 1000
+    time_ticks = np.linspace(0, time_max, time_max + 1)[:, None]
+    data = data[(21 < data.age) & (data.age < 30) & (data.sex == 1)]
+
+    lines = []
+    for cutoff in [1000, float('inf')]:
+        label = 'Cutoff at {} h'.format(cutoff)
+        alpha, beta_samples = fit(data, label, data.search_hours < cutoff)
+        beta_mean = np.mean(beta_samples)
+
+        data_ = data.copy() # data[data.search_hours > 1000].copy()
+        predictions = sigmoid(data_['search_hours'], alpha, beta_mean)
+        bs = brier_score(data_['survived'], predictions)
+        print('  BS = {:.3f}'.format(bs))
+
+        y = sigmoid(time_ticks.T, alpha, beta_samples)
+        line, *_ = plt.plot(time_ticks, y.mean(axis=0),
+                            label=label + ' ({:.3f})'.format(bs), alpha=0.8)
+        lines.append(line)
+
+        quantiles = mquantiles(y, [0.025, 0.975], axis=0)
+        plt.fill_between(time_ticks[:, 0], *quantiles, alpha=0.6,
+                         color=line.get_color())
+
+    plt.legend(handles=lines)
+    plt.title('Survival Curves Over Time (Male Subjects, 21 - 30 Years Old)')
     plt.xlabel('Search Duration (hours)')
     plt.ylabel('Probability of Survival')
     plt.xlim(0, 1000)
     plt.ylim(0, 1)
+    plt.grid(True)
+    # plt.savefig('../doc/figures/survival-curves-male.svg', transparent=True)
     plt.show()
 
 
