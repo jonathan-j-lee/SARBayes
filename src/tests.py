@@ -91,7 +91,9 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(self.subject.sex_as_str, 'female')
         self.assertEqual(self.subject.bmi, 25)
         self.assertEqual(self.subject.dead_on_arrival, None)
+
         self.subject.status = 'DOA'
+        self.session.commit()
         self.assertTrue(self.subject.dead_on_arrival)
         self.assertFalse(self.subject.survived)
 
@@ -101,7 +103,8 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(self.location.country, 'US')
 
         self.weather.low_temp, self.weather.high_temp = -5, 10
-        self.assertEqual(self.weather.avg_temp, 2.5)
+        self.session.commit()
+        self.assertAlmostEqual(self.weather.avg_temp, 2.5)
         # HDD and CDD are mutually exclusive
         self.assertEqual(self.weather.hdd, 15.5)
         self.assertEqual(self.weather.cdd, None)
@@ -156,6 +159,15 @@ class DatabaseIntegrityTests(unittest.TestCase):
         query = self.session.query(*columns).filter(*criteria)
         identifiers = list(map(frozenset, query))
         self.assertEqual(len(identifiers), len(set(identifiers)))
+
+    def test_status(self):
+        query = self.session.query(Subject)
+        self.assertEqual(query.filter(Subject.dead_on_arrival == None).count(),
+                         query.filter(Subject.survived == None).count())
+        self.assertEqual(query.filter(Subject.dead_on_arrival).count(),
+                         query.filter(Subject.survived == False).count())
+        self.assertEqual(query.filter(Subject.survived).count(), query.filter(
+                         Subject.dead_on_arrival == False).count())
 
     def tearDown(self):
         database.terminate(self.engine, self.session)

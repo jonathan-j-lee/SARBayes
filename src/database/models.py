@@ -6,14 +6,13 @@ database.models
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
            'Weather', 'Search', 'Incident']
 
-from functools import reduce
 import numbers
 import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
 from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, not_, select, case, func
 from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
@@ -40,32 +39,14 @@ class Subject(Base):
     group_id = Column(Integer, ForeignKey('groups.id'))
     group = relationship('Group', back_populates='subjects')
 
-    @hybrid_property
+    @property
     def sex_as_str(self):
         return self.__class__.SEX_CODES.get(self.sex, None)
 
-    @sex_as_str.expression
-    def sex_as_str(cls):
-        ...
-
-    @hybrid_property
-    def dead_on_arrival(self):
-        if self.status is not None:
-            status, types = self.status.casefold(), self.__class__.DOA_TYPES
-            return any(status == doa.casefold() for doa in types)
-
-    @dead_on_arrival.expression
-    def dead_on_arrival(cls):
-        return reduce(or_, (cls.status == doa for doa in cls.DOA_TYPES))
-
-    @hybrid_property
-    def survived(self):
-        return self.dead_on_arrival == False
-
-    @survived.expression
-    def survived(cls):
-        return cls.dead_on_arrival == False
-
+    dead_on_arrival = column_property(func.upper(status)
+                                      .in_(map(str.upper, DOA_TYPES)))
+    survived = column_property(not_(func.upper(status)
+                                      .in_(map(str.upper, DOA_TYPES))))
     bmi = column_property(weight/height/height*1e4)  # Measured in kg/m^2
 
     @validates('age', 'weight', 'height')
@@ -112,9 +93,8 @@ class Group(Base):
     incident_id = Column(Integer, ForeignKey('incidents.id'))
     incident = relationship('Incident', back_populates='group', uselist=False)
 
-    @property
-    def size(self):
-        return len(self.subjects)
+    size = column_property(select([func.count(Subject.id)])
+                           .where(Subject.group_id == id))
 
 
 class Point(Base):
@@ -222,10 +202,7 @@ class Weather(Base):
     incident = relationship('Incident', back_populates='weather',
                             uselist=False)
 
-    @property
-    def avg_temp(self):
-        if self.high_temp is not None and self.low_temp is not None:
-            return (self.high_temp + self.low_temp)/2
+    avg_temp = column_property((high_temp + low_temp)/2)
 
     @property
     def hdd(self):
@@ -347,6 +324,4 @@ class Incident(Base):
     other = Column(PickleType)  # Dictionary strictly for holding legacy data
     comments = Column(Text)
 
-    @property
-    def lost_hours(self):
-        return self.notify_hours + self.search_hours
+    lost_hours = column_property(notify_hours + search_hours)
