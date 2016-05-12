@@ -13,6 +13,7 @@ import pandas as pd
 import pymc as pm
 from scipy.stats.mstats import mquantiles
 
+from anomaly import local_outlier_factors
 import database
 from database.models import Subject, Group, Incident, Location
 from database.models import Operation, Outcome, Weather, Search
@@ -95,6 +96,15 @@ def execute():
     time_max = 1000
     time_ticks = np.linspace(0, time_max, time_max + 1)[:, None]
     data = data[(21 < data.age) & (data.age < 30) & (data.sex == 1)]
+
+    times = data['search_hours'].as_matrix()
+    lof = local_outlier_factors(times)
+
+    indices = [index for index, time in enumerate(times) if time > 1000]
+    # for index in indices:
+    #     print(times[index], lof(index))
+
+    return
 
     lines = []
     for cutoff in [1000, float('inf')]:
