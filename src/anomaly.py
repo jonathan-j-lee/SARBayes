@@ -4,8 +4,6 @@ anomaly
 Anomaly detection.
 """
 
-import numpy as np
-
 
 def local_outlier_factors(x, k=1):
     distances = {}
@@ -25,5 +23,4 @@ def local_outlier_factors(x, k=1):
                        len(neighbors[a]))
     lof = lambda a: sum(map(lrd, neighbors[a]))/len(neighbors[a])/lrd(a)
 
-    # yield from map(lof, range(len(x)))
     return lof

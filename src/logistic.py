@@ -97,14 +97,19 @@ def execute():
     time_ticks = np.linspace(0, time_max, time_max + 1)[:, None]
     data = data[(21 < data.age) & (data.age < 30) & (data.sex == 1)]
 
+    # Preprocessing
     times = data['search_hours'].as_matrix()
     lof = local_outlier_factors(times)
 
-    indices = [index for index, time in enumerate(times) if time > 1000]
-    # for index in indices:
-    #     print(times[index], lof(index))
+    indices, threshold = [], 100
+    for index, time in enumerate(times):
+        if time > time_max:
+            p = lof(index)
+            if p > threshold:
+                print('t = {:.3f} h, LOF = {:.3f}'.format(time, p))
+                indices.append(index)
 
-    return
+    data.drop(data.index[indices], inplace=True)
 
     lines = []
     for cutoff in [1000, float('inf')]:
@@ -133,7 +138,8 @@ def execute():
     plt.xlim(0, 1000)
     plt.ylim(0, 1)
     plt.grid(True)
-    # plt.savefig('../doc/figures/survival-curves-male.svg', transparent=True)
+    # plt.savefig('../doc/figures/survival-curves-male-filter.svg',
+    #             transparent=True)
     plt.show()
 
 
