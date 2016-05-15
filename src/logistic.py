@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-logistic.py
+logistic
+========
 """
 
 import datetime
@@ -62,6 +63,13 @@ def fit(data, label, *criteria, verbose=True):
     if len(data) < 100:
         raise ValueError('Not enough cases.')
 
+    # Derivation:
+    #   starting_rate = 1/(1 + np.exp(alpha + beta*t))
+    #   t = 0:
+    #       starting_rate = 1/(1 + np.exp(alpha))
+    #       1/starting_rate = 1 + np.exp(alpha)
+    #       np.log(1/starting_rate - 1) = alpha
+
     alpha = np.log(1/starting_rate - 1)
     beta = pm.Beta('beta', 1, 2, 1e-3)
 
@@ -95,13 +103,17 @@ def execute():
 
     time_max = 1000
     time_ticks = np.linspace(0, time_max, time_max + 1)[:, None]
-    data = data[(21 < data.age) & (data.age < 30) & (data.sex == 1)]
+    data = data[(21 <= data.age) & (data.age < 30) & (data.sex == 1)]
 
     # Preprocessing
+    # The anomaly detection is slow and memory-intensive
+    # There is probably a smarter way to calculate the distances
     times = data['search_hours'].as_matrix()
     lof = local_outlier_factors(times)
 
-    indices, threshold = [], 100
+    indices, threshold = [], 100  # Threshold is arbitrary
+                                  # There is an extension to map the LOF on a
+                                  # closed range from 0 to 1
     for index, time in enumerate(times):
         if time > time_max:
             p = lof(index)
@@ -111,13 +123,14 @@ def execute():
 
     data.drop(data.index[indices], inplace=True)
 
+    # Fitting
     lines = []
     for cutoff in [1000, float('inf')]:
         label = 'Cutoff at {} h'.format(cutoff)
         alpha, beta_samples = fit(data, label, data.search_hours < cutoff)
         beta_mean = np.mean(beta_samples)
 
-        data_ = data.copy() # data[data.search_hours > 1000].copy()
+        data_ = data.copy()
         predictions = sigmoid(data_['search_hours'], alpha, beta_mean)
         bs = brier_score(data_['survived'], predictions)
         print('  BS = {:.3f}'.format(bs))
@@ -131,14 +144,29 @@ def execute():
         plt.fill_between(time_ticks[:, 0], *quantiles, alpha=0.6,
                          color=line.get_color())
 
+    # Empirical Distribution
+    start, end, width = 0, time_max, time_max//10
+    probabilities = []
+    for left in range(start, end, width):
+        right = left + width
+        cases = data[(data.search_hours >= left) & (data.search_hours < right)]
+
+        print(len(cases))
+        if len(cases) > 0:
+            probabilities.append(sum(cases['survived'])/len(cases))
+        else:
+            probabilities.append(float('nan'))
+
+    plt.scatter([x + width/2 for x in range(start, end, width)], probabilities)
+
     plt.legend(handles=lines)
     plt.title('Survival Curves Over Time (Male Subjects, 21 - 30 Years Old)')
     plt.xlabel('Search Duration (hours)')
     plt.ylabel('Probability of Survival')
-    plt.xlim(0, 1000)
+    plt.xlim(0, time_max)
     plt.ylim(0, 1)
     plt.grid(True)
-    # plt.savefig('../doc/figures/survival-curves-male-filter.svg',
+    # plt.savefig('../doc/figures/survival-curves-male-empirical.svg',
     #             transparent=True)
     plt.show()
 
