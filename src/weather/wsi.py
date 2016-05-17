@@ -29,12 +29,12 @@ def fetch_history(safe=':,', **parameters):
     default.update(parameters)
     parameters = default
 
-    if 'fields' in parameters:
-        parameters['fields'] = ','.join(map(str, parameters['fields']))
-
     for key, value in parameters.items():
         if isinstance(value, (datetime.datetime, datetime.date)):
             parameters[key] = value.strftime('%m/%d/%Y')
+
+        elif isinstance(value, (list, tuple)):
+            parameters[key] = ','.join(map(str, value))
 
         elif not isinstance(value, str):
             parameters[key] = str(value)

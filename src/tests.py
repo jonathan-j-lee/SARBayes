@@ -13,8 +13,9 @@ import warnings
 import database
 from database.cleaning import extract_numbers
 from database.processing import survival_rate
-from database.models import Subject, Group, Point, Location, Weather
-from database.models import Operation, Outcome, Search, Incident
+from database.models import Subject, Group, Incident, Location, Point
+from database.models import Operation, Outcome, Weather, Search
+from weather import noaa, wsi
 
 
 class ModelTests(unittest.TestCase):
@@ -106,7 +107,7 @@ class ModelTests(unittest.TestCase):
         self.session.commit()
         self.assertAlmostEqual(self.weather.avg_temp, 2.5)
         # HDD and CDD are mutually exclusive
-        self.assertEqual(self.weather.hdd, 15.5)
+        self.assertAlmostEqual(self.weather.hdd, 15.5)
         self.assertEqual(self.weather.cdd, None)
 
     def tearDown(self):
@@ -171,6 +172,10 @@ class DatabaseIntegrityTests(unittest.TestCase):
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
+
+
+class WeatherFetchingTests(unittest.TestCase):
+    ...
 
 
 if __name__ == '__main__':

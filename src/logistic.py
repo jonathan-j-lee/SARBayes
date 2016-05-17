@@ -16,7 +16,7 @@ from scipy.stats.mstats import mquantiles
 
 from anomaly import local_outlier_factors
 import database
-from database.models import Subject, Group, Incident, Location
+from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 
 

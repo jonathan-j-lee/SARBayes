@@ -164,12 +164,14 @@ class Operation(Base):
     ipp_type = Column(Text)
     ipp_class = Column(Text)
     ipp_id = Column(Integer, ForeignKey('points.id'))
-    ipp = relationship('Point', foreign_keys=[ipp_id])
+    ipp = relationship('Point', foreign_keys=[ipp_id],
+                       cascade='all, delete-orphan', single_parent=True)
     ipp_accuracy = Column(Float)  # Measured in m
     idot = Column(Float)  # Measured in degrees of true North
     idot_basis = Column(Text)
     dest_id = Column(Integer, ForeignKey('points.id'))
-    dest = relationship('Point', foreign_keys=[dest_id])
+    dest = relationship('Point', foreign_keys=[dest_id],
+                        cascade='all, delete-orphan', single_parent=True)
     revised_point_id = Column(Integer, ForeignKey('points.id'))
     revised_point = relationship('Point', foreign_keys=[revised_point_id])
     revision_reason = Column(Text)
@@ -240,12 +242,14 @@ class Outcome(Base):
 
     id = Column(Integer, primary_key=True)
     dec_point_id = Column(Integer, ForeignKey('points.id'))
-    dec_point = relationship('Point', foreign_keys=[dec_point_id])
+    dec_point = relationship('Point', foreign_keys=[dec_point_id],
+                             cascade='all, delete-orphan', single_parent=True)
     dec_point_type = Column(Text)
     conclusion = Column(Text)
     invest_find = Column(Text)
     find_point_id = Column(Integer, ForeignKey('points.id'))
-    find_point = relationship('Point', foreign_keys=[find_point_id])
+    find_point = relationship('Point', foreign_keys=[find_point_id],
+                              cascade='all, delete-orphan', single_parent=True)
     find_point_accuracy = Column(Float)  # Measured in m
     distance_from_ipp = Column(Float)  # Measured in km
     find_bearing = Column(Float)  # Measured in degrees from true North
@@ -255,7 +259,8 @@ class Outcome(Base):
     elevation_change = Column(Float)  # Measured in m
     incident_id = Column(Integer, ForeignKey('incidents.id'))
     incident = relationship('Incident', back_populates='outcome',
-                            uselist=False)
+                            uselist=False, cascade='all, delete-orphan',
+                            single_parent=True)
 
     @validates('find_point_accuracy', 'distance_from_ipp', 'find_bearing',
                'track_offset')
@@ -308,19 +313,23 @@ class Incident(Base):
     number = Column(Text)
     datetime = Column(DateTime)
     location = relationship('Location', back_populates='incident',
-                            uselist=False)
+                            uselist=False, cascade='all, delete-orphan')
     type = Column(Text)
     disaster_type = Column(Text)
-    group = relationship('Group', back_populates='incident', uselist=False)
+    group = relationship('Group', back_populates='incident', uselist=False,
+                         cascade='all, delete-orphan')
     notify_hours = Column(Interval)
     search_hours = Column(Interval)
     total_hours = Column(Interval)
     operation = relationship('Operation', back_populates='incident',
-                             uselist=False)
-    weather = relationship('Weather', back_populates='incident', uselist=False)
-    outcome = relationship('Outcome', back_populates='incident', uselist=False)
+                             uselist=False, cascade='all, delete-orphan')
+    weather = relationship('Weather', back_populates='incident', uselist=False,
+                           cascade='all, delete-orphan')
+    outcome = relationship('Outcome', back_populates='incident', uselist=False,
+                           cascade='all, delete-orphan')
     cause = Column(Text)
-    search = relationship('Search', back_populates='incident', uselist=False)
+    search = relationship('Search', back_populates='incident', uselist=False,
+                          cascade='all, delete-orphan')
     other = Column(PickleType)  # Dictionary strictly for holding legacy data
     comments = Column(Text)
 

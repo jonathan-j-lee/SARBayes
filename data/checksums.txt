@@ -6,4 +6,5 @@ c0f94f14082d936cd84e3d1b0f1cdd6f  ISRID 2015 NY cleaned and corrected data 991 c
 e968f96c0797c14b087e1769b137b277  isrid-master.db
 0612484656aa7898e3a092be93a1b0a7  ISRIDnew-data-20150721.xlsx
 e968f96c0797c14b087e1769b137b277  isrid-snapshot-2016-03-28.db
+66eefdfccbf697c7c35e0152ced226f6  isrid-snapshot-2016-03-28.db.zip
 2783a62420ebc70b3f2a045a4fddac91  mappings.yaml
