@@ -38,10 +38,10 @@ class ModelTests(unittest.TestCase):
                                  operation=self.operation,
                                  outcome=self.outcome, search=self.search)
 
-        new_models = [self.group, self.subject, self.location, self.weather,
-                      self.operation, self.outcome, self.search, self.incident]
-        for new_model in new_models:
-            self.session.add(new_model)
+        instances = [self.group, self.subject, self.location, self.weather,
+                  self.operation, self.outcome, self.search, self.incident]
+        for instance in instances:
+            self.session.add(instance)
 
         self.session.commit()
 
@@ -135,6 +135,38 @@ class QueryingTests(unittest.TestCase):
 
         results = self.session.query(Subject).filter(Subject.sex != None)
         self.assertEqual(results.count(), 0)
+
+    def tearDown(self):
+        database.terminate(self.engine, self.session)
+
+
+class DeletionTests(unittest.TestCase):
+    def setUp(self):
+        self.engine, self.session = database.initialize('sqlite:///:memory:')
+
+        self.subjects = [Subject() for number in range(10)]
+        self.ipp = Point(latitude=0, longitude=0)
+        self.group = Group(subjects=self.subjects)
+        self.operation = Operation(ipp=self.ipp)
+        self.incident = Incident(group=self.group, operation=self.operation)
+
+        instances = [self.ipp, self.group, self.operation, self.incident]
+        for instance in self.subjects + instances:
+            self.session.add(instance)
+        self.session.commit()
+
+    def test_cascade(self):
+        query = self.session.query(Incident)
+        self.assertEqual(query.count(), 1)
+
+        self.session.delete(query.first())
+        self.session.commit()
+        self.assertEqual(query.count(), 0)
+
+        self.assertEqual(Subject.query.count(), 0)
+        self.assertEqual(Point.query.count(), 0)
+        self.assertEqual(Group.query.count(), 0)
+        self.assertEqual(Operation.query.count(), 0)
 
     def tearDown(self):
         database.terminate(self.engine, self.session)

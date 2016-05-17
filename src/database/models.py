@@ -89,7 +89,8 @@ class Group(Base):
     treatment = Column(Text)
     rescue_method = Column(Text)
     signaling = Column(Text)
-    subjects = relationship('Subject', back_populates='group')
+    subjects = relationship('Subject', back_populates='group',
+                            cascade='all, delete-orphan')
     incident_id = Column(Integer, ForeignKey('incidents.id'))
     incident = relationship('Incident', back_populates='group', uselist=False)
 
