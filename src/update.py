@@ -13,26 +13,6 @@ from database.models import Operation, Outcome, Weather, Search
 from merge import initialize_logging
 
 
-def delete_case(session, incident_id):
-    deletions = []
-
-    for model in Group, Location, Operation, Outcome, Weather, Search:
-        query = session.query(model).filter(model.incident_id == incident_id)
-        instance = query.one()
-
-        if model == Group:
-            deletions += instance.subjects
-        elif model == Operation:
-            deletions += [instance.ipp, instance.dest, instance.revised_point]
-        elif model == Outcome:
-            deletions += [instance.dec_point, instance.find_point]
-        deletions.append(instance)
-
-    for instance in deletions:
-        if instance is not None:
-            session.delete(instance)
-
-
 def remove_unreadable_incidents(session, limit=float('inf'), save_every=100):
     logger, count = logging.getLogger(), 0
 
@@ -43,14 +23,22 @@ def remove_unreadable_incidents(session, limit=float('inf'), save_every=100):
             query.one()
         except ValueError:
             logger.info('Removing incident {} ... '.format(incident_id))
-            delete_case(session, incident_id)
+
+            for model in Group, Weather, Location, Operation, Outcome, Search:
+                subquery = session.query(model)
+                subquery = subquery.filter(model.incident_id == incident_id)
+
+                instance = subquery.one_or_none()
+                if instance is not None:
+                    session.delete(instance)
+
             query.delete()
 
             count += 1
             if count >= limit:
                 break
-            # elif (count + 1)%save_every == 0:
-            #     session.commit()
+            elif (count + 1)%save_every == 0:
+                session.commit()
 
     session.commit()
     logger.info('Removed {} cases'.format(count))
@@ -95,6 +83,7 @@ def execute():
     logger = logging.getLogger()
     engine, session = database.initialize('sqlite:///../data/isrid-master.db')
 
+    """
     tasks = [remove_unreadable_incidents, add_missing_instances,
              augment_weather_instances]
 
@@ -112,6 +101,7 @@ def execute():
         except Exception as error:
             logger.error('{}: {}'.format(type(error).__name__, error))
             break
+    """
 
     logging.shutdown()
     database.terminate(engine, session)

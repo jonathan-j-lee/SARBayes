@@ -3,8 +3,9 @@ d41d8cd98f00b204e9800998ecf8427e  checksums.txt
 c0f94f14082d936cd84e3d1b0f1cdd6f  ISRID 2015 NY cleaned and corrected data 991 cases through 2014-01-06.xlsx
 2afd38457a091fb2ae72d17b357d3cfa  ISRIDclean.xlsx
 7d8a3ca8506d4cd51ee0a9f1c42d8668  ISRID DATA STANDARDS 2013.docx
-e968f96c0797c14b087e1769b137b277  isrid-master.db
+850eedd7c949a839e276b43122f94909  isrid-master.db
 0612484656aa7898e3a092be93a1b0a7  ISRIDnew-data-20150721.xlsx
 e968f96c0797c14b087e1769b137b277  isrid-snapshot-2016-03-28.db
 66eefdfccbf697c7c35e0152ced226f6  isrid-snapshot-2016-03-28.db.zip
+850eedd7c949a839e276b43122f94909  isrid-snapshot-2016-05-17.db
 2783a62420ebc70b3f2a045a4fddac91  mappings.yaml
