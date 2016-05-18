@@ -6,11 +6,13 @@ update
 from functools import reduce
 import logging
 from sqlalchemy import or_
+import yaml
 
 import database
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 from merge import initialize_logging
+from weather import wsi
 
 
 def remove_unreadable_incidents(session, limit=float('inf'), save_every=100):
@@ -45,37 +47,37 @@ def remove_unreadable_incidents(session, limit=float('inf'), save_every=100):
 
 
 def add_missing_instances(session):
-    # for incident in session.query(Incident):
-    #     print(incident)
+    logger, count = logging.getLogger(), 0
 
-    # session.commit()
     ...
 
 
-def augment_weather_instance(weather):
+def augment_weather_instance(weather, datetime, ipp):
     logger = logging.getLogger()
     logger.debug(weather)
 
+    # wsi.fetch_history(lat=ipp.latitude, long=ipp.longitude, startDate=datetime, endDate, fields=)
 
-def augment_weather_instances(session, limit=500, save_every=10):
-    # criteria = reduce(or_, map(lambda column: column == None, column_map.values()))
-    # print(criteria)
 
-    """
-    count = 0
-    for weather in session.query(Weather):
-        modified = augment_weather_instance(weather)
+def augment_weather_instances(session, limit=1000, save_every=10):
+    with open('../data/config.yaml') as config_file:
+        config = yaml.load(config_file.read())
 
-        if modified:
-            count += 1
-            if count >= limit:
-                break
+    wsi.DEFAULT_PARAMETERS['userKey'] = config['wsi']['key']
 
-        if (count + 1)%save_every == 0:
-            session.commit()
+    query = session.query(Weather, Incident.datetime, Operation.ipp_id)
+    query = query.join(Incident, Operation)
+    query = query.filter(Incident.datetime, Operation.ipp_id)
+
+    # columns = Weather.high_temp, Weather.low_temp
+    # criteria = map(lambda column: column == None, columns)
+    # query = query.filter(reduce(or_, criteria))
+
+    for weather, datetime, ipp_id in query:
+        ipp = session.query(Point).get(ipp_id)
+        augment_weather_instance(weather, datetime, ipp)
 
     session.commit()
-    """
 
 
 def execute():
@@ -83,9 +85,7 @@ def execute():
     logger = logging.getLogger()
     engine, session = database.initialize('sqlite:///../data/isrid-master.db')
 
-    """
-    tasks = [remove_unreadable_incidents, add_missing_instances,
-             augment_weather_instances]
+    tasks = [augment_weather_instances]
 
     for task in tasks:
         try:
@@ -101,7 +101,6 @@ def execute():
         except Exception as error:
             logger.error('{}: {}'.format(type(error).__name__, error))
             break
-    """
 
     logging.shutdown()
     database.terminate(engine, session)

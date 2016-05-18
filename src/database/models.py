@@ -122,7 +122,7 @@ class Point(Base):
             raise ValueError("invalid bounds for '{}'".format(key))
 
     def __str__(self):
-        return '({}, {})'.format(self.latitude, self.longitude)
+        return '({:.5f}, {:.5f})'.format(self.latitude, self.longitude)
 
 
 class Location(Base):
