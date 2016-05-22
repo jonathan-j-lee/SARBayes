@@ -29,7 +29,11 @@ def __getitem__(self, name):
 
 
 def __repr__(self):
-    return '{}(id={})'.format(self.__class__.__name__, self.id)
+    attributes = ((attribute, getattr(self, attribute))
+                  for attribute in self.__class__.__mapper__.columns.keys())
+    pairs = ('{}={}'.format(attribute, repr(value))
+             for attribute, value in attributes if value is not None)
+    return '{}({})'.format(self.__class__.__name__, ', '.join(pairs))
 
 
 Base.__bool__ = __bool__

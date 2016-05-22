@@ -9,6 +9,7 @@ Unit Testing
 import numpy as np
 import unittest
 import warnings
+import yaml
 
 import database
 from database.cleaning import extract_numbers
@@ -207,7 +208,14 @@ class DatabaseIntegrityTests(unittest.TestCase):
 
 
 class WeatherFetchingTests(unittest.TestCase):
-    ...
+    def setUp(self):
+        with open('../data/config.yaml') as config_file:
+            self.config = yaml.load(config_file.read())
+
+        wsi.DEFAULT_PARAMETERS['userKey'] = config['wsi']['key']
+
+    def test_connectivity(self):
+        ... # wsi.fetch_history(lat)
 
 
 if __name__ == '__main__':

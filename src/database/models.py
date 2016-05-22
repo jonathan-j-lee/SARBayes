@@ -51,7 +51,7 @@ class Subject(Base):
 
     @validates('age', 'weight', 'height')
     def validate_sign(self, key, value):
-        if value is None or value >= 0:
+        if value is None or value >= 0:  # Possibly rounded down
             return value
         else:
             raise ValueError("'{}' must be a positive number".format(key))
@@ -190,7 +190,9 @@ class Operation(Base):
 
 class Weather(Base):
     __tablename__ = 'weather'
+    MIN_TEMP = -273.15  # Measured in degrees C
     BASE_TEMP = 18  # Measured in degrees C
+    WATER_FREEZING_POINT = 0  # Measured in degrees C (approximately)
 
     id = Column(Integer, primary_key=True)
     high_temp = Column(Float)  # Measured in degrees C
@@ -199,7 +201,7 @@ class Weather(Base):
     rain = Column(Float)  # Measured in mm
     snow = Column(Float)  # Measured in mm
     daylight = Column(Interval)
-    solar_radiation = Column(Float)  # Total flux through surface
+    solar_radiation = Column(Float)  # Maximum total flux through surface
     description = Column(Text)
     incident_id = Column(Integer, ForeignKey('incidents.id'))
     incident = relationship('Incident', back_populates='weather',
@@ -219,7 +221,7 @@ class Weather(Base):
 
     @validates('high_temp', 'low_temp')
     def validate_bounds(self, key, value):
-        lowerbound, upperbound = float('-inf'), float('inf')
+        lowerbound, upperbound = self.__class__.MIN_TEMP, float('inf')
         if key == 'high_temp' and isinstance(self.low_temp, numbers.Real):
             lowerbound = self.low_temp
         elif isinstance(self.high_temp, numbers.Real):
