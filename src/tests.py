@@ -6,7 +6,9 @@ tests
 Unit Testing
 """
 
-import numpy as np
+import hashlib
+import os
+import random
 import unittest
 import warnings
 import yaml
@@ -16,6 +18,7 @@ from database.cleaning import extract_numbers
 from database.processing import survival_rate
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
+from evaluation import brier_score
 from weather import noaa, wsi
 
 
@@ -120,12 +123,22 @@ class QueryingTests(unittest.TestCase):
         self.engine, self.session = database.initialize('sqlite:///:memory:')
 
         for age in range(1, 11):
-            subject = Subject(age=age)
+            status = 'DOA' if random.random() < 0.5 else 'Well'
+            subject = Subject(age=age, status=status)
             if age < 6:
                 subject.weight = 20
             self.session.add(subject)
 
         self.session.commit()
+
+    def test_retrieval(self):
+        models = Subject, Group, Incident, Location, Point
+        models += Operation, Outcome, Weather, Search
+
+        for model in models:
+            instances = self.session.query(model).all()
+            for instance in instances:
+                self.assertTrue(isinstance(instance, model))
 
     def test_count(self):
         results = self.session.query(Subject)
@@ -136,6 +149,15 @@ class QueryingTests(unittest.TestCase):
 
         results = self.session.query(Subject).filter(Subject.sex != None)
         self.assertEqual(results.count(), 0)
+
+    def test_column_properties(self):
+        query = self.session.query(Subject)
+        self.assertEqual(query.filter(Subject.dead_on_arrival == None).count(),
+                         query.filter(Subject.survived == None).count())
+        self.assertEqual(query.filter(Subject.dead_on_arrival).count(),
+                         query.filter(Subject.survived == False).count())
+        self.assertEqual(query.filter(Subject.survived).count(), query.filter(
+                         Subject.dead_on_arrival == False).count())
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
@@ -194,17 +216,32 @@ class DatabaseIntegrityTests(unittest.TestCase):
         identifiers = list(map(frozenset, query))
         self.assertEqual(len(identifiers), len(set(identifiers)))
 
-    def test_status(self):
-        query = self.session.query(Subject)
-        self.assertEqual(query.filter(Subject.dead_on_arrival == None).count(),
-                         query.filter(Subject.survived == None).count())
-        self.assertEqual(query.filter(Subject.dead_on_arrival).count(),
-                         query.filter(Subject.survived == False).count())
-        self.assertEqual(query.filter(Subject.survived).count(), query.filter(
-                         Subject.dead_on_arrival == False).count())
+    def test_checksums(self):
+        self.assertTrue(os.path.exists('../data/checksums.txt'))
+
+        with open('../data/checksums.txt') as checksums_file:
+            checksums = checksums_file.read().strip().split('\n')
+
+        for checksum in checksums:
+            checksum, filename = checksum[:32], checksum[34:].split('/')[-1]
+
+            if filename != 'checksums.txt':
+                hashing = hashlib.md5()
+                filename = os.path.join('../data/', filename)
+
+                with open(filename, 'rb') as data_file:
+                    for chunk in iter(lambda: data_file.read(4096), b''):
+                        hashing.update(chunk)
+
+                self.assertEqual(hashing.hexdigest(), checksum)
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
+
+
+class EvaluationTests(unittest.TestCase):
+    def test_brier_score(self):
+        ...
 
 
 class WeatherFetchingTests(unittest.TestCase):
@@ -212,10 +249,11 @@ class WeatherFetchingTests(unittest.TestCase):
         with open('../data/config.yaml') as config_file:
             self.config = yaml.load(config_file.read())
 
-        wsi.DEFAULT_PARAMETERS['userKey'] = config['wsi']['key']
+        wsi.DEFAULT_PARAMETERS['userKey'] = self.config['wsi']['key']
+        noaa.API_TOKEN = self.config['noaa']['key']
 
     def test_connectivity(self):
-        ... # wsi.fetch_history(lat)
+        ...
 
 
 if __name__ == '__main__':
