@@ -3,7 +3,7 @@ weather.noaa
 ============
 """
 
-__all__ = ['fetch']
+__all__ = ['fetch', 'fetch_history']
 
 import datetime
 import json
@@ -23,7 +23,7 @@ def fetch(endpoint, safe=':,', **parameters):
         raise ValueError('no API token found')
 
     for key, value in parameters.items():
-        if isinstance(value, datetime.datetime):
+        if isinstance(value, (datetime.datetime, datetime.date)):
             parameters[key] = value.strftime('%Y-%m-%d')
 
         elif isinstance(value, (list, tuple)):
@@ -37,3 +37,17 @@ def fetch(endpoint, safe=':,', **parameters):
 
     response = urlopen(request)
     return json.loads(response.read().decode('utf-8'))
+
+
+def fetch_history(date, bounds, *datatypes):
+    stations = fetch('stations', datasetid='GHCND', startdate=date,
+                     enddate=date, datatypeid=datatypes, extent=bounds,
+                     limit=1000)
+
+    identifiers = [station['id'] for station in stations['results']]
+
+    data = fetch('data', datasetid='GHCND', startdate=date, enddate=date,
+                 datatypeid=datatypes, stationid=identifiers, limit=1000)
+
+    return {datatype: [record['value'] for record in data['results']
+                  if record['datatype'] == datatype] for datatype in datatypes}
