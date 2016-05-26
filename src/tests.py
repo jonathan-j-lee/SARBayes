@@ -6,15 +6,20 @@ tests
 Unit Testing
 """
 
-import numpy as np
+import hashlib
+import os
+import random
 import unittest
 import warnings
+import yaml
 
 import database
 from database.cleaning import extract_numbers
 from database.processing import survival_rate
-from database.models import Subject, Group, Point, Location, Weather
-from database.models import Operation, Outcome, Search, Incident
+from database.models import Subject, Group, Incident, Location, Point
+from database.models import Operation, Outcome, Weather, Search
+from evaluation import brier_score
+from weather import noaa, wsi
 
 
 class ModelTests(unittest.TestCase):
@@ -37,10 +42,10 @@ class ModelTests(unittest.TestCase):
                                  operation=self.operation,
                                  outcome=self.outcome, search=self.search)
 
-        new_models = [self.group, self.subject, self.location, self.weather,
-                      self.operation, self.outcome, self.search, self.incident]
-        for new_model in new_models:
-            self.session.add(new_model)
+        instances = [self.group, self.subject, self.location, self.weather,
+                  self.operation, self.outcome, self.search, self.incident]
+        for instance in instances:
+            self.session.add(instance)
 
         self.session.commit()
 
@@ -106,7 +111,7 @@ class ModelTests(unittest.TestCase):
         self.session.commit()
         self.assertAlmostEqual(self.weather.avg_temp, 2.5)
         # HDD and CDD are mutually exclusive
-        self.assertEqual(self.weather.hdd, 15.5)
+        self.assertAlmostEqual(self.weather.hdd, 15.5)
         self.assertEqual(self.weather.cdd, None)
 
     def tearDown(self):
@@ -118,12 +123,22 @@ class QueryingTests(unittest.TestCase):
         self.engine, self.session = database.initialize('sqlite:///:memory:')
 
         for age in range(1, 11):
-            subject = Subject(age=age)
+            status = 'DOA' if random.random() < 0.5 else 'Well'
+            subject = Subject(age=age, status=status)
             if age < 6:
                 subject.weight = 20
             self.session.add(subject)
 
         self.session.commit()
+
+    def test_retrieval(self):
+        models = Subject, Group, Incident, Location, Point
+        models += Operation, Outcome, Weather, Search
+
+        for model in models:
+            instances = self.session.query(model).all()
+            for instance in instances:
+                self.assertTrue(isinstance(instance, model))
 
     def test_count(self):
         results = self.session.query(Subject)
@@ -134,6 +149,47 @@ class QueryingTests(unittest.TestCase):
 
         results = self.session.query(Subject).filter(Subject.sex != None)
         self.assertEqual(results.count(), 0)
+
+    def test_column_properties(self):
+        query = self.session.query(Subject)
+        self.assertEqual(query.filter(Subject.dead_on_arrival == None).count(),
+                         query.filter(Subject.survived == None).count())
+        self.assertEqual(query.filter(Subject.dead_on_arrival).count(),
+                         query.filter(Subject.survived == False).count())
+        self.assertEqual(query.filter(Subject.survived).count(), query.filter(
+                         Subject.dead_on_arrival == False).count())
+
+    def tearDown(self):
+        database.terminate(self.engine, self.session)
+
+
+class DeletionTests(unittest.TestCase):
+    def setUp(self):
+        self.engine, self.session = database.initialize('sqlite:///:memory:')
+
+        self.subjects = [Subject() for number in range(10)]
+        self.ipp = Point(latitude=0, longitude=0)
+        self.group = Group(subjects=self.subjects)
+        self.operation = Operation(ipp=self.ipp)
+        self.incident = Incident(group=self.group, operation=self.operation)
+
+        instances = [self.ipp, self.group, self.operation, self.incident]
+        for instance in self.subjects + instances:
+            self.session.add(instance)
+        self.session.commit()
+
+    def test_cascade(self):
+        query = self.session.query(Incident)
+        self.assertEqual(query.count(), 1)
+
+        self.session.delete(query.first())
+        self.session.commit()
+        self.assertEqual(query.count(), 0)
+
+        self.assertEqual(Subject.query.count(), 0)
+        self.assertEqual(Point.query.count(), 0)
+        self.assertEqual(Group.query.count(), 0)
+        self.assertEqual(Operation.query.count(), 0)
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
@@ -160,17 +216,44 @@ class DatabaseIntegrityTests(unittest.TestCase):
         identifiers = list(map(frozenset, query))
         self.assertEqual(len(identifiers), len(set(identifiers)))
 
-    def test_status(self):
-        query = self.session.query(Subject)
-        self.assertEqual(query.filter(Subject.dead_on_arrival == None).count(),
-                         query.filter(Subject.survived == None).count())
-        self.assertEqual(query.filter(Subject.dead_on_arrival).count(),
-                         query.filter(Subject.survived == False).count())
-        self.assertEqual(query.filter(Subject.survived).count(), query.filter(
-                         Subject.dead_on_arrival == False).count())
+    def test_checksums(self):
+        self.assertTrue(os.path.exists('../data/checksums.txt'))
+
+        with open('../data/checksums.txt') as checksums_file:
+            checksums = checksums_file.read().strip().split('\n')
+
+        for checksum in checksums:
+            checksum, filename = checksum[:32], checksum[34:].split('/')[-1]
+
+            if filename != 'checksums.txt':
+                hashing = hashlib.md5()
+                filename = os.path.join('../data/', filename)
+
+                with open(filename, 'rb') as data_file:
+                    for chunk in iter(lambda: data_file.read(4096), b''):
+                        hashing.update(chunk)
+
+                self.assertEqual(hashing.hexdigest(), checksum)
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
+
+
+class EvaluationTests(unittest.TestCase):
+    def test_brier_score(self):
+        ...
+
+
+class WeatherFetchingTests(unittest.TestCase):
+    def setUp(self):
+        with open('../data/config.yaml') as config_file:
+            self.config = yaml.load(config_file.read())
+
+        wsi.DEFAULT_PARAMETERS['userKey'] = self.config['wsi']['key']
+        noaa.API_TOKEN = self.config['noaa']['key']
+
+    def test_connectivity(self):
+        ...
 
 
 if __name__ == '__main__':

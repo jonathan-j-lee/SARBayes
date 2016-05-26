@@ -206,6 +206,7 @@ pythontex-files-*/
 
 ### Custom
 
+data/config.yaml
 *.swp
 *.xlsx*
 *.tab

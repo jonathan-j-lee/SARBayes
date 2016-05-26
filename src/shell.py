@@ -13,7 +13,8 @@ import readline
 from sqlalchemy import func
 
 import database
-from database.models import *
+from database.models import Subject, Group, Incident, Location, Point
+from database.models import Operation, Outcome, Weather, Search
 from database.processing import *
 
 
@@ -28,7 +29,7 @@ def loop():
             print()
             break
         except Exception as error:
-            print(' =>', error)
+            print(' => {}: {}'.format(type(error).__name__, error))
         finally:
             cmd += 1
 

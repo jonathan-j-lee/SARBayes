@@ -17,10 +17,9 @@ def local_outlier_factors(x, k=1):
         y.sort(key=lambda b: distances[a, b])
         neighbors.append(y)
 
-    k_distance = lambda a: distances[a, neighbors[a][k - 1]]
-    reach_distance = lambda a, b: max(k_distance(b), distances[a, b])
-    lrd = lambda a: 1/(sum(reach_distance(a, b) for b in neighbors[a])/
-                       len(neighbors[a]))
-    lof = lambda a: sum(map(lrd, neighbors[a]))/len(neighbors[a])/lrd(a)
+    k_distances = [distances[a, neighbors[a][k - 1]] for a in range(len(x))]
+    reach_distances = [[(None if a == b else max(k_distances[b], distances[a, b])) for b in range(len(x))] for a in range(len(x))]
+    lrds = [1/(sum(reach_distances[a][b] for b in neighbors[a])/len(neighbors[a])) for a in range(len(x))]
+    lofs = [sum(lrds[u] for u in neighbors[a])/len(neighbors[a]) for a in range(len(x))]
 
-    return lof
+    return lambda u: lofs[u]
