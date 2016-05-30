@@ -1,2 +1,8 @@
+pyyaml
+numpy
+scipy
+pandas
 matplotlib
 sqlalchemy
+pymc
+lifelines

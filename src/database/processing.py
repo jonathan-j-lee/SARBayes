@@ -28,16 +28,3 @@ def tabulate(query, not_null=True):
     df.columns = list(map(lambda column: column['name'], columns))
 
     return df
-
-
-def standardize_category(category, merge=True):
-    category = category.strip().casefold()
-
-    if merge:
-        for keyword in 'child', 'skier', 'vehicle':
-            pattern = r'\b({})\b'.format(keyword)
-            result = re.search(pattern, category)
-            if result:
-                return result.group(1)
-
-    return category

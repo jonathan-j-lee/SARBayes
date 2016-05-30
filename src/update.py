@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 update
 ======
@@ -12,7 +14,7 @@ import yaml
 import database
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
-from merge import initialize_logging
+from util import initialize_logging
 from weather import wsi
 
 
