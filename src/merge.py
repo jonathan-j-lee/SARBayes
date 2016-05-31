@@ -37,7 +37,6 @@ import datetime
 import logging
 import openpyxl
 import os
-import sys
 import warnings
 import yaml
 
@@ -45,6 +44,7 @@ import database
 from database.cleaning import extract_numbers
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
+from util import initialize_logging
 
 EXCEL_START_DATE = datetime.datetime(1900, 1, 1)
 
@@ -54,24 +54,6 @@ def read_excel(filename):
     for worksheet in workbook:
         rows = (tuple(cell.value for cell in row) for row in worksheet.rows)
         yield worksheet.title, rows
-
-
-def initialize_logging(filename, mode='a+'):
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(levelname)s][%(asctime)s] > %(message)s')
-
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.DEBUG)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    file_handler = logging.FileHandler(filename, mode)
-    file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-    logger.debug('Logging initialized')
 
 
 def coerce_type(value, datatype):

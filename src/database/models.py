@@ -10,9 +10,9 @@ import numbers
 import re
 
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
-from sqlalchemy import Column, ForeignKey, DateTime, Interval, Text, PickleType
+from sqlalchemy import DateTime, Interval, Text, PickleType, Column, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import and_, or_, not_, select, case, func
+from sqlalchemy import and_, not_, select, func
 from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
@@ -95,7 +95,8 @@ class Group(Base):
     incident = relationship('Incident', back_populates='group', uselist=False)
 
     size = column_property(select([func.count(Subject.id)])
-                           .where(Subject.group_id == id))
+                           .where(Subject.group_id == id)
+                           .correlate_except(Subject))
 
 
 class Point(Base):

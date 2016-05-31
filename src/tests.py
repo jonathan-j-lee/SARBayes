@@ -15,9 +15,9 @@ import yaml
 
 import database
 from database.cleaning import extract_numbers
-from database.processing import survival_rate
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
+from database.processing import survival_rate, tabulate
 from evaluation import brier_score
 from weather import noaa, wsi
 
@@ -158,6 +158,16 @@ class QueryingTests(unittest.TestCase):
                          query.filter(Subject.survived == False).count())
         self.assertEqual(query.filter(Subject.survived).count(), query.filter(
                          Subject.dead_on_arrival == False).count())
+
+    def test_tabulation(self):
+        query = self.session.query(Subject.survived, Subject.age)
+        df = tabulate(query)
+
+        self.assertEqual(list(df.columns), ['survived', 'age'])
+        self.assertEqual(len(df), self.session.query(Subject).count())
+        for columns in df.itertuples(False):
+            for value in columns:
+                self.assertIsNotNone(value)
 
     def tearDown(self):
         database.terminate(self.engine, self.session)
