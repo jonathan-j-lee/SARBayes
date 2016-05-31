@@ -222,3 +222,7 @@ summer-analysis/machine_learning/logreg
 *.pdf_tex
 *.db
 *.sqlite*
+
+data/isrid-snapshot-2016-03-28.db.zip
+
+src/.#anomaly.py
