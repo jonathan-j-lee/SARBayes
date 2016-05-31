@@ -9,6 +9,8 @@ Interactive REPL shell (read-eval-print loop).
 import datetime
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import Orange
 import readline
 from sqlalchemy import func
 import yaml
@@ -16,7 +18,7 @@ import yaml
 import database
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
-from database.processing import survival_rate, tabulate, to_orange_table
+from database.processing import survival_rate, tabulate, export_orange
 import weather
 
 

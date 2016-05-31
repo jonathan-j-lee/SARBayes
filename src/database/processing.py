@@ -3,10 +3,11 @@ database.processing
 ===================
 """
 
-__all__ = ['survival_rate', 'tabulate', 'to_orange_table']
+__all__ = ['survival_rate', 'tabulate', 'export_orange']
 
+from numbers import Real
 import numpy as np
-import Orange
+from Orange.data import ContinuousVariable, DiscreteVariable
 import pandas as pd
 
 from .models import Subject
@@ -30,6 +31,17 @@ def tabulate(query, not_null=True):
     return df
 
 
-def to_orange_table(df):
-    ...
+def export_orange(df):
+    variables = []
+
+    for name in df:
+        dtype = df[name].dtype
+        if issubclass(df[name].dtype, Real):
+            variable_type = ContinuousVariable
+        else:
+            variable_type = DiscreteVariable
+
+        variables.append(variable_type(name))
+
+    print(variables)
     # domain = Orange.data.Domain()
