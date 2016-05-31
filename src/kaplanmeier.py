@@ -30,11 +30,14 @@ def execute():
         ax = axes[plot//3, plot%3]
         df_ = df[df.category == category]
 
+        # if category == 'Child':
+        #     print(df_[df.hours > 100])
+
         kmf = KaplanMeierFitter()
         kmf.fit(df_.hours, event_observed=df_.doa, label=category)
         kmf.plot(show_censors=True, censor_styles={'marker': '|', 'ms': 6},
                  ax=ax)
-        ax.set_xlim(0, min(24*30, ax.get_xlim()[1]))
+        ax.set_xlim(0, min(24*30, ax.get_xlim()[1] + 5))
 
         ax.set_title('{}, N = {}'.format(category, len(df_)))
         ax.set_xlabel('Total Incident Time (h)')
@@ -47,7 +50,7 @@ def execute():
     figure.suptitle('Kaplan-Meier Empirical Survival Curves', fontsize=20)
     figure.tight_layout()
     plt.subplots_adjust(top=0.925)
-    plt.savefig('../doc/figures/kaplan-meier.svg', transparent=True)
+    plt.savefig('../doc/figures/kaplan-meier-single-subject.svg', transparent=True)
     plt.show()
 
 

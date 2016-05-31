@@ -16,7 +16,8 @@ def read_data(url):
     engine, session = database.initialize(url)
 
     query = session.query(Incident.total_hours, Subject.survived,
-                          Group.category).join(Group, Subject)
+                          Group.category).join(Group, Subject)\
+                          .filter(Group.size == 1)
     df = tabulate(query)
 
     database.terminate(engine, session)
