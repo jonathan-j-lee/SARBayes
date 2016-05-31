@@ -1,18 +1,8 @@
 # SARBayes
 
-Predicting lost person survival rates using wilderness search-and-rescue (WiSAR) data.
+Forecast lost person survival using wilderness search-and-rescue (WiSAR) data.
 
-### Project Structure
+Goals:
 
-* `SARBayes`
-    * `data`
-    * `doc`
-        * `figures`
-        * `journal`
-        * `paper`
-        * `poster`
-        * `posts`
-        * `presentation`
-    * `logs`
-    * `old`
-    * `src`
+1. Classify subjects as alive or dead-on-arrival.
+2. Generate probability-of-survival over time curves.

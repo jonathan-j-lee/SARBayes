@@ -20,7 +20,7 @@ def execute():
     df = df.assign(hours=[total_hours.total_seconds()/3600
                           for total_hours in df.total_hours],
                    doa=[not survived for survived in df.survived])
-    df = df[(0 <= df.hours) & (df.hours < 24*30)]
+    df = df[0 <= df.hours]
 
     figure, axes = plt.subplots(3, 3, figsize=(15, 10))
 
@@ -32,8 +32,9 @@ def execute():
 
         kmf = KaplanMeierFitter()
         kmf.fit(df_.hours, event_observed=df_.doa, label=category)
-        kmf.plot(ax=ax)
-        ax.set_xlim(0, ax.get_xlim()[1])
+        kmf.plot(show_censors=True, censor_styles={'marker': '|', 'ms': 6},
+                 ax=ax)
+        ax.set_xlim(0, min(24*30, ax.get_xlim()[1]))
 
         ax.set_title('{}, N = {}'.format(category, len(df_)))
         ax.set_xlabel('Total Incident Time (h)')

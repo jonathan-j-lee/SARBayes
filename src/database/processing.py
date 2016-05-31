@@ -3,11 +3,11 @@ database.processing
 ===================
 """
 
-__all__ = ['survival_rate', 'tabulate']
+__all__ = ['survival_rate', 'tabulate', 'to_orange_table']
 
 import numpy as np
+import Orange
 import pandas as pd
-import re
 
 from .models import Subject
 
@@ -28,3 +28,8 @@ def tabulate(query, not_null=True):
     df.columns = list(map(lambda column: column['name'], columns))
 
     return df
+
+
+def to_orange_table(df):
+    ...
+    # domain = Orange.data.Domain()
