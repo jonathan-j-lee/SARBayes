@@ -7,6 +7,7 @@ Survival analysis
 """
 
 from collections import Counter
+import matplotlib
 import matplotlib.pyplot as plt
 from lifelines import KaplanMeierFitter
 
@@ -16,11 +17,13 @@ from database.processing import tabulate
 
 
 def execute():
+    matplotlib.rc('font', size=20)
+
     engine, session = database.initialize('sqlite:///../data/isrid-master.db')
 
     query = session.query(Incident.total_hours, Subject.survived,
                           Group.category).join(Group, Subject)
-    # query = query.filter(Group.size == 1)
+    query = query.filter(Group.size == 1)
     df = tabulate(query)
 
     database.terminate(engine, session)
@@ -30,13 +33,14 @@ def execute():
                    doa=[not survived for survived in df.survived])
     df = df[0 <= df.days]
 
-    grid, axes = plt.subplots(3, 3, figsize=(15, 10))
+    rows, columns = 2, 2
+    grid, axes = plt.subplots(rows, columns, figsize=(15, 10))
 
     categories = Counter(df.category)
     plot = 0
     kmfs = []
-    for category, count in categories.most_common()[:9]:
-        ax = axes[plot//3, plot%3]
+    for category, count in categories.most_common()[:rows*columns]:
+        ax = axes[plot//columns, plot%columns]
         df_ = df[df.category == category]
 
         kmf = KaplanMeierFitter()
@@ -56,14 +60,14 @@ def execute():
 
         plot += 1
 
-    grid.suptitle('Kaplan-Meier Empirical Survival Curves', fontsize=20)
+    grid.suptitle('Kaplan-Meier Survival Curves', fontsize=25)
     grid.tight_layout()
-    grid.subplots_adjust(top=0.925)
-    grid.savefig('../doc/figures/kaplan-meier/km-group-grid.svg', transparent=True)
+    grid.subplots_adjust(top=0.9)
+    grid.savefig('../doc/figures/kaplan-meier/km-single-grid-large.svg', transparent=True)
 
     combined = plt.figure(figsize=(15, 10))
     ax = combined.add_subplot(1, 1, 1)
-    for kmf in kmfs[:5]:
+    for kmf in kmfs[:rows*columns]:
         kmf.plot(ci_show=False, show_censors=True,
                  censor_styles={'marker': '|', 'ms': 6}, ax=ax)
 
@@ -71,8 +75,8 @@ def execute():
     ax.set_ylim(0, 1)
     ax.set_xlabel('Total Incident Time (days)')
     ax.set_ylabel('Probability of Survival')
-    ax.set_title('Kaplan-Meier Empirical Survival Curves', fontsize=20)
-    combined.savefig('../doc/figures/kaplan-meier/km-group-combined.svg', transparent=True)
+    ax.set_title('Kaplan-Meier Survival Curves', fontsize=25)
+    combined.savefig('../doc/figures/kaplan-meier/km-single-combined-large.svg', transparent=True)
 
     plt.show()
 
