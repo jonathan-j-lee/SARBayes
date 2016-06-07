@@ -12,7 +12,7 @@ import re
 from sqlalchemy import Integer, SmallInteger, Float, Boolean
 from sqlalchemy import DateTime, Interval, Text, PickleType, Column, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import and_, not_, select, func
+from sqlalchemy import and_, not_, select, func, case
 from sqlalchemy.orm import column_property, relationship, validates
 
 from . import Base
@@ -39,9 +39,14 @@ class Subject(Base):
     group_id = Column(Integer, ForeignKey('groups.id'))
     group = relationship('Group', back_populates='subjects')
 
-    @property
+    @hybrid_property
     def sex_as_str(self):
         return self.__class__.SEX_CODES.get(self.sex, None)
+
+    @sex_as_str.expression
+    def sex_as_str(cls):
+        return case([(cls.sex == code, sex_str)
+                     for code, sex_str in cls.SEX_CODES.items()])
 
     dead_on_arrival = column_property(func.upper(status)
                                       .in_(map(str.upper, DOA_TYPES)))

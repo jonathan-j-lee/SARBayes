@@ -57,6 +57,7 @@ def execute():
         ax.set_ylabel('Probability of Survival')
 
         ax.legend_.remove()
+        ax.grid(True)
 
         plot += 1
 
@@ -76,6 +77,7 @@ def execute():
     ax.set_xlabel('Total Incident Time (days)')
     ax.set_ylabel('Probability of Survival')
     ax.set_title('Kaplan-Meier Survival Curves', fontsize=25)
+    ax.grid(True)
     combined.savefig('../doc/figures/kaplan-meier/km-single-combined-large.svg', transparent=True)
 
     plt.show()

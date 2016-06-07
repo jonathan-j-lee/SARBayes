@@ -6,3 +6,4 @@ matplotlib
 sqlalchemy
 pymc
 lifelines
+flask

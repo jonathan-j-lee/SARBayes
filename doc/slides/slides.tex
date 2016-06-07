@@ -1,7 +1,9 @@
 \documentclass[serif,final,bigger]{beamer}
 \usepackage{enumerate}
 \usepackage{graphicx}
+\usepackage{moresize}
 \usepackage{svg}
+\usepackage{url}
 
 \usetheme{Rochester}
 \usecolortheme{beaver}
@@ -47,31 +49,52 @@
       \item Cleaning and validation
       \item SQLAlchemy backend
       \item Unit testing
-      \item External historic weather data API
+      \item WSI historic weather data API
     \end{itemize}
   \end{frame}
 
   \begin{frame}
-    \frametitle{Survival Function}
+    \frametitle{Classification Model Selection}
+    \begin{itemize}
+      \item Bayesian network
+      \item Handles missing data well
+      \item Intuitive
+      \item Transparent
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Classification Model Configuration}
+    \begin{center}
+      \includegraphics[height=0.8\textheight]{bayes.png}
+    \end{center}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Survival Function Selection}
     $$S(t) = P(T > t) = 1 - F_T(t) = \int_t^\infty f_T(u) du$$
     $$S(0) = 1, \lim_{t \to \infty} S(t) = 0$$
   \end{frame}
 
   \begin{frame}
-    \frametitle{Kaplan-Meier}
+    \frametitle{Survival Function Selection}
     \begin{itemize}
-      \item Empirical, stepwise, decreasing survival over time (non-parametric)
+      \item Kaplan-Meier:
       $$S(t) = \prod_{t_i < t} \frac{n_i - d_i}{n_i}$$
+      \item Empirical, stepwise, decreasing survival over time
       \item Curve should approach the true survival function
       \item Handles right-censoring
     \end{itemize}
   \end{frame}
 
   \begin{frame}
-    \frametitle{Evaluation}
+    \frametitle{Classification Evaluation}
     \begin{itemize}
-      \item Brier Score
+      \item Cross-validation
+      \item Brier Score:
       $$0 \leq \frac{1}{N} \sum_{i=1}^N (y_i - o_i)^2 \leq 1$$
+      \item Baseline BS: 0.092
+      \item Classification BS: 0.057
     \end{itemize}
   \end{frame}
 
@@ -92,12 +115,31 @@
   \section{Conclusion}
 
   \begin{frame}
-    \frametitle{Future Work}
+    \frametitle{Conclusion}
+    \begin{itemize}
+      \item Good performance
+      \begin{itemize}
+        \item Stability, noise reduction
+      \end{itemize}
+      \item Future work
+      \begin{itemize}
+        \item Terrain features
+        \item Hierarchical models
+      \end{itemize}
+    \end{itemize}
   \end{frame}
 
   \section{Appendix}
 
   \begin{frame}
     \frametitle{References}
+    \linespread{1}
+    \ssmall
+    \begin{enumerate}
+      \item “Malaysia Airlines Flight 370 Anniversary Looms as Nations Weight Costs of Continuing Search,” The Wall Street Journal, last updated 2015.
+      \item “International Search \& Rescue Incident Database,” dbS Productions, last updated 2011, \url{https://www.dbs-sar.com/SAR_Research/ISRID.htm}
+      \item National Oceanic and Atmospheric Administration. Web Services API (version 2) Documentation. \url{https://www.ncdc.noaa.gov/cdo-web/webservices/v2}. [Provided for free to the public].
+      \item Weather Services International Corporation. Cleaned Observation API Documentation. PDF document. [Provided during a free trial].
+    \end{enumerate}
   \end{frame}
 \end{document}

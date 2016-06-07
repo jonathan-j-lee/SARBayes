@@ -11,4 +11,5 @@ e968f96c0797c14b087e1769b137b277  isrid-snapshot-2016-03-28.db
 66eefdfccbf697c7c35e0152ced226f6  isrid-snapshot-2016-03-28.db.zip
 850eedd7c949a839e276b43122f94909  isrid-snapshot-2016-05-17.db
 4c81670d5a476a4fd6403c679be9c283  isrid-snapshot-2016-05-22.db
+de82dab1a0b5b8ccd7c67ec991127ff3  isrid-snapshot-2016-05-22.db.zip
 2783a62420ebc70b3f2a045a4fddac91  mappings.yaml

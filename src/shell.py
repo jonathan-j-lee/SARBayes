@@ -18,7 +18,7 @@ import yaml
 import database
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
-from database.processing import survival_rate, tabulate, export_as_orange
+from database.processing import survival_rate, tabulate, export_to_orange
 import weather
 
 

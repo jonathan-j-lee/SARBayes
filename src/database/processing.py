@@ -3,7 +3,7 @@ database.processing
 ===================
 """
 
-__all__ = ['survival_rate', 'tabulate', 'export_as_orange']
+__all__ = ['survival_rate', 'tabulate', 'export_to_orange']
 
 import numpy as np
 from Orange.data import ContinuousVariable, DiscreteVariable, Domain, Table
@@ -35,7 +35,7 @@ def tabulate(query, not_null=True):
     return df
 
 
-def export_as_orange(df, *class_names,
+def export_to_orange(df, *class_names,
                   from_duration=lambda delta: delta.total_seconds()/3600):
     features, classes = [], []
 
@@ -58,6 +58,8 @@ def export_as_orange(df, *class_names,
 
     for index in range(len(df)):
         for name in df.columns:
-            table[index][name] = df[name][index].item()
+            value = df[name][index]
+            table[index][name] = (value if isinstance(value, str)
+                                  else value.item())
 
     return table
