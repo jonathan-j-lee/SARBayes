@@ -7,8 +7,9 @@ import logging
 import sys
 
 
-def initialize_logging(filename, mode='a+'):
-    logger = logging.getLogger()
+def initialize_logging(filename, mode='a+', logger=None):
+    if logger is None:
+        logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(levelname)s][%(asctime)s] > %(message)s')
 

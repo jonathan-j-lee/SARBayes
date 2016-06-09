@@ -5,5 +5,7 @@ pandas
 matplotlib
 sqlalchemy
 pymc
+pgmpy
 lifelines
 flask
+tornado
