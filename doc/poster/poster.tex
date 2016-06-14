@@ -1,0 +1,138 @@
+\documentclass[serif,final]{beamer}
+\usepackage[scale=1.6]{beamerposter}
+\usepackage{multicol}
+\usepackage{lipsum}
+\usepackage{ragged2e}
+\usepackage{svg}
+
+\usetheme{Berlin}
+\usecolortheme{dove}
+\beamertemplatenavigationsymbolsempty
+\setlength{\columnsep}{1in}
+\setbeamersize{text margin left=1.5in, text margin right=1.5in}
+\newcommand{\heading}[1]{{\large \textbf{#1}}\\}
+\newcommand{\subheading}[1]{{\textbf{#1}}\\}
+
+\title{Forecasting Lost Person Survival}
+\author{Jonathan Lee}
+\institute{TJHSST Computer Systems Lab}
+\date{\today}
+
+\begin{document}
+  \justify
+  \begin{frame}
+    \titlepage
+
+    \begin{multicols}{3}
+      \heading{Introduction}
+
+      \indent
+
+      \subheading{Purpose}
+
+      When conducting wilderness search-and-rescue (WiSAR) operations, speed is critical. Every
+      passing hour allows lost persons to move ever further away from their
+      last known locations along roads, trails, and waterways. As the
+      potentially searchable area expands, the likelihood of a successful find
+      drops, and extreme temperatures, hunger, exhaustion, and accidents result
+      in fatalities. Therefore, search planners need reliable models of lost
+      person motion to determine where to send their teams. Prolonged searches also put search teams into harm's way and strain their
+      resources.
+
+      \indent
+
+      A model for describing the probability of survival over time for a given
+      subject lost in the wilderness would help address both of these issues.
+      Researchers developing motion models may consider survival forecasts when
+      predicting how lost persons behave in particular circumstances, and
+      search planners may examine the probability of survival to determine when the odds of a successful find are too low to continue searching.
+
+      \indent
+
+      \subheading{Objective}
+
+      The objective of this project was to describe the probability of survival
+      as a function of time, denoted here as $S(t)$, given a list of attributes
+      about the incident, such as subject age, category, and temperature.
+
+      \indent
+
+      $S(t)$ should have the following properties:
+
+      $$S(0) \approx 1, \lim_{t \to \infty} S(t) = 0$$
+
+      In other words, we assume nearly all subjects start out alive, but
+      eventually expire.
+
+      \indent
+
+      \vfill
+      \columnbreak
+
+      \heading{Methods}
+
+      The data used originate from the International Search \& Rescue Incident
+      Database (ISRID) \cite{isrid}, which collects information about real-life
+      WiSAR cases.
+
+      \indent
+
+      \subheading{Model}
+
+      Asking for the probability of survival at a given time is the same as
+      asking for the probability the subject will have survived at least
+      until that time. In survival analysis, the latter can be written as
+
+      $$S(t) = P(T > t) = 1 - F_T(t) = \int_t^\infty f_T(t) dt$$
+
+      where $T$ is the random variable representing the time of death,
+      $F_T(t)$ is the cumulative distribution function of $T$, and $f_T(t)$
+      is the probability density function of $T$ \cite{rochford}. To
+      approximate the true survival function, we used the Kaplan-Meier
+      estimator, given by
+
+      $$S(t) = \prod_{t_i < t} \frac{N_i - d_i}{N_i}$$
+
+      where $t_i$ is the time of every event before $t$, $N_i$ is the number
+      of subjects just before $t_i$, and $0 \leq d_i \leq N_i$ is the number of deaths
+      at $t_i$.
+
+      \indent
+
+      As shown, the Kaplan-Meier estimator uses the cases themselves to calculate an empirical probability
+      of survival, which decreases over time. Such a nonparametric model can adapt to new data well. Also, the
+      Kaplan-Meier esimator handles right-censoring, which occurs when subjects are rescued
+      and we cannot see when they would have died, had searchers not found them.
+
+      \indent
+
+      \vfill
+      \columnbreak
+
+      \heading{Results}
+
+      \begin{center}
+      \setsvg{svgpath=../figures/kaplan-meier/}
+      \includesvg[width=0.32\textwidth]{km-single-grid-large}
+      \end{center}
+
+      The Kaplan-Meier curves for the four most common categories,
+      excluding subjects in groups, are shown above. The $95\%$ credence intervals are
+      given by the shaded regions. Survivals
+      are indicated by the tick marks.
+
+      \indent
+
+      \heading{Conclusion}
+        As shown, Kaplan-Meier curves fit the data well, and are robust enough
+        to handle noisy data. Unlike other models, like logistic curves, the Kaplan-Meier
+        estimator can capture a range of survival processes well.
+
+      \indent
+
+      \heading{References}
+      \bibliographystyle{unsrt}
+      \bibliography{poster}
+    \end{multicols}
+  \end{frame}
+\end{document}

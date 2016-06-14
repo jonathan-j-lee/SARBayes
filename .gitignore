@@ -213,7 +213,6 @@ data/config.yaml
 *.bak
 trash/
 *.csv
-summer-analysis/machine_learning/logreg
 *tree*
 *.docx
 # data/
@@ -222,9 +221,6 @@ summer-analysis/machine_learning/logreg
 *.pdf_tex
 *.db
 *.sqlite*
-
-data/isrid-snapshot-2016-03-28.db.zip
+*.zip
 
 src/.#anomaly.py
-
-data/isrid-snapshot-2016-05-22.db.zip
