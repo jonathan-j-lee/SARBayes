@@ -32,8 +32,8 @@ database.terminate(engine, session)
 
 # Build UI
 
-plot = figure(y_range=Range1d(bounds='auto', start=0, end=1), plot_width=1000,
-              title='Lost Person Survival Over Time')
+plot = figure(y_range=Range1d(bounds='auto', start=0, end=1 + 1e-3),
+              plot_width=1000, title='Lost Person Survival Over Time')
 
 status = Paragraph()
 
@@ -62,7 +62,7 @@ selectors = Tabs(tabs=[
 
 generate = Button(label='Generate')
 
-renderer = plot.line([], [])
+renderer = plot.line([], [], line_width=2, line_alpha=0.75)
 
 
 def generate_plot():
@@ -112,3 +112,7 @@ generate_plot()
 
 document = curdoc()
 document.add_root(vplot(plot, status, selectors, generate))
+
+# from bokeh.embed import autoload_server
+# script = autoload_server(model=None, app_path='/server/')
+# print(script)
