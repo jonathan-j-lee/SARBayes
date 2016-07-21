@@ -6,6 +6,10 @@ util
 import logging
 import sys
 
+import database
+from database.models import Subject, Group, Incident
+from database.processing import tabulate
+
 
 def initialize_logging(filename, mode='a+', logger=None):
     if logger is None:
@@ -24,3 +28,24 @@ def initialize_logging(filename, mode='a+', logger=None):
     logger.addHandler(file_handler)
 
     logger.debug('Logging initialized')
+
+
+def read_simple_data(url, exclude_singles=False, exclude_groups=False):
+    engine, session = database.initialize(url)
+
+    columns = Incident.total_hours, Subject.survived, Group.category
+    query = session.query(*columns).join(Group, Subject)
+    if exclude_singles:
+        query = query.filter(Group.size > 1)
+    if exclude_groups:
+        query = query.filter(Group.size == 1)
+
+    database.terminate(engine, session)
+
+    df = tabulate(query)
+    df = df.assign(days=[total_hours.total_seconds()/3600/24
+                         for total_hours in df.total_hours],
+                   doa=[not survived for survived in df.survived])
+    df = df[0 <= df.days]
+
+    return df

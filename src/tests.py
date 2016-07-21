@@ -18,7 +18,7 @@ from database.cleaning import extract_numbers
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 from database.processing import survival_rate, tabulate
-from evaluation import brier_score
+from evaluation import compute_brier_score
 from weather import noaa, wsi
 
 
@@ -251,7 +251,7 @@ class DatabaseIntegrityTests(unittest.TestCase):
 
 class EvaluationTests(unittest.TestCase):
     def test_brier_score(self):
-        ...
+        self.assertAlmostEqual(compute_brier_score([1, 0], [0.5, 0.5]), 0.25)
 
 
 class WeatherFetchingTests(unittest.TestCase):
