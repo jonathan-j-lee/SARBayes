@@ -42,14 +42,14 @@ categories = sorted(categories, key=lambda category: -categories[category])
 category_select = CheckboxGroup(labels=categories, active=[0])
 
 min_size_select = Slider(start=1, end=max(df['size']), value=1, step=1,
-                         title='Minimum Group Size')
+                         title='Minimum Group Size (Inclusive)')
 max_size_select = Slider(start=1, end=max(df['size']), value=max(df['size']),
-                         step=1, title='Maximum Group Size')
+                         step=1, title='Maximum Group Size (Inclusive)')
 
 min_age_select = Slider(start=0, end=max(df['age']), value=0, step=1,
-                        title='Minimum Age')
+                        title='Minimum Age (Inclusive)')
 max_age_select = Slider(start=0, end=max(df['age']), value=max(df['age']),
-                        step=1, title='Maximum Age')
+                        step=1, title='Maximum Age (Inclusive)')
 
 sex_select = CheckboxGroup(labels=['Male', 'Female'], active=[0, 1])
 
@@ -111,7 +111,7 @@ generate.on_click(generate_plot)
 generate_plot()
 
 document = curdoc()
-document.add_root(vplot(plot, status, selectors, generate))
+document.add_root(vplot(plot, status, generate, selectors))
 
 # from bokeh.embed import autoload_server
 # script = autoload_server(model=None, app_path='/server/')

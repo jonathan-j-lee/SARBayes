@@ -2,9 +2,6 @@
 
 Forecast lost person survival using wilderness search-and-rescue (WiSAR) data.
 
-1. Classify subjects as alive or dead-on-arrival.
-2. Describe the probability of survival over time.
-
 ## Setup
 
 ```bash
