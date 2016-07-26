@@ -9,13 +9,14 @@ Survival analysis
 from collections import Counter
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 from lifelines import KaplanMeierFitter
 
 from evaluation import compute_brier_score
 from util import read_simple_data
 
 
-def evaluate_fitters(df, fitters):
+def evaluate_curves(df, fitters):
     for fitter in fitters:
         df_subset = df[df.category == fitter._label]
 
@@ -30,7 +31,7 @@ def evaluate_fitters(df, fitters):
         yield base_score, prediction_score
 
 
-def fit_data(df):
+def fit_curves(df):
     categories = Counter(df.category)
 
     for category, count in categories.most_common():
@@ -103,11 +104,11 @@ def execute():
     df_singles = read_simple_data(url, exclude_groups=True)
     df_groups = read_simple_data(url, exclude_singles=True)
 
-    fitters = list(fit_data(df_singles))
+    fitters = list(fit_curves(df_singles))
 
     fitters = [fitter for fitter in fitters if len(fitter.durations) > 10]
 
-    brier_scores = evaluate_fitters(df_singles, fitters)
+    brier_scores = evaluate_curves(df_singles, fitters)
     base_scores, prediction_scores = zip(*brier_scores)
 
     plt.title('Brier Scores Across Categories')
@@ -116,7 +117,38 @@ def execute():
     plt.boxplot([base_scores, prediction_scores], vert=True,
                 labels=['Survival Rate', 'Kaplan-Meier'])
 
+    colormap = plt.get_cmap('RdYlGn')
+    N = [len(fitter.durations) for fitter in fitters]
+    r = [1 - sum(fitter.event_observed)/len(fitter.event_observed)
+         for fitter in fitters]
+    c = [colormap((rate - min(r))/(1 - min(r))) for rate in r]
+
+    plt.scatter(np.random.normal(1, 0.025, size=len(base_scores)), base_scores,
+                s=N, alpha=0.3, c=c)
+
+    plt.scatter(np.random.normal(2, 0.025, size=len(prediction_scores)),
+                prediction_scores, s=N, alpha=0.3, c=c)
+
+    plt.ylim(0, 0.25)
+
     plt.savefig('../doc/figures/brier-score-boxplot.svg', transparent=True)
+
+    figure = plt.figure(figsize=(10, 10))
+    ax = figure.add_subplot(1, 1, 1)
+    ax.scatter(prediction_scores, base_scores, N, alpha=0.3)
+    t = np.linspace(0, 0.25, 100)
+    ax.plot(t, t, 'r--')
+
+    ax.set_xlim(0, 0.25)
+    ax.set_ylim(0, 0.25)
+
+    ax.set_title('Brier Score Comparison')
+    ax.set_xlabel('Brier Score by Kaplan-Meier')
+    ax.set_ylabel('Brier Score by Survival Rate')
+    ax.grid(True)
+
+    figure.savefig('../doc/figures/brier-score-comparison.svg', transparent=True)
+
     plt.show()
 
     # title = 'Kaplan-Meier Survival Curves of Most Common Categories'

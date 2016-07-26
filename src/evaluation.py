@@ -3,24 +3,9 @@ evaluation
 ==========
 """
 
-
-class Result:
-    def true_positive_rate():
-        ...
-    ...
+import numpy as np
 
 
-def brier_score(predictions, outcomes):
-    if len(predictions) != len(outcomes):
-        raise ValueError('prediction and outcome count mismatch')
-
-    return sum(pow(prediction - outcome, 2) for prediction, outcome in
-               zip(predictions, outcomes))/len(predictions)
-
-
-def cross_validate(predictions, outcomes, folds=10):
-    ...
-
-
-def leave_one_out():
-    ...
+def compute_brier_score(predictions, outcomes):
+    predictions, outcomes = np.asarray(predictions), np.asarray(outcomes)
+    return np.sum(np.power(predictions - outcomes, 2))/len(predictions)
