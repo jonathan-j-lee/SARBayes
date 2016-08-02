@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from lifelines import KaplanMeierFitter
 
-from evaluation import compute_brier_score
+from evaluation import compute_brier_score, cross_validate
 from util import read_simple_data
 
 
@@ -102,14 +102,47 @@ def plot_combined(fitters, size=(15, 10), max_days=15,
 def execute():
     url = 'sqlite:///../data/isrid-master.db'
     df_singles = read_simple_data(url, exclude_groups=True)
-    df_groups = read_simple_data(url, exclude_singles=True)
 
-    fitters = list(fit_curves(df_singles))
+    excluded = []
+    for category, df_subset in df_singles.groupby('category'):
+        if len(df_subset) < 20 or sum(df_subset.doa.as_matrix()) < 2:
+            excluded.append(category)
 
-    fitters = [fitter for fitter in fitters if len(fitter.durations) > 10]
+    df_singles = df_singles[~df_singles.category.isin(excluded)]
 
-    brier_scores = evaluate_curves(df_singles, fitters)
-    base_scores, prediction_scores = zip(*brier_scores)
+    # fitters = list(fit_curves(df_singles))
+    categories = Counter(df_singles.category)
+    categories, counts = zip(*categories.most_common())
+    rates = []
+
+    base_scores, prediction_scores = [], []
+    for category in categories:
+        df_subset = df_singles[df_singles.category == category]
+
+        naive_fit = (lambda training_cases:
+                     sum(training_cases.survived)/len(training_cases))
+        naive_predict = lambda model, testing_case: model
+
+        km_fit = (lambda training_cases: KaplanMeierFitter().fit(
+                  df_subset.days, df_subset.doa, label=category))
+        km_predict = lambda model, testing_case: model.predict(
+                        testing_case.days)
+
+        naive_predictions = cross_validate(df_subset, naive_fit, naive_predict)
+        km_predictions = cross_validate(df_subset, km_fit, km_predict)
+
+        outcomes = df_subset.survived.as_matrix().astype(int)
+        naive_score = compute_brier_score([naive_predictions.ix[index].prediction for index in df_subset.index], outcomes)
+        km_score = compute_brier_score([km_predictions.ix[index].prediction for index in df_subset.index], outcomes)
+
+        base_scores.append(naive_score)
+        prediction_scores.append(km_score)
+        rates.append(sum(df_subset.survived)/len(df_subset))
+
+    # brier_scores = evaluate_curves(df_singles, fitters)
+    # base_scores, prediction_scores = zip(*brier_scores)
+
+    # Brier Score Boxplot
 
     plt.title('Brier Scores Across Categories')
     plt.ylabel('Brier Score')
@@ -118,9 +151,9 @@ def execute():
                 labels=['Survival Rate', 'Kaplan-Meier'])
 
     colormap = plt.get_cmap('RdYlGn')
-    N = [len(fitter.durations) for fitter in fitters]
-    r = [1 - sum(fitter.event_observed)/len(fitter.event_observed)
-         for fitter in fitters]
+    N = counts # [len(fitter.durations) for fitter in fitters]
+    r = rates  #[1 - sum(fitter.event_observed)/len(fitter.event_observed)
+        # for fitter in fitters]
     c = [colormap((rate - min(r))/(1 - min(r))) for rate in r]
 
     plt.scatter(np.random.normal(1, 0.025, size=len(base_scores)), base_scores,
@@ -133,8 +166,16 @@ def execute():
 
     plt.savefig('../doc/figures/brier-score-boxplot.svg', transparent=True)
 
+    # Brier Score Scatterplot
+
     figure = plt.figure(figsize=(10, 10))
     ax = figure.add_subplot(1, 1, 1)
+
+    print('{:<32} {:<32} {:<32} {:<32}'.format('Category', 'Base Score', 'Prediction Score', 'Net Change'))
+    print(' '.join('-'*32 for i in range(4)))
+    for prediction_score, base_score, category in zip(prediction_scores, base_scores, categories):
+        print('{:<32} {:<32.5f} {:<32.5f} {:<32.5f}'.format(category, base_score, prediction_score, prediction_score - base_score))
+
     ax.scatter(prediction_scores, base_scores, N, alpha=0.3)
     t = np.linspace(0, 0.25, 100)
     ax.plot(t, t, 'r--')
