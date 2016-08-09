@@ -156,7 +156,7 @@ def execute():
     print(sum(map(abs, naive_errors))/len(naive_errors))
     print(sum(map(abs, km_errors))/len(km_errors))
 
-    plt.figure(figsize=(15, 10))
+    plt.figure(figsize=(10, 8))
 
     error_diffs = [abs(naive_error) - abs(km_error) for naive_error, km_error in zip(naive_errors, km_errors)]
     plt.hist(error_diffs, 200, [-1, 1], weights=[0.1]*len(error_diffs), alpha=0.6)
@@ -168,15 +168,16 @@ def execute():
     print(sum(1 for diff in error_diffs if diff >= 0.05)/len(error_diffs))
     assert sum(counts) == len(df_singles)
 
-    upperbound = 1.05*plt.ylim()[1]
+    upperbound = plt.ylim()[1]
     plt.title('Distribution of Differences in Absolute Error ($N = {}$)'.format(sum(counts)))
     plt.plot([-0.05, -0.05], [0, upperbound], 'r--', alpha=0.6)
     plt.plot([0.05, 0.05], [0, upperbound], 'r--', alpha=0.6)
     plt.plot([0, 0], [0, upperbound], 'b--', alpha=0.6)
     plt.ylim(0, upperbound)
+    plt.tight_layout()
     plt.savefig('../doc/figures/pos-abs-error-diff-dist.svg', transparent=True)
 
-    plt.figure(figsize=(15, 10))
+    plt.figure(figsize=(10, 8))
 
     # brier_scores = evaluate_curves(df_singles, fitters)
     # base_scores, prediction_scores = zip(*brier_scores)
@@ -203,6 +204,7 @@ def execute():
 
     plt.ylim(0, 0.25)
 
+    plt.tight_layout()
     plt.savefig('../doc/figures/brier-score-boxplot.svg', transparent=True)
 
     # Brier Score Scatterplot
@@ -227,6 +229,7 @@ def execute():
     ax.set_ylabel('Brier Score by Survival Rate')
     ax.grid(True)
 
+    figure.tight_layout()
     figure.savefig('../doc/figures/brier-score-comparison.svg', transparent=True)
 
     plt.show()
