@@ -113,31 +113,70 @@ def execute():
     # fitters = list(fit_curves(df_singles))
     categories = Counter(df_singles.category)
     categories, counts = zip(*categories.most_common())
-    rates = []
 
-    base_scores, prediction_scores = [], []
+    naive_fit = (lambda training_cases:
+                 sum(training_cases.survived)/len(training_cases))
+    naive_predict = lambda model, testing_case: model
+
+    km_fit = (lambda training_cases: KaplanMeierFitter().fit(
+              df_subset.days, df_subset.doa, label=category))
+    km_predict = lambda model, testing_case: model.predict(
+                    testing_case.days)
+
+    rates, counts = [], []
+    naive_scores, km_scores = [], []
+    naive_errors, km_errors = [], []
+
     for category in categories:
         df_subset = df_singles[df_singles.category == category]
-
-        naive_fit = (lambda training_cases:
-                     sum(training_cases.survived)/len(training_cases))
-        naive_predict = lambda model, testing_case: model
-
-        km_fit = (lambda training_cases: KaplanMeierFitter().fit(
-                  df_subset.days, df_subset.doa, label=category))
-        km_predict = lambda model, testing_case: model.predict(
-                        testing_case.days)
-
-        naive_predictions = cross_validate(df_subset, naive_fit, naive_predict)
-        km_predictions = cross_validate(df_subset, km_fit, km_predict)
-
-        outcomes = df_subset.survived.as_matrix().astype(int)
-        naive_score = compute_brier_score([naive_predictions.ix[index].prediction for index in df_subset.index], outcomes)
-        km_score = compute_brier_score([km_predictions.ix[index].prediction for index in df_subset.index], outcomes)
-
-        base_scores.append(naive_score)
-        prediction_scores.append(km_score)
         rates.append(sum(df_subset.survived)/len(df_subset))
+        counts.append(len(df_subset))
+
+        naive_subscores, km_subscores = [], []
+
+        for iteration in range(10):
+            df_subset = df_subset.sample(n=len(df_subset))
+
+            naive_predictions = cross_validate(df_subset, naive_fit, naive_predict)
+            km_predictions = cross_validate(df_subset, km_fit, km_predict)
+            outcomes = df_subset.survived.as_matrix().astype(int)
+
+            naive_score = compute_brier_score([naive_predictions.ix[index].prediction for index in df_subset.index], outcomes)
+            km_score = compute_brier_score([km_predictions.ix[index].prediction for index in df_subset.index], outcomes)
+
+            naive_subscores.append(naive_score)
+            km_subscores.append(km_score)
+
+            naive_errors += list(naive_predictions.prediction - outcomes)
+            km_errors += list(km_predictions.prediction - outcomes)
+
+        naive_scores.append(np.mean(naive_subscores))
+        km_scores.append(np.mean(km_subscores))
+
+    print(sum(map(abs, naive_errors))/len(naive_errors))
+    print(sum(map(abs, km_errors))/len(km_errors))
+
+    plt.figure(figsize=(15, 10))
+
+    error_diffs = [abs(naive_error) - abs(km_error) for naive_error, km_error in zip(naive_errors, km_errors)]
+    plt.hist(error_diffs, 200, [-1, 1], weights=[0.1]*len(error_diffs), alpha=0.6)
+    plt.ylabel('Frequency')
+    plt.xlabel('Difference in Absolute Error ($|p_{naive} - p_{actual}| - |p_{km} - p_{actual}|$)')
+
+    # Include this too, will not win on every case, faint line at x=0, x=+/-0.05 (null zone), invert order, title, add N, add note: positive is improvement
+
+    print(sum(1 for diff in error_diffs if diff >= 0.05)/len(error_diffs))
+    assert sum(counts) == len(df_singles)
+
+    upperbound = 1.05*plt.ylim()[1]
+    plt.title('Distribution of Differences in Absolute Error ($N = {}$)'.format(sum(counts)))
+    plt.plot([-0.05, -0.05], [0, upperbound], 'r--', alpha=0.6)
+    plt.plot([0.05, 0.05], [0, upperbound], 'r--', alpha=0.6)
+    plt.plot([0, 0], [0, upperbound], 'b--', alpha=0.6)
+    plt.ylim(0, upperbound)
+    plt.savefig('../doc/figures/pos-abs-error-diff-dist.svg', transparent=True)
+
+    plt.figure(figsize=(15, 10))
 
     # brier_scores = evaluate_curves(df_singles, fitters)
     # base_scores, prediction_scores = zip(*brier_scores)
@@ -147,7 +186,7 @@ def execute():
     plt.title('Brier Scores Across Categories')
     plt.ylabel('Brier Score')
 
-    plt.boxplot([base_scores, prediction_scores], vert=True,
+    plt.boxplot([naive_scores, km_scores], vert=True,
                 labels=['Survival Rate', 'Kaplan-Meier'])
 
     colormap = plt.get_cmap('RdYlGn')
@@ -156,11 +195,11 @@ def execute():
         # for fitter in fitters]
     c = [colormap((rate - min(r))/(1 - min(r))) for rate in r]
 
-    plt.scatter(np.random.normal(1, 0.025, size=len(base_scores)), base_scores,
+    plt.scatter(np.random.normal(1, 0.025, size=len(naive_scores)), naive_scores,
                 s=N, alpha=0.3, c=c)
 
-    plt.scatter(np.random.normal(2, 0.025, size=len(prediction_scores)),
-                prediction_scores, s=N, alpha=0.3, c=c)
+    plt.scatter(np.random.normal(2, 0.025, size=len(km_scores)),
+                km_scores, s=N, alpha=0.3, c=c)
 
     plt.ylim(0, 0.25)
 
@@ -171,12 +210,12 @@ def execute():
     figure = plt.figure(figsize=(10, 10))
     ax = figure.add_subplot(1, 1, 1)
 
-    print('{:<32} {:<32} {:<32} {:<32}'.format('Category', 'Base Score', 'Prediction Score', 'Net Change'))
+    print('{:<32} {:<32} {:<32} {:<32}'.format('Category', 'Naive Score', 'KM Score', 'Net Change'))
     print(' '.join('-'*32 for i in range(4)))
-    for prediction_score, base_score, category in zip(prediction_scores, base_scores, categories):
-        print('{:<32} {:<32.5f} {:<32.5f} {:<32.5f}'.format(category, base_score, prediction_score, prediction_score - base_score))
+    for km_score, naive_score, category in zip(km_scores, naive_scores, categories):
+        print('{:<32} {:<32.5f} {:<32.5f} {:<32.5f}'.format(category, naive_score, km_score, km_score - naive_score))
 
-    ax.scatter(prediction_scores, base_scores, N, alpha=0.3)
+    ax.scatter(km_scores, naive_scores, N, alpha=0.3)
     t = np.linspace(0, 0.25, 100)
     ax.plot(t, t, 'r--')
 
