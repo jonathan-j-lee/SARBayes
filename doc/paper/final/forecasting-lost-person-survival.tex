@@ -11,8 +11,9 @@
   \date{\today}
   \maketitle
 
-  % \abstract{
-  % }
+  \abstract{
+    \ldots
+  }
 
   \section{Introduction}
     \subsection{Rationale}
@@ -47,132 +48,191 @@
       of a lost person as a function of time, denoted here as $S(t)$, given
       information about the incident, such as subject age, category, and
       temperature. Describing survival as a probability rather than as a
-      discrete status allows search commanders to see a model's degree of
-      confidence in the occurrence of each outcome and to adjust their plan
-      accordingly.
+      discrete status allows search planners to see a model's degree of
+      confidence in the occurrence of each outcome and enables them to set
+      their own threshold for discontinuing a search.
+
+  \section{Models}
+    \subsection{Na{\"i}ve Survival Rate}
+      This simple model predicts a subject's probability of survival is the
+      same as the overall survival rate of a subset of lost persons the subject
+      belongs to, regardless of how much time has elapsed. This is given by
+
+      $$S(t) = \frac{N - d}{N} = 1 - \frac{d}{N}$$
+
+      where $d$ is the number of deaths in the subset, and $N$ is the total
+      number of subjects in the subset. Here, we separated subjects by
+      category, but one could also just as well use binning for continuous
+      variables and split on age, sex, or group size.
+
+      When the outcomes of a subset are homogenous (that is, the majority of
+      subjects either survived or died), the survival rate approaches the
+      more frequent of the two outcomes. Because many categories have
+      survival rates exceeding 90\%, using the survival rate predicts
+      survivals well, and serves as a good baseline for comparing other
+      models to. Conversely, in subsets more evenly split between the two
+      outcomes, this model compromises by forecasting probabilities midway
+      between dead-on-arrival and survival.
+
+    \subsection{Kaplan-Meier Estimator}
+      Asking for the probability of survival at a given point in time is the
+      same as asking for the probability the subject will have survived at
+      least until that time. The latter expression can be written as
+
+      $$S(t) = P(T > t) = 1 - F_T(t) = 1 - \int_0^t f_T(t) dt = \int_t^\infty f_T(t) dt$$
+
+      where $T$ is the random variable representing the the time of death,
+      $F_T(t)$ is the cumulative distribution function of $T$, and $f_T(t)$
+      is the probability density function of $T$ \cite{rochford}. Given a
+      subset of cases a subject belongs to, the Kaplan-Meier estimator
+      approximates this true survival function nonparametrically as
+
+      $$S(t) = \prod_{t_i < t} \frac{N_i - d_i}{N_i}$$
+
+      where $t_i$ is the duration until an event---the death of a subject,
+      $N_i$ is the number of subjects just before $t_i$, and $1 \leq d_i \leq
+      N_i$ is the number of deaths at $t_i$. When plotted, the survival curve
+      starts at $S(0) = 1$ and decreases in steps because the model uses the
+      new survival rate at each death to lower the ``ceiling" on the
+      probability of survival. Therefore, in theory,
+
+      $$\lim_{t \to \infty} S(t) = 0$$
+
+      In other words, the model assumes all subjects begin alive, but
+      eventually expire.
+
+      The Kaplan-Meier estimator also has the property of handling
+      right-censoring, which occurs when we cannot determine how long survivors
+      would have lived had searchers not rescued them \cite{rich}. However, in
+      survivals, the incident duration is the lowerbound of the time until the
+      subject's death. The model reflects this by decreasing the $N_i$ term for
+      all future events and treating survivals as subjects exiting the
+      ``study."
+
+      Here, we used the Kaplan-Meier implementation provided by the Lifelines
+      package \cite{lifelines}. Like with the survival rate model, we separated
+      subjects by category when fitting curves.
 
   \section{Methods}
-    \subsection{Data}
+    \subsection{Data Preprocessing}
       The data used originate from the International Search \& Rescue Incident
       Database (ISRID) \cite{isrid}, which collects information about real-life
       WiSAR cases from search organizations around the world. dbS Productions
-      provided these proprietary data for free for analysis purposes.
+      provided these proprietary data for free for analysis purposes. Readers
+      unconcerned with the details of our data preparation process may skip
+      ahead to the evaluation subsection.
+
+      % Refer readers to ISRID data standards?
 
       \subsubsection{Cleaning}
+        First, to reduce the time needed to read and query the data and to
+        enforce strong typing, we merged several spreadsheets containing the
+        raw data together into a database backend using SQLAlchemy, a
+        structured query language (SQL) abstraction toolkit \cite{sqlalchemy}.
+        Rather than storing information from all incidents in one flat table,
+        we defined several modular but linked table. For instance, every
+        instance of the group table pointed to one or more instances of the
+        subject table. For every non-empty row, the backend attempted to
+        convert each value to its column's data type. In the case of subject
+        age, the backend expected every value to be a positive real number, and
+        attempted to extract such a number when passed a string.
 
       \subsubsection{Validation}
+        To ensure data used were of high quality, the backend checked for
+        data correctness when assigning an attribute a value. For instance,
+        the backend required age, weight, and incident duration to be
+        nonnegative, sex to conform to one of four codes, and latitude to be
+        between $-90^\circ$ and $90^\circ$. Using the key, incident number, and
+        mission number attributes, we found no duplicate cases in the database.
 
       \subsubsection{Augmentation}
-
-      % Because nearly all suspended cases result in dead-on-arrival,
-      % Other statuses, such as injured, were treated as survivals
-
-      %\subsubsection{Migration}
-      %  First, to enable timely retrieval, querying, and strict typing, we
-      %  constructed a database backend using SQLAlchemy, a structured query
-      %  language (SQL) abstraction toolkit \cite{sqlalchemy}. The script
-      %  merging together the spreadsheets into a single SQLite file also stored
-      %  information about each incident across several independent tables,
-      %  rather than in a single flat table.
-
-      %\subsubsection{Cleaning}
-      %  For every value extracted from each spreadsheet, we attempted to
-      %  convert that value into the type required by the corresponding column.
-      %  If the conversion failed, we stored that value in a pickled Python
-      %  dictionary. Later, empty rows were removed.
-
-      %\subsubsection{Validation}
-      %  For columns that should have positive values, such as age or weight,
-      %  we used SQLAlchemy's built-in validation procedures to ensure the
-      %  correctness of values upon assignment. Using the key, incident number,
-      %  and mission number, the unit tests for the database infrastructure also
-      %  determined there were no duplicate cases.
-
-      %\subsubsection{Augmentation}
-      %  Given a time and coordinates as latitude and longitude, we used Weather
-      %  Services International's (WSI) online historic weather database
-      %  \cite{wsi} to populate missing values in ISRID for temperature, wind
-      %  speed, and precipitation.
-
-    \subsection{Models}
-      \subsubsection{Na{\"i}ve Survival Rate}
-        This simple model predicts a subject's probability of survival is the
-        same as the overall survival rate of the subset of lost persons the
-        subject belongs to, regardless of how much time has elapsed. This is
-        given by
-
-        $$S(t) = \frac{N - d}{N} = 1 - \frac{d}{N}$$
-
-        where $d$ is the number of deaths in the subset, and $N$ is the total
-        number of subjects in the subset.
-
-        When the outcomes of a subset are homogenous (that is, the majority of
-        subjects either survived or died), the survival rate approaches the
-        more frequent of the two outcomes. Because many categories have
-        survival rates exceeding 90\%, using the survival rate predicts
-        survivals well, and serves as a good baseline for comparing other
-        models to. Conversely, in subsets more evenly split between the two
-        outcomes, this model compromises by forecasting probabilities midway
-        between dead-on-arrival and survival.
-
-      \subsubsection{Kaplan-Meier Estimator}
-        Asking for the probability of survival at a given point in time is the
-        same as asking for the probability the subject will have survived at
-        least until that time. The latter expression can be written as
-
-        $$S(t) = P(T > t) = 1 - F_T(t) = 1 - \int_0^t f_T(t) dt = \int_t^\infty f_T(t) dt$$
-
-        where $T$ is the random variable representing the the time of death,
-        $F_T(t)$ is the cumulative distribution function of $T$, and $f_T(t)$
-        is the probability density function of $T$ \cite{rochford}. The Kaplan-
-        Meier estimator approximates this true survival function
-        nonparametrically by setting the survival rate at each death as the new
-        ``ceiling" on the probability of survival. Given a subset of similar
-        cases, the survival function is estimated as
-
-        $$S(t) = \prod_{t_i < t} \frac{N_i - d_i}{N_i}$$
-
-        where $t_i$ is the duration until an event---the death or withdrawal of
-        a subject, $N_i$ is the number of subjects at $t_i$, and $0 \leq d_i
-        \leq N_i$ is the number of deaths at $t_i$.
-
-        %When plotted, the survival curve starts at $S(0) = 1$ and then
-        %decreases in a series of steps so that
-
-        %$$\lim_{t \to \infty} S(t) = 0$$
-
-        %In other words, the model assumes all subjects begin alive, but
-        %eventually expire.
-
-        %Also, the Kaplan-Meier esimator handles right-censoring, when
-        %subjects are rescued and we cannot see when they would have died, had
-        %searchers not found them.
-
-  \section{Results}
-    \subsection{Plots}
-      \setsvg{svgpath=../../figures/kaplan-meier/}
-      \includesvg[width=\textwidth]{km-single-subject-grid}
-
-      Above are Kaplan-Meier curves for the nine most common categories,
-      excluding subjects traveling in groups. The $95\%$ credence intervals are
-      given by the shaded regions. Survivals, which are right-censored events,
-      are indicated with tick marks.
+        Given the time and location of an incident, we used Weather Services
+        International's (WSI) online historic weather database \cite{wsi} to
+        populate missing values in ISRID for temperature, wind speed,
+        precipitation, and solar radiation. WSI's data were preferred over
+        those collected by the National Oceanic and Atmospheric Administration
+        (NOAA) because we have shown the former's measurements tended to align
+        more closely with what search-and-rescue personnel on the ground
+        measure \cite{lee}. The backend updated a total of 2821 instances.
 
     \subsection{Evaluation}
-      \setsvg{svgpath=../../figures/}
-      \includesvg[width=\textwidth]{brier-score-boxplot}
-      \includesvg[width=\textwidth]{brier-score-comparison}
-      \includesvg[width=\textwidth]{pos-abs-error-diff-dist}
+      To measure how well each model performed in general cases, we conducted
+      10-fold cross-validation on each category with 10 repetitions. That is,
+      we split each subset of subjects with a common category into ten
+      equally-sized segments. For every segment, we trained one of the models
+      on the other nine segments, and generated forecasts for the one segment.
+      We repeated this procedure a total of ten times with random shuffling
+      between each iteration to minimize the effect of the ordering of the
+      cases on forecast accuracy.
+
+      Here, we excluded categories with fewer than 20 cases or fewer than two
+      deaths from this analysis. Without enough noncensored observations, the
+      models overfit the data by virtue of a 100\% survival rate. We also
+      excluded cases where the subject belonged to a group. By including
+      groups, the curve shifts as a function of group size, especially when
+      large blocks of subjects all exit at once.
+
+      % During the cleaning process, we applied a single subject status
+      % group-wide in the event each subject did not have his or her own.
+
+      % Also, do groups have a higher survival rate than singles?
+
+      In some cases, the subject's status was neither ``well" nor
+      ``dead-on-arrival." Because nearly all suspended incidents result in the
+      latter outcome, we treated them as deaths. We treated all other types of
+      status, such as ``injured," as survivals.
+
+      \subsubsection{Absolute Error}
+        % The simplest way to measure how
+
+        $$E = |f - o| \leq 1$$
+
+        where $f$ is the forecasted probability and $o$ is the observed outcome
+        (that is, $0$ for dead-on-arrival and $1$ for survival). As the
+        forecast becomes more accurate, the absolute error will approach zero.
+
+        $$\lim_{f \to o} E = 0$$
+
+      \subsubsection{Brier Score}
+        \cite{brier+score}
+
+        $$BS = \frac{1}{N} \sum_{i=1}^N {E_i}^2 = \frac{1}{N} \sum_{i=1}^N (f_i - o_i)^2 \leq 1$$
+
+        where $f_i$ is the forecasted probability, $o_i$ is the observed
+        outcome, and $N$ is the number of cases evaluated.
+
+  \section{Results}
+    \setsvg{svgpath=../../figures/kaplan-meier/}
+
+    \includesvg[width=\textwidth]{km-single-subject-grid}
+
+    Kaplan-Meier curves are shwon above for the nine most common categories,
+    excluding subjects lost in groups. The $95\%$ credence intervals are
+    given by the shaded regions. Survivals, which are instances of
+    right-censoring, are indicated by the tick marks on the curve. The number
+    of observations is denoted in the title of each plot as $N$.
+
+    The curve for despondents drops off especially sharply. After just over
+    a day has passed, the odds of survival are worse than even.
+
+    \setsvg{svgpath=../../figures/}
+
+    \includesvg[width=\textwidth]{pos-abs-error-diff-dist}
+
+    \includesvg[width=\textwidth]{brier-score-boxplot}
+    \includesvg[width=\textwidth]{brier-score-comparison}
 
   \section{Conclusion}
     \ldots
     % Good empirical fit
 
+    % Overfitting as more time passes
+
+    % Comparison of categories using hazard ratio
 
 
-    %\subsection{Future Work}
-    %  Future work may focus using external geographic data to augment other
-    %  fields in the database, such as elevation change or track offset.
+    \subsection{Future Work}
+      Future work may
 
   \bibliographystyle{unsrt}
   \bibliography{forecasting-lost-person-survival}
