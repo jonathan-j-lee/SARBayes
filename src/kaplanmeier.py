@@ -161,11 +161,11 @@ def execute():
     error_diffs = [abs(naive_error) - abs(km_error) for naive_error, km_error in zip(naive_errors, km_errors)]
     plt.hist(error_diffs, 200, [-1, 1], weights=[0.1]*len(error_diffs), alpha=0.6)
     plt.ylabel('Frequency')
-    plt.xlabel('Difference in Absolute Error ($|p_{naive} - p_{actual}| - |p_{km} - p_{actual}|$)')
+    plt.xlabel('Difference in Absolute Error ($\Delta E$)')
 
     # Include this too, will not win on every case, faint line at x=0, x=+/-0.05 (null zone), invert order, title, add N, add note: positive is improvement
 
-    print(sum(1 for diff in error_diffs if diff >= 0.05)/len(error_diffs))
+    print(sum(1 for diff in error_diffs if diff <= -0.05)/len(error_diffs))
     assert sum(counts) == len(df_singles)
 
     upperbound = plt.ylim()[1]
@@ -217,9 +217,9 @@ def execute():
     for km_score, naive_score, category in zip(km_scores, naive_scores, categories):
         print('{:<32} {:<32.5f} {:<32.5f} {:<32.5f}'.format(category, naive_score, km_score, km_score - naive_score))
 
-    ax.scatter(km_scores, naive_scores, N, alpha=0.3)
+    ax.scatter(km_scores, naive_scores, N, c=c, alpha=0.3)
     t = np.linspace(0, 0.25, 100)
-    ax.plot(t, t, 'r--')
+    ax.plot(t, t, 'b--')
 
     ax.set_xlim(0, 0.25)
     ax.set_ylim(0, 0.25)
