@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 """
-merge
-=====
-An extensible script for merging data into ISRID.
+merge -- An extensible script for merging data into ISRID
 
 Usage:
 
@@ -30,7 +28,6 @@ Notes:
 
   - Once the data are added, disable the procedure when running the script in
     the future by adding `enabled=False` to the decorator.
-
 """
 
 import datetime

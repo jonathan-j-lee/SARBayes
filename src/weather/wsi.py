@@ -1,6 +1,5 @@
 """
-weather.wsi
-===========
+weather.wsi -- WSI historical weather data API access
 """
 
 __all__ = ['fetch_history']

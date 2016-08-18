@@ -163,8 +163,6 @@ def execute():
     plt.ylabel('Frequency')
     plt.xlabel('Difference in Absolute Error ($\Delta E$)')
 
-    # Include this too, will not win on every case, faint line at x=0, x=+/-0.05 (null zone), invert order, title, add N, add note: positive is improvement
-
     print(sum(1 for diff in error_diffs if diff <= -0.05)/len(error_diffs))
     assert sum(counts) == len(df_singles)
 

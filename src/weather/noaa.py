@@ -1,6 +1,10 @@
 """
-weather.noaa
-============
+weather.noaa -- NOAA historical weather data API access
+
+This module provides access to the National Oceanic and Atmospheric
+Administration's online historical weather data API. Access requires a token
+limited to 1000 requests per day. Requests sent too frequently may also be
+ignored.
 """
 
 __all__ = ['fetch', 'fetch_history']
@@ -19,6 +23,12 @@ ENDPOINTS = ('datasets', 'datacategories', 'datatypes', 'locationcategories',
 
 
 def fetch(endpoint, safe=':,', **parameters):
+    """
+    Fetch JSON data with the given endpoint and parameters.
+
+    Arguments:
+        endpoint: ...
+    """
     if API_TOKEN is None:
         raise ValueError('no API token found')
 
