@@ -15,10 +15,21 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, not_, select, func, case
 from sqlalchemy.orm import column_property, relationship, validates
 
-from . import Base
+from database import Base
 
 
 class Subject(Base):
+    """
+    Represents an individual from a search-and-rescue incident.
+
+    Attributes:
+        __tablename__: A string representing the name of the model's table.
+        SEX_CODES: A dictionary of integer values mapped to string descriptions
+                   (please see ISO/IEC 5218 for details).
+        DOA_TYPES: A list of types of subject status considered as
+                   dead-on-arrival
+    """
+
     __tablename__ = 'subjects'
     SEX_CODES = {0: 'unknown', 1: 'male', 2: 'female', 9: 'not_applicable'}
     DOA_TYPES = ['DOA', 'Suspended']

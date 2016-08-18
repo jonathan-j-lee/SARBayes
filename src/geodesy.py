@@ -1,5 +1,5 @@
 """
-gis/geodesy.py -- Geodetic Data Manipulation
+gis.geodesy -- Geodetic Data Manipulation
 
 Notes:
   - The reference coordinate system is decimal latitude and longitude.
@@ -11,28 +11,24 @@ Sources:
   - http://www.uwgb.edu/dutchs/usefuldata/utmformulas.htm
   - https://en.wikipedia.org/wiki/
         Universal_Transverse_Mercator_coordinate_system
-  - http://www.esg.montana.edu/gl/trs-data.html
   - https://en.wikipedia.org/wiki/Public_Land_Survey_System
 """
 
 from math import (degrees, radians, sin, cos, tan, asin, acos, atan2, sinh,
-    cosh, tanh, asinh, acosh, atanh, sqrt, hypot, ceil, floor)
+                  cosh, tanh, asinh, acosh, atanh, sqrt, hypot, ceil, floor)
 
 __all__ = [
-    'MERIDIANS',
     'from_utm',
     'to_utm',
     'from_dms',
     'to_dms',
-    'from_tr',
-    'from_tr',
     'great_circle',
     'bounding_box'
 ]
 
 # Constants
-a, f = 6378.137, 1/298.257223563    # Equatorial radius (km), flattening
-k0, easting_ = 0.9996, 500          # Point scale factor, false easting
+a, f = 6378.137, 1/298.257223563    # Equatorial radius (km) and flattening
+k0, easting_ = 0.9996, 500          # Point scale factor and false easting
 
 # Derived values
 n = f/(2 - f)
@@ -52,47 +48,6 @@ delta = (
     7/3*pow(n, 2) - 8/5*pow(n, 3),
     56/15*pow(n, 3)
 )
-
-# Used for Township and Range conversions
-MERIDIANS = {
-    'BLACK_HILLS':                  ((43, 59, 44, 1), (104, 3, 16, -1)),
-    'BOISE':                        ((43, 22, 21, 1), (116, 23, 35, -1)),
-    'CHICKASAW':                    ((35, 1, 58, 1), (89, 14, 47, -1)),
-    'CHOCTAW':                      ((31, 52, 32, 1), (90, 14, 41, -1)),
-    'CIMARRON':                     ((36, 30, 5, 1), (103, 0, 7, -1)),
-    'COPPER_RIVER':                 ((61, 49, 4, 1), (145, 18, 37, -1)),
-    'FAIRBANKS':                    ((64, 51, 50, 1), (147, 38, 26, -1)),
-    'FIFTH_PRINCIPAL':              ((34, 38, 45, 1), (91, 3, 7, -1)),
-    'FIRST_PRINCIPAL':              ((40, 59, 22, 1), (84, 48, 11, -1)),
-    'FOURTH_PRINCIPAL':             ((40, 0, 50, 1), (90, 27, 11, -1)),
-    'FOURTH_PRINCIPAL_EXTENDED':    ((42, 30, 28, 1), (90, 25, 37, -1)),
-    'GILA_AND_SALT_RIVER':          ((33, 22, 38, 1), (112, 18, 19, -1)),
-    'HUMBOLDT':                     ((40, 25, 2, 1), (124, 7, 10, -1)),
-    'HUNTSVILLE':                   ((34, 59, 27, 1), (86, 34, 16, -1)),
-    'INDIAN':                       ((34, 29, 32, 1), (97, 14, 49, -1)),
-    'KATEEL_RIVER':                 ((65, 26, 16, 1), (158, 45, 31, -1)),
-    'LOUISIANA':                    ((31, 0, 31, 1), (92, 24, 55, -1)),
-    'MICHIGAN':                     ((42, 25, 28, 1), (84, 21, 53, -1)),
-    'MOUNT_DIABLO':                 ((37, 52, 54, 1), (121, 54, 47, -1)),
-    'NAVAJO':                       ((35, 44, 56, 1), (108, 31, 59, -1)),
-    'NEW_MEXICO_PRINCIPAL':         ((34, 15, 35, 1), (106, 53, 12, -1)),
-    'MONTANA_PRINCIPAL':            ((45, 47, 13, 1), (111, 39, 33, -1)),
-    'SALT_LAKE':                    ((40, 46, 11, 1), (111, 53, 27, -1)),
-    'SAN_BERNARDINO':               ((34, 7, 13, 1), (116, 55, 48, -1)),
-    'SECOND_PRINCIPAL':             ((38, 28, 14, 1), (86, 27, 21, -1)),
-    'SEWARD':                       ((60, 7, 37, 1), (149, 21, 26, -1)),
-    'SIXTH_PRINCIPAL':              ((40, 0, 7, 1), (97, 22, 8, -1)),
-    'SAINT_HELENA':                 ((30, 59, 56, 1), (91, 9, 36, -1)),
-    'SAINT_STEPHENS':               ((30, 59, 51, 1), (88, 1, 20, -1)),
-    'TALLAHASSEE':                  ((30, 26, 3, 1), (84, 16, 38, -1)),
-    'THIRD_PRINCIPAL':              ((38, 28, 27, 1), (89, 8, 54, -1)),
-    'UINTAH':                       ((40, 25, 59, 1), (109, 56, 6, -1)),
-    'UMIAT':                        ((69, 23, 30, 1), (152, 0, 5, -1)),
-    'UTE':                          ((39, 6, 23, 1), (108, 31, 59, -1)),
-    'WASHINGTON':                   ((30, 59, 56, 1), (91, 9, 36, -1)),
-    'WILLAMETTE':                   ((45, 31, 11, 1), (122, 44, 34, -1)),
-    'WIND_RIVER':                   ((43, 0, 41, 1), (108, 48, 49, -1))
-}
 
 
 def from_utm(easting: float, northing: float,
@@ -213,18 +168,6 @@ def to_dms(decimal: float) -> (float, float, float, int):
     return degrees, minutes, seconds, sign
 
 
-def from_tr():
-    """
-    """
-    raise NotImplementedError
-
-
-def to_tr():
-    """
-    """
-    raise NotImplementedError
-
-
 def great_circle(latitude1: float, longitude1: float,
         latitude2: float, longitude2: float) -> (float):
     """
@@ -239,7 +182,7 @@ def great_circle(latitude1: float, longitude1: float,
         longitude2: The longitude of the second point, in decimal degrees.
 
     Returns:
-        decimal: The angle between the two points.
+        angle: The angle between the two points.
     """
     latitude1, latitude2 = radians(latitude1), radians(latitude2)
     delta = radians(abs(longitude1 - longitude2))
