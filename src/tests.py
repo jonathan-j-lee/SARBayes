@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 """
-tests
-=====
-Unit Testing
+tests -- Unit Testing
 """
 
 import hashlib
@@ -20,6 +18,7 @@ from database.models import Operation, Outcome, Weather, Search
 from database.processing import survival_rate, tabulate
 from evaluation import compute_brier_score
 from weather import noaa, wsi
+from util import configure_api_access
 
 
 class ModelTests(unittest.TestCase):
@@ -256,11 +255,7 @@ class EvaluationTests(unittest.TestCase):
 
 class WeatherFetchingTests(unittest.TestCase):
     def setUp(self):
-        with open('../data/config.yaml') as config_file:
-            self.config = yaml.load(config_file.read())
-
-        wsi.DEFAULT_PARAMETERS['userKey'] = self.config['wsi']['key']
-        noaa.API_TOKEN = self.config['noaa']['key']
+        configure_api_access('../data/config.yaml')
 
     def test_connectivity(self):
         ...

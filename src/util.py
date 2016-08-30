@@ -1,14 +1,23 @@
 """
-util
-====
+util -- Utilities for configuration and logging
 """
 
 import logging
 import sys
+import yaml
 
 import database
 from database.models import Subject, Group, Incident
 from database.processing import tabulate
+import weather
+
+
+def configure_api_access(filename):
+    with open(filename) as config_file:
+        config = yaml.load(config_file.read())
+
+    weather.wsi.DEFAULT_PARAMETERS['userKey'] = config['wsi']['key']
+    weather.noaa.API_TOKEN = config['noaa']['key']
 
 
 def initialize_logging(filename, mode='a+', logger=None):

@@ -2,7 +2,6 @@
 
 """
 update
-======
 """
 
 import datetime
@@ -16,6 +15,7 @@ from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 from util import initialize_logging
 from weather import wsi
+from util import configure_api_access
 
 
 def remove_unreadable_incidents(session, limit=float('inf'), save_every=100):
@@ -104,11 +104,8 @@ def augment_weather_instance(weather, datetime_, ipp):
 
 
 def augment_weather_instances(session, limit=5000, save_every=50):
+    configure_api_access('../data/config.yaml')
     logger = logging.getLogger()
-    with open('../data/config.yaml') as config_file:
-        config = yaml.load(config_file.read())
-
-    wsi.DEFAULT_PARAMETERS['userKey'] = config['wsi']['key']
     logger.info('WSI key set to: {}'.format(wsi.DEFAULT_PARAMETERS['userKey']))
 
     query = session.query(Weather, Incident.datetime, Operation.ipp_id)

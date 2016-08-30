@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 """
-shell
-=====
-Interactive REPL shell (read-eval-print loop).
+shell -- Interactive REPL shell (read-eval-print loop).
 """
 
 import datetime
@@ -13,22 +11,16 @@ import pandas as pd
 import Orange
 import readline
 from sqlalchemy import func
-import yaml
 
 import database
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 from database.processing import survival_rate, tabulate, export_to_orange
 import weather
+from util import configure_api_access
 
 
 def loop():
-    with open('../data/config.yaml') as config_file:
-        config = yaml.load(config_file.read())
-
-    weather.wsi.DEFAULT_PARAMETERS['userKey'] = config['wsi']['key']
-    weather.noaa.API_TOKEN = config['noaa']['key']
-
     engine, session = database.initialize('sqlite:///../data/isrid-master.db')
     print('Shell initialized at: {}'.format(datetime.datetime.now()))
 
@@ -47,5 +39,10 @@ def loop():
     database.terminate(engine, session)
 
 
-if __name__ == '__main__':
+def execute():
+    configure_api_access('../data/config.yaml')
     loop()
+
+
+if __name__ == '__main__':
+    execute()
