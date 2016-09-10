@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-tests -- Unit Testing
+tests -- Unit testing
 """
 
 import hashlib
@@ -151,12 +151,18 @@ class QueryingTests(unittest.TestCase):
 
     def test_column_properties(self):
         query = self.session.query(Subject)
+
         self.assertEqual(query.filter(Subject.dead_on_arrival == None).count(),
                          query.filter(Subject.survived == None).count())
         self.assertEqual(query.filter(Subject.dead_on_arrival).count(),
                          query.filter(Subject.survived == False).count())
         self.assertEqual(query.filter(Subject.survived).count(), query.filter(
                          Subject.dead_on_arrival == False).count())
+
+        self.assertEqual(query.filter(Subject.sex_as_str == 'male').count(),
+                         query.filter(Subject.sex == 1).count())
+        self.assertEqual(query.filter(Subject.sex_as_str == 'female').count(),
+                         query.filter(Subject.sex == 2).count())
 
     def test_tabulation(self):
         query = self.session.query(Subject.survived, Subject.age)
@@ -255,7 +261,7 @@ class EvaluationTests(unittest.TestCase):
 
 class WeatherFetchingTests(unittest.TestCase):
     def setUp(self):
-        configure_api_access('../data/config.yaml')
+        configure_api_access()
 
     def test_connectivity(self):
         ...

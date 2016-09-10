@@ -28,12 +28,14 @@ from database.processing import tabulate
 
 # Get data
 
-engine, session = database.initialize('sqlite:///../data/isrid-master.db')
+# Path may vary based on your current working directory
+engine, session = database.initialize('sqlite:///../../data/isrid-master.db')
 
 query = session.query(Subject.survived, Incident.total_hours, Group.category,
-                      Group.size, Subject.age, Subject.sex)
+                      Group.id, Subject.age, Subject.sex)
 query = query.join(Group, Incident)
 df = tabulate(query)
+df['size'] = [Group.query.get(int(id)).size for id in df.id]  # Bad hack
 df['days'] = [hours.total_seconds()/3600/24 for hours in df.total_hours]
 
 database.terminate(engine, session)

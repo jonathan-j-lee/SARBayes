@@ -39,7 +39,7 @@ from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 from database.processing import survival_rate, tabulate, export_to_orange
 import weather
-from util import configure_api_access
+from util import configure_api_access, read_simple_data
 
 
 def loop():
