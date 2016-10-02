@@ -1,41 +1,50 @@
 #!/usr/bin/env python3
 
 """
-plots
+plots -- Plots of subject data
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 import database
 from database.models import Subject
+from database.processing import tabulate
+
+# Fetch data
 
 engine, session = database.initialize('sqlite:///../data/isrid-master.db')
-subjects = session.query(Subject)
+query = session.query(Subject.age, Subject.weight, Subject.height)
+query = query.filter(Subject.age != None)
+df = tabulate(query, not_null=False)
 database.terminate(engine, session)
 
-ages = np.fromiter((subject.age for subject in subjects), np.float64)
-weights = np.fromiter((subject.weight for subject in subjects), np.float64)
-heights = np.fromiter((subject.height for subject in subjects), np.float64)
+# Make weight vs. age plot
 
-figure = plt.figure(figsize=(16, 8))
+color = '#177788'
+df_filtered = df[df.weight.notnull()]
+plt.figure(1)
+plt.scatter(df_filtered.age, df_filtered.weight, c=color, alpha=0.5)
+plt.xlim(0, df_filtered.age.max() + 5)
+plt.ylim(0, df_filtered.weight.max() + 5)
+plt.title('Weight vs. Age')
+plt.xlabel('Age (year)')
+plt.ylabel('Weight (kg)')
+plt.tight_layout()
+plt.savefig('../doc/figures/subject-data/weight-vs-age-plot.svg',
+            transparent=True)
 
-ax = figure.add_subplot(1, 2, 1)
-ax.scatter(ages, weights, c='#2574a9', alpha=0.7)
-ax.set_title('Weight vs. Age')
-ax.set_xlim(0, np.nanmax(ages) + 5)
-ax.set_ylim(0, np.nanmax(weights) + 5)
-ax.set_xlabel('Age (year)')
-ax.set_ylabel('Weight (kg)')
+# Make height vs. age plot
 
-ax = figure.add_subplot(1, 2, 2)
-ax.scatter(ages, heights, c='#2574a9', alpha=0.7)
-ax.set_title('Height vs. Age')
-ax.set_xlim(0, np.nanmax(ages) + 5)
-ax.set_ylim(0, np.nanmax(heights) + 5)
-ax.set_xlabel('Age (year)')
-ax.set_ylabel('Height (cm)')
+df_filtered = df[df.height.notnull()]
+plt.figure(2)
+plt.scatter(df_filtered.age, df_filtered.height, c=color, alpha=0.5)
+plt.xlim(0, df_filtered.age.max() + 5)
+plt.ylim(0, df_filtered.height.max() + 5)
+plt.title('Height vs. Age')
+plt.xlabel('Age (year)')
+plt.ylabel('Height (cm)')
+plt.tight_layout()
+plt.savefig('../doc/figures/subject-data/height-vs-age-plot.svg',
+            transparent=True)
 
-plt.savefig('../doc/figures/age-plots.svg', transparent=True)
-plt.savefig('../doc/figures/age-plots.png', transparent=True)
 plt.show()

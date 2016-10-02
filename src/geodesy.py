@@ -1,5 +1,5 @@
 """
-gis.geodesy -- Geodetic Data Manipulation
+geodesy -- Geodetic data manipulation
 
 Notes:
   - The reference coordinate system is decimal latitude and longitude.
@@ -51,7 +51,7 @@ delta = (
 
 
 def from_utm(easting: float, northing: float,
-                zone: int, hemisphere: int =1) -> (float, float):
+             zone: int, hemisphere: int =1) -> (float, float):
     """
     Convert UTM coordinates to decimal latitude and longitude coordinates.
 
@@ -132,7 +132,7 @@ def to_utm(latitude: float, longitude: float) -> (float, float, int, int):
 
 
 def from_dms(degrees: float, minutes: float, seconds: float,
-        sign: int =1) -> (float):
+             sign: int =1) -> (float):
     """
     Converts degree, minute, and second components to a decimal angle.
 
@@ -169,7 +169,7 @@ def to_dms(decimal: float) -> (float, float, float, int):
 
 
 def great_circle(latitude1: float, longitude1: float,
-        latitude2: float, longitude2: float) -> (float):
+                 latitude2: float, longitude2: float) -> (float):
     """
     Calculate the angle between two points on the surface of a sphere.
     Multiply this angle by the sphere's radius to obtain the distance along the
@@ -193,7 +193,7 @@ def great_circle(latitude1: float, longitude1: float,
 
 
 def bounding_box(latitude: float, longitude: float, side: float) -> (
-        float, float, float, float):
+                 float, float, float, float):
     """
     Calculate the southwest and northeast coordinates of a bounding box.
 
