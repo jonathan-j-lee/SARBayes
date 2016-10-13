@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 """
-times
-=====
-Analyze the distribution of incident times.
+times -- Analyze the distribution of incident times.
 """
 
 import datetime
