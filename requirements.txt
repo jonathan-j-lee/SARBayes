@@ -9,3 +9,4 @@ pgmpy
 lifelines
 flask
 tornado
+openpyxl

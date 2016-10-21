@@ -4,6 +4,7 @@
 tests -- Unit testing
 """
 
+import datetime
 import hashlib
 import os
 import random
@@ -12,7 +13,7 @@ import warnings
 import yaml
 
 import database
-from database.cleaning import extract_numbers
+from database.cleaning import extract_numbers, coerce_type
 from database.models import Subject, Group, Incident, Location, Point
 from database.models import Operation, Outcome, Weather, Search
 from database.processing import survival_rate, tabulate
@@ -216,6 +217,33 @@ class CleaningTests(unittest.TestCase):
         self.assertEqual(list(extract_numbers('1, 2.2, 3., -.4')),
                          [1, 2.2, 3, -0.4])
         self.assertEqual(list(extract_numbers('no numbers')), [])
+
+    def test_coerce_type(self):
+        self.assertEqual(coerce_type(5, str), '5')  # int -> str
+        self.assertEqual(coerce_type(-3.3, str), '-3.3')  # float -> str
+        self.assertEqual(coerce_type(datetime.date(2016, 1, 1), str),
+                                     '2016-01-01')  # datetime.date -> str
+
+        self.assertEqual(coerce_type('5', int), 5)  # str -> int
+        self.assertEqual(coerce_type(5.1, int), 5)  # float -> int
+        self.assertEqual(coerce_type('5 subjects', int), 5)  # str -> int
+        with self.assertRaises(ValueError):
+            coerce_type('5 or 4 subjects', int)  # ambiguity
+
+        self.assertAlmostEqual(coerce_type(5, float), 5.0)  # int -> float
+        self.assertAlmostEqual(coerce_type('3.3', float), 3.3)  # str -> float
+        self.assertAlmostEqual(coerce_type(datetime.timedelta(hours=2,
+                                           minutes=30), float), 2.5)
+                                           # datetime.timedelta -> float
+
+        self.assertAlmostEqual(coerce_type(1/24, datetime.timedelta)
+                               .total_seconds(), datetime.timedelta(hours=1)
+                               .total_seconds())  # float -> datetime.timedelta
+        self.assertAlmostEqual(coerce_type(datetime.time(1, 30, 30),
+                               datetime.timedelta).total_seconds(),
+                               datetime.timedelta(hours=1, minutes=30,
+                               seconds=30).total_seconds())
+                               # datetime.time -> datetime.timedelta
 
 
 class DatabaseIntegrityTests(unittest.TestCase):
