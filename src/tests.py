@@ -21,7 +21,7 @@ from weather import noaa, wsi
 from util import configure_api_access
 
 
-class ModelTests(unittest.TestCase):
+class ModelRepresentationTests(unittest.TestCase):
     def setUp(self):
         self.engine, self.session = database.initialize('sqlite:///:memory:')
 
@@ -257,14 +257,8 @@ class DatabaseIntegrityTests(unittest.TestCase):
 class EvaluationTests(unittest.TestCase):
     def test_brier_score(self):
         self.assertAlmostEqual(compute_brier_score([1, 0], [0.5, 0.5]), 0.25)
-
-
-class WeatherFetchingTests(unittest.TestCase):
-    def setUp(self):
-        configure_api_access()
-
-    def test_connectivity(self):
-        ...
+        self.assertAlmostEqual(compute_brier_score([1, 0, 0],
+                                                   [0.75, 0.25, 0.25]), 0.0625)
 
 
 if __name__ == '__main__':

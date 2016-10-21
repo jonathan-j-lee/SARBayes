@@ -78,7 +78,7 @@ def add_missing_instances(session):
         create a `Weather` instance for the case). Hence, this function's body
         remains incomplete--it is unnecessary.
 
-        Nevertheless, if more data is added in the the future, there should be
+        Nevertheless, if more data are added in the the future, there should be
         a way to ensure every case has a full suite of instances. This way, for
         example, we can assume every `Incident` has a `Group`.
     """
