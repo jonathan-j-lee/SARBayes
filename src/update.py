@@ -89,8 +89,8 @@ def add_missing_instances(session):
 
 def augment_weather_instance(weather, datetime_, ipp):
     """
-    Pull data from the online WSI historic weather database and attempt to fill
-    in the `Weather` instance's missing fields.
+    Pull historical weather data from the online WSI database and attempt to
+    fill in the `Weather` instance's missing fields.
 
     The data pulled are for the first day of the incident in hourly intervals.
     Wind speed and downward solar radiation are averaged and rounded to three
@@ -158,7 +158,7 @@ def augment_weather_instance(weather, datetime_, ipp):
 def augment_weather_instances(session, limit=5000, save_every=50):
     """
     Find incomplete `Weather` instances with a location and time and attempt to
-    supplement them with historic data from the online WSI database.
+    supplement them with historical weather data from the online WSI database.
 
     Arguments:
         session: A SQLAlchemy scoped session object connected to the database.

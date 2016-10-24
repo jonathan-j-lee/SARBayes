@@ -2,9 +2,14 @@
 weather.noaa -- NOAA historical weather data API access
 
 This module provides access to the National Oceanic and Atmospheric
-Administration's online historical weather data API. Access requires a token
+Administration's online historical weather data API. Access requires a token,
 limited to 1000 requests per day. Requests sent too frequently may also be
 ignored.
+
+Also, note that it typically takes a few days for recent data to be available.
+
+Additional documentation is available at:
+    http://www.ncdc.noaa.gov/cdo-web/webservices/v2
 """
 
 __all__ = ['fetch', 'fetch_history']
@@ -14,7 +19,7 @@ import json
 from urllib.request import Request, urlopen, urljoin
 from urllib.parse import urlencode
 
-API_TOKEN = None
+API_TOKEN = None  # Set to a string containing a valid token
 
 BASE_URL = 'http://www.ncdc.noaa.gov/cdo-web/api/v2/'
 
@@ -27,7 +32,17 @@ def fetch(endpoint, safe=':,', **parameters):
     Fetch JSON data with the given endpoint and parameters.
 
     Arguments:
-        endpoint: ...
+        endpoint: The API endpoint as a string.
+        safe: A string containing the characters to be exempted from URL
+              encoding.
+        parameters: A variable number of keyword arguments containing the
+                    URL parameters to send with the request.
+
+    Returns:
+        The response as a dictionary containing JSON data.
+
+    Raises:
+        ValueError: when no API token is set.
     """
     if API_TOKEN is None:
         raise ValueError('no API token found')
@@ -50,6 +65,26 @@ def fetch(endpoint, safe=':,', **parameters):
 
 
 def fetch_history(date, bounds, *datatypes):
+    """
+    Fetch measurements with the given datatypes.
+
+    Arguments:
+        date: A `datetime.date` object of the date to take measurements from.
+        bounds: A 4-tuple containing the southern latitude, the western
+                longitude, the northern latitude, and the eastern longitude.
+                This specifies a box to request measurements from.
+        datatypes: A variable number of datatype identifiers as strings. See
+                   the API's "datatypes" endpoint for more information.
+
+    Returns:
+        A dictionary mapping each datatype identifier to a list of
+        measurements, which may be empty in the event no stations recorded
+        measurements for that datatype during the given date and at the given
+        location.
+
+    Raises:
+        ValueError: when no API token is set.
+    """
     stations = fetch('stations', datasetid='GHCND', startdate=date,
                      enddate=date, datatypeid=datatypes, extent=bounds,
                      limit=1000)
