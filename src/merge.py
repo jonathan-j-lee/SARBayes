@@ -3,28 +3,28 @@
 """
 merge -- A standalone extensible script for adding data to the database backend
 
-Usage:
+This script contains rules for importing data in a variety of sources
+(currently, this mainly encompasses Excel spreadsheets) into a single
+SQLAlchemy environment.
+
+Sample usage:
 
 >>> @Registry.add('my-workbook.xlsx', 'my-worksheet')
 >>> def procedure(index, labeled_row, mapping):
 >>>     ...  # Your code here
 
-Notes:
-
+Glossary:
   - A labeled row is a dictionary where each raw column name maps to a value
     (in essence, column names are used instead of indices to represent rows).
-
   - A mapping is a dictionary where each raw column name points to the
     attribute of a model instance.
-
   - Every procedure is a function that accepts an index, labeled row, and
     mapping, and yields an iterable of database models. These acts as rules for
     how to add a particular worksheet to the backend.
 
+Notes:
   - The name of the procedure does not matter.
-
   - You may access the logger as `logging.getLogger()`.
-
   - If a straightforward one-to-one conversion is available, you may add it
     to the mappings file (`SARBayes/data/mappings.yaml`) like so:
 
@@ -35,7 +35,6 @@ Notes:
     Then, call `setup_models`, which will call `automap` and seek out the type
     of the attribute and attempt type coercion if the raw value does not have
     the same type as the model attribute.
-
   - Once the data are added, disable the procedure when running the script in
     the future by adding `enabled=False` to the decorator.
 """
