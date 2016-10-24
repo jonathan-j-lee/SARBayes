@@ -33,8 +33,7 @@ def fetch(endpoint, safe=':,', **parameters):
 
     Arguments:
         endpoint: The API endpoint as a string.
-        safe: A string containing the characters to be exempted from URL
-              encoding.
+        safe: A string containing characters exempt from URL encoding.
         parameters: A variable number of keyword arguments containing the
                     URL parameters to send with the request.
 
@@ -66,7 +65,7 @@ def fetch(endpoint, safe=':,', **parameters):
 
 def fetch_history(date, bounds, *datatypes):
     """
-    Fetch measurements with the given datatypes.
+    Fetch past weather measurements with the given datatypes.
 
     Arguments:
         date: A `datetime.date` object of the date to take measurements from.

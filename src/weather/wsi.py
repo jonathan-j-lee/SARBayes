@@ -1,5 +1,8 @@
 """
 weather.wsi -- WSI historical weather data API access
+
+This module provides access to Weather Service International's online historic
+weather data API.
 """
 
 __all__ = ['fetch_history']
@@ -24,6 +27,25 @@ DEFAULT_PARAMETERS = {
 
 
 def fetch_history(safe=':,', **parameters):
+    """
+    Fetch past weather measurements.
+
+    Arguments:
+        safe: A string containing characters exempt from URL encoding.
+        parameters: A variable number of keyword arguments containing URL
+                    parameters (overrides `DEFAULT_PARAMETERS`).
+
+    More information on the parameters is available in the API's internal
+    documentation.
+
+    Returns:
+        The response as a dictionary for JSON, `csv.reader` object for CSV, or
+        an `xml.etree.ElementTree` instance for XML.
+
+    Raises:
+        ValueError: when the reponse format is unrecognizable (valid options
+                    are JSON, CSV, and XML).
+    """
     default = dict(DEFAULT_PARAMETERS)
     default.update(parameters)
     parameters = default
