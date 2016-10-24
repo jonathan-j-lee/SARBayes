@@ -1,6 +1,7 @@
 """
-database.models
-===============
+database.models -- Database model definitions
+
+These definitions are based on the 2013 ISRID data standards.
 """
 
 __all__ = ['Subject', 'Group', 'Point', 'Location', 'Operation', 'Outcome',
@@ -20,38 +21,44 @@ from database import Base
 
 class Subject(Base):
     """
-    Represents an individual from a search-and-rescue incident.
+    An individual from a search-and-rescue incident.
 
     Attributes:
-        __tablename__: A string representing the name of the model's table.
+        __tablename__: The name of the model's SQL table as a string (required
+                       by SQLAlchemy).
         SEX_CODES: A dictionary of integer values mapped to string descriptions
-                   (please see ISO/IEC 5218 for details).
-        DOA_TYPES: A list of types of subject status considered as
-                   dead-on-arrival
+                   (see ISO/IEC 5218 for details).
+        DOA_TYPES: A list of types of subject status considered equivalent to
+                   dead-on-arrival.
     """
-
     __tablename__ = 'subjects'
     SEX_CODES = {0: 'unknown', 1: 'male', 2: 'female', 9: 'not_applicable'}
     DOA_TYPES = ['DOA', 'Suspended']
 
-    id = Column(Integer, primary_key=True)
-    age = Column(Float)  # Measured in years
-    sex = Column(SmallInteger)  # See ISO/IEC 5218
-    weight = Column(Float)  # Measured in kg
-    height = Column(Float)  # Measured in cm
-    physical_fit = Column(Text)
-    mental_fit = Column(Text)
-    personality = Column(Text)
-    experience = Column(Text)
-    training = Column(Text)
-    equipment = Column(Text)
-    clothing = Column(Text)
-    status = Column(Text)
-    group_id = Column(Integer, ForeignKey('groups.id'))
-    group = relationship('Group', back_populates='subjects')
+    id = Column(Integer, primary_key=True, doc='A unique identifier')
+    age = Column(Float, doc='Age at the time of the incident in years')
+    sex = Column(SmallInteger, doc='Sex using the encoding standard')
+    weight = Column(Float, doc='Weight measured in kg')
+    height = Column(Float, doc='Height measured in cm')
+    physical_fit = Column(Text, doc="The subject's general physical fitness")
+    mental_fit = Column(Text, doc="The subject's general mental fitness")
+    personality = Column(Text, doc="The subject's personality")
+    experience = Column(Text,
+                        doc="The subject's experience at the activity")
+    training = Column(Text, doc="The subject's level of survival training")
+    equipment = Column(Text, doc="The subject's equipment preparedness "
+                                 "(excluding clothing)")
+    clothing = Column(Text, doc="The fitness of the subject's clothing for "
+                                "the environment")
+    status = Column(Text, doc='Status after rescue or location')
+    group_id = Column(Integer, ForeignKey('groups.id'), doc='The identifier '
+                      'of the group the subject belonged to')
+    group = relationship('Group', back_populates='subjects',
+                         doc='The group the subject belonged to')
 
     @hybrid_property
     def sex_as_str(self):
+        """ The subject's sex as a human-readable string """
         return self.__class__.SEX_CODES.get(self.sex, None)
 
     @sex_as_str.expression
@@ -60,13 +67,19 @@ class Subject(Base):
                      for code, sex_str in cls.SEX_CODES.items()])
 
     dead_on_arrival = column_property(func.upper(status)
-                                      .in_(map(str.upper, DOA_TYPES)))
+                                      .in_(map(str.upper, DOA_TYPES)),
+                                      doc='A boolean indicating whether the '
+                                          'subject was dead-on-arrival')
     survived = column_property(not_(func.upper(status)
-                                      .in_(map(str.upper, DOA_TYPES))))
-    bmi = column_property(weight/height/height*1e4)  # Measured in kg/m^2
+                                      .in_(map(str.upper, DOA_TYPES))),
+                               doc='A boolean indicating whether the subject '
+                                   'survived')
+    bmi = column_property(weight/height/height*1e4,
+                          doc='Body mass index in kg/m^2')
 
     @validates('age', 'weight', 'height')
     def validate_sign(self, key, value):
+        """ Validate the listed attributes are nonnegative. """
         if value is None or value >= 0:  # Possibly rounded down
             return value
         else:
@@ -74,6 +87,7 @@ class Subject(Base):
 
     @validates('sex')
     def validate_sex_code(self, key, value):
+        """ Validate that sex conforms to the encoding standard. """
         if value is None:
             return value
         for code, sex in self.__class__.SEX_CODES.items():
@@ -86,47 +100,79 @@ class Subject(Base):
 
 
 class Group(Base):
+    """
+    A group in a search-and-rescue incident containing one or more subjects.
+
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'groups'
 
-    id = Column(Integer, primary_key=True)
-    category = Column(Text)
-    subcategory = Column(Text)
-    activity = Column(Text)
-    contact_method = Column(Text)
-    scenario = Column(Text)
-    detectability = Column(Text)
-    mobile = Column(Boolean)
-    responsive = Column(Boolean)
-    lost_strategy = Column(Text)
-    mobile_hours = Column(Interval)
-    mechanism = Column(Text)
-    injury_type = Column(Text)
-    illness_type = Column(Text)
-    treatment = Column(Text)
-    rescue_method = Column(Text)
-    signaling = Column(Text)
+    id = Column(Integer, primary_key=True, doc='A unique identifier')
+    category = Column(Text, doc='Determined by a hierarchy')
+    subcategory = Column(Text, doc='An open text field for further '
+                                   'specification')
+    activity = Column(Text, doc='The activity the group was performing')
+    contact_method = Column(Text, doc='The method by which the SAR agency '
+                                      'became aware of the incident')
+    scenario = Column(Text, doc='The primary reason the event occurred')
+    detectability = Column(Text, doc='How detectable the group was to '
+                                     'searchers')
+    mobile = Column(Boolean, doc='A boolean indicating if the group was '
+                                 'capable of and exhibited movement')
+    responsive = Column(Boolean, doc='A boolean indicating if one or more '
+                                     'subjects could respond to signals')
+    lost_strategy = Column(Text, doc="The group's strategy for being found")
+    mobile_hours = Column(Interval, doc='The duration the group was mobile '
+                                        'for')
+    mechanism = Column(Text, doc='The cause of an injury')
+    injury_type = Column(Text, doc='The type of any injuries')
+    illness_type = Column(Text, doc='The type of any illnesses')
+    treatment = Column(Text, doc='The highest level of treatment a subject '
+                                 'receives in the field')
+    rescue_method = Column(Text, doc='How the group is evacuated')
+    signaling = Column(Text, doc='The signals used by the group to attempt '
+                                 'contact with searchers')
     subjects = relationship('Subject', back_populates='group',
-                            cascade='all, delete-orphan')
-    incident_id = Column(Integer, ForeignKey('incidents.id'))
-    incident = relationship('Incident', back_populates='group', uselist=False)
+                            cascade='all, delete-orphan', doc='The subjects '
+                            'belonging to this group')
+    incident_id = Column(Integer, ForeignKey('incidents.id'),
+                         doc='The identifier of the incident this group was '
+                             'involved in')
+    incident = relationship('Incident', back_populates='group', uselist=False,
+                            doc='The incident this group was involved in')
 
     size = column_property(select([func.count(Subject.id)])
                            .where(Subject.group_id == id)
-                           .correlate_except(Subject))
+                           .correlate_except(Subject),
+                           doc='The number of subjects in the group')
 
 
 class Point(Base):
+    """
+    A location on the Earth's surface (in three dimensions).
+
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+        MIN_LATITUDE: The minimum possible latitude in degrees.
+        MAX_LATITUDE: The maximum possible latitude in degrees.
+        MIN_LONGITUDE: The minimum possible longitude in degrees.
+        MAX_LONGITUDE: The maximum possible longitude in degrees.
+    """
     __tablename__ = 'points'
     MIN_LATITUDE, MAX_LATITUDE = -90, 90
     MIN_LONGITUDE, MAX_LONGITUDE = -180, 180
 
-    id = Column(Integer, primary_key=True)
-    latitude = Column(Float)  # Measured in decimal degrees
-    longitude = Column(Float)  # Measured in decimal degrees
-    altitude = Column(Float)  # Measured in m above mean sea level
+    id = Column(Integer, primary_key=True, doc='A unique identifier')
+    latitude = Column(Float, doc='Latitude in decimal degrees')
+    longitude = Column(Float, doc='Longitude in decimal degrees')
+    altitude = Column(Float, doc='Height in m above mean sea level')
 
     @validates('latitude', 'longitude')
     def validate_bounds(self, key, value):
+        """
+        Validates latitude and longitude are between their respective bounds.
+        """
         cls = self.__class__
         if key == 'latitude':
             lowerbound, upperbound = cls.MIN_LATITUDE, cls.MAX_LATITUDE
@@ -139,29 +185,45 @@ class Point(Base):
             raise ValueError("invalid bounds for '{}'".format(key))
 
     def __str__(self):
+        """ Represent this point as a human-readable coordinate. """
         return '({:.5f}, {:.5f})'.format(self.latitude, self.longitude)
 
 
 class Location(Base):
+    """
+    The general location of an incident and a description of the land.
+
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'locations'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(Text)
-    city = Column(Text)
-    county = Column(Text)
-    eco_domain = Column(Text)
-    eco_division = Column(Text)
-    pop_density = Column(Text)
-    terrain = Column(Text)
-    land_cover = Column(Text)
-    land_owner = Column(Text)
-    environment = Column(Text)
-    incident_id = Column(Integer, ForeignKey('incidents.id'))
+    id = Column(Integer, primary_key=True, doc='A unique identifier')
+    name = Column(Text, doc='A name for the general location of the incident')
+    city = Column(Text, doc="The city of the incident by the IPP's mailing "
+                            "address")
+    county = Column(Text, doc='The county of the incident by the IPP')
+    eco_domain = Column(Text, doc='The ecoregion domain (Bailey Ecoregions)')
+    eco_division = Column(Text, doc='The ecoregion division')
+    pop_density = Column(Text, doc='The population density of the area')
+    terrain = Column(Text, doc='The topology of the area')
+    land_cover = Column(Text, doc='The vegetative cover of the search area')
+    land_owner = Column(Text, doc='The land owner type')
+    environment = Column(Text, doc='The environment the incident occurred in')
+    incident_id = Column(Integer, ForeignKey('incidents.id'),
+                         doc='The identifier of the incident that occurred at '
+                         'this location')
     incident = relationship('Incident', back_populates='location',
-                            uselist=False)
+                            uselist=False, doc='The incident that occurred at '
+                            'this location')
 
     @property
     def region(self):
+        """
+        The region of the country of this location.
+
+        For cases in the United States, the `region` is usually a state.
+        """
         if isinstance(self.incident.source, str):
             result = re.search(r'-([A-Z]+)', self.incident.source)
             if result:
@@ -169,6 +231,7 @@ class Location(Base):
 
     @property
     def country(self):
+        """ The country of this location. """
         if isinstance(self.incident.source, str):
             result = re.search(r'^([A-Z]{1,2})-?', self.incident.source)
             if result:
@@ -176,6 +239,12 @@ class Location(Base):
 
 
 class Operation(Base):
+    """
+    Information typically known before a search to planners.
+
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'operations'
 
     id = Column(Integer, primary_key=True)
@@ -206,8 +275,12 @@ class Operation(Base):
 
 
 class Weather(Base):
+    """
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'weather'
-    MIN_TEMP = -273.15  # Measured in degrees C
+    MIN_TEMP = -273.15  # Measured in degrees C (for sanity checks)
     BASE_TEMP = 18  # Measured in degrees C
     WATER_FREEZING_POINT = 0  # Measured in degrees C (approximately)
 
@@ -258,6 +331,10 @@ class Weather(Base):
 
 
 class Outcome(Base):
+    """
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'outcomes'
 
     id = Column(Integer, primary_key=True)
@@ -292,6 +369,10 @@ class Outcome(Base):
 
 
 class Search(Base):
+    """
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'searches'
 
     id = Column(Integer, primary_key=True)
@@ -324,6 +405,10 @@ class Search(Base):
 
 
 class Incident(Base):
+    """
+    Attributes:
+        __tablename__: The name of the model's SQL table as a string.
+    """
     __tablename__ = 'incidents'
 
     id = Column(Integer, primary_key=True)
