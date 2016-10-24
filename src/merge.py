@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-merge -- An extensible script for merging data into ISRID
+merge -- A standalone extensible script for adding data to the database backend
 
 Usage:
 
@@ -11,8 +11,17 @@ Usage:
 
 Notes:
 
-  - The name of the procedure does not matter. The decorator adds it to the
-    registry as an anonymous function.
+  - A labeled row is a dictionary where each raw column name maps to a value
+    (in essence, column names are used instead of indices to represent rows).
+
+  - A mapping is a dictionary where each raw column name points to the
+    attribute of a model instance.
+
+  - Every procedure is a function that accepts an index, labeled row, and
+    mapping, and yields an iterable of database models. These acts as rules for
+    how to add a particular worksheet to the backend.
+
+  - The name of the procedure does not matter.
 
   - You may access the logger as `logging.getLogger()`.
 
@@ -24,7 +33,8 @@ Notes:
                 my-excel-heading:   my-model-attribute
 
     Then, call `setup_models`, which will call `automap` and seek out the type
-    of the attribute and attempt a conversion.
+    of the attribute and attempt type coercion if the raw value does not have
+    the same type as the model attribute.
 
   - Once the data are added, disable the procedure when running the script in
     the future by adding `enabled=False` to the decorator.
@@ -38,7 +48,7 @@ import warnings
 import yaml
 
 import database
-from database.cleaning import extract_numbers
+from database.cleaning import extract_numbers, coerce_type
 from database.models import Subject, Group, Point, Location, Weather
 from database.models import Operation, Outcome, Search, Incident
 from util import initialize_logging
@@ -47,53 +57,54 @@ EXCEL_START_DATE = datetime.datetime(1900, 1, 1)
 
 
 def read_excel(filename):
+    """
+    Read each worksheet from an Excel workbook file.
+
+    Arguments:
+        filename: A string representing the path to the file.
+
+    Returns:
+        A generator containing worksheet title-and-row generator pairs. The
+        title is a string representing the worksheet's title. The row generator
+        is another inner generator that iterates over the worksheet's rows,
+        each of which is represented as a tuple of values.
+    """
     workbook = openpyxl.load_workbook(filename, read_only=True)
     for worksheet in workbook:
         rows = (tuple(cell.value for cell in row) for row in worksheet.rows)
         yield worksheet.title, rows
 
 
-def coerce_type(value, datatype):
-    if isinstance(value, datatype) or value is None:
-        return value
-
-    elif datatype == str:
-        return str(value)
-
-    elif datatype in (int, float):
-        try:
-            return datatype(value)
-        except (TypeError, ValueError):
-            pass
-
-        if isinstance(value, str):
-            numbers = tuple(extract_numbers(value))
-
-            if len(numbers) > 1:
-                raise ValueError('more than one number found')
-            elif len(numbers) == 1:
-                return datatype(numbers[0])
-
-        elif isinstance(value, datetime.timedelta):
-            return datatype(value.total_seconds()/3600)
-
-    elif datatype == datetime.timedelta:
-        if isinstance(value, (int, float)):
-            return datetime.timedelta(hours=24*value)
-
-        elif isinstance(value, datetime.time):
-            return datetime.timedelta(hours=value.hour, minutes=value.minute,
-                                      seconds=value.second)
-
-        elif isinstance(value, datetime.datetime):
-            return value - EXCEL_START_DATE
-
-
 class Registry:
+    """
+    A global namespace for holding procedures.
+
+    Attributes:
+        instances: A dictionary mapping keys to procedures.
+        serialize: A callable that converts a sequence of labels into a
+                   hashable key (by default, serialization is implemented as
+                   the immutable set's constructor).
+    """
     instances, serialize = {}, frozenset
 
     @classmethod
     def add(cls, *labels, enabled=True):
+        """
+        A decorator for adding a procedure to the registry.
+
+        Arguments:
+            cls: The `Registry` class object.
+            labels: A variable number of values to attach to the procedure.
+            enabled: A boolean indicating whether or not to exclude the
+                     procedure (used when the procedure has already been used
+                     on a worksheet, and should not be used in future script
+                     runs).
+
+        Returns:
+            A one-argument wrapper function that takes another function, adds
+            it to the registry, and returns it (the behavior of the wrapper and
+            original functions are identical).
+        """
         def wrapper(function):
             if enabled:
                 cls.instances[cls.serialize(labels)] = function
@@ -103,10 +114,33 @@ class Registry:
 
     @classmethod
     def retrieve(cls, *labels):
+        """
+        A class method for retrieving a procedure from the registry.
+
+        Arguments:
+            cls: The `Registry` class object.
+            labels: A variable number of values attached to the procedure.
+
+        Returns:
+            The procedure (that is, a function) if the labels are found in the
+            registry, or `None` otherwise.
+        """
         return cls.instances.get(cls.serialize(labels), None)
 
 
 def automap(index, labeled_row, mapping, **models):
+    """
+    Map each row's raw values to the corresponding column in the database
+    models, attempting type conversion when possible.
+
+    Arguments:
+        index: The index of `labeled_row` in the current table or worksheet.
+        labeled_row: A dictionary mapping each raw column name to the row's
+                     corresponding value (see module docstring for definition).
+        mapping: A dictionary mapping raw column names to model attributes.
+        models: A variable number of keyword arguments mapping names to model
+                instances.
+    """
     logger = logging.getLogger()
 
     for old, new in mapping.items():
@@ -126,6 +160,19 @@ def automap(index, labeled_row, mapping, **models):
 
 
 def setup_models(index, labeled_row, mapping):
+    """
+    Initialize a new set of instances and fill in their attributes naively.
+
+    Arguments:
+        index: The index of `labeled_row` in the current table or worksheet.
+        labeled_row: A dictionary mapping each raw column name to the row's
+                     corresponding value (see module docstring for definition).
+        mapping: A dictionary mapping raw column names to model attributes.
+
+    Returns:
+        Instances of the `Group`, `Location`, `Weather`, `Operation`,
+        `Outcome`, `Search`, and `Incident` models, in that order.
+    """
     group, location, weather = Group(), Location(), Weather()
     operation, outcome, search = Operation(), Outcome(), Search()
     incident = Incident(group=group, location=location, weather=weather,
@@ -141,6 +188,8 @@ def setup_models(index, labeled_row, mapping):
 
 @Registry.add('ISRIDclean.xlsx', 'ISRIDclean', enabled=False)
 def procedure(index, labeled_row, mapping):
+    """ A procedure for the `ISRIDclean` worksheet. """
+
     logger = logging.getLogger()
     models = setup_models(index, labeled_row, mapping)
     group, location, weather, operation, outcome, search, incident = models
@@ -233,6 +282,8 @@ def procedure(index, labeled_row, mapping):
               '991 cases through 2014-01-06.xlsx', 'SDF', enabled=False)
 @Registry.add('combined NPS Data (SEKI and ZION).xlsx', 'SDF', enabled=False)
 def procedure(index, labeled_row, mapping):
+    """ A procedure for merging worksheet in standard data format (SDF). """
+
     if 'Medical Type' in labeled_row:
         labeled_row['Illness Type'] = None
 
@@ -354,6 +405,12 @@ def procedure(index, labeled_row, mapping):
 
 
 def execute():
+    """
+    Import and merge new data into the backend.
+
+    Currently only handles Excel spreadsheets, but can be extended to other
+    data sources.
+    """
     warnings.filterwarnings('ignore')
     initialize_logging('../logs/merge.log', 'a+')
 
