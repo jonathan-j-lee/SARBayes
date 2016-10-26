@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 """
-kaplanmeier
-===========
-Survival analysis
+kaplanmeier -- Survival analysis using the Kaplan-Meier estimator
 """
 
 from collections import Counter
@@ -16,32 +14,24 @@ from evaluation import compute_brier_score, cross_validate
 from util import read_simple_data
 
 
-def evaluate_curves(df, fitters):
-    for fitter in fitters:
-        df_subset = df[df.category == fitter._label]
-
-        predictions = list(map(fitter.predict, df_subset.days))
-        outcomes = df_subset.survived
-        base_survival_rate = sum(df_subset.survived)/len(df_subset)
-
-        prediction_score = compute_brier_score(predictions, outcomes)
-        base_score = compute_brier_score([base_survival_rate]*len(df_subset),
-                                         outcomes)
-
-        yield base_score, prediction_score
-
-
-def fit_curves(df):
-    categories = Counter(df.category)
-
-    for category, count in categories.most_common():
-        df_subset, fitter = df[df.category == category], KaplanMeierFitter()
-        fitter.fit(df_subset.days, df_subset.doa, label=category)
-        yield fitter
-
-
 def plot_grid(fitters, rows=3, columns=3, size=(15, 10), max_days=30,
               title='Kaplan-Meier Survival Curves'):
+    """
+    Plot a grid of Kaplan-Meier curves.
+
+    Arguments:
+        fitters: A list of `KaplanMeierFitter` instances (must have at least
+                 `rows` times `columns` elements).
+        rows: The number of rows of the grid of subplots.
+        columns: The number of columns of the grid of subplots.
+        size: The size of the figure.
+        max_days: The maximum number of days to display predictions for.
+        title: The overall figure title.
+
+    Returns:
+        figure: A Matplotlib figure object containing the plot.
+        axes: Matplotlib axes, containing each individual subplot.
+    """
     if len(fitters) < rows*columns:
         raise ValueError('fewer fitters than requested')
 
@@ -74,6 +64,21 @@ def plot_grid(fitters, rows=3, columns=3, size=(15, 10), max_days=30,
 
 def plot_combined(fitters, size=(15, 10), max_days=15,
                   title='Kaplan-Meier Survival Curves', smooth=False):
+    """
+    Plot a list of Kaplan-Meier curves on one set of axes.
+
+    Arguments:
+        fitters: A list of `KaplanMeierFitter` instances.
+        size: The size of the figure.
+        max_days: The maximum number of days to display predictions for.
+        title: The title of the figure.
+        smooth: A boolean that, when `True`, overrides the default stepwise
+                plot to generate a smooth curve.
+
+    Returns:
+        figure: A Matplotlib figure object containing the plot.
+        ax: A Matplotlib ax object.
+    """
     figure = plt.figure(figsize=size)
     ax = figure.add_subplot(1, 1, 1)
 
@@ -99,146 +104,243 @@ def plot_combined(fitters, size=(15, 10), max_days=15,
     return figure, ax
 
 
-def execute():
-    url = 'sqlite:///../data/isrid-master.db'
-    df_singles = read_simple_data(url, exclude_groups=True)
+class NaiveSurvivalRateModel:
+    """
+    A model that guesses the probability of survival is always the overall
+    survival rate.
+    """
+    def fit(self, times, doa, label=None):
+        """
+        Fit a survival rate model instance to data.
 
+        Arguments:
+            times: A sequence of incident times.
+            doa: A sequence of booleans indicating whether the incident ended
+                 with the subject dead-on-arrival (same length as `times`).
+            label: A name to attach to the model instance.
+
+        Returns:
+            self: The model instance.
+        """
+        assert len(times) == len(doa)
+        self.label, self.survival_rate = label, 1 - sum(doa)/len(doa)
+        return self
+
+    def predict(self, time):
+        """
+        Predict a subject's probability of survival with the survival rate.
+
+        Arguments:
+            time: The time the model should make a prediction for (unused).
+
+        Returns:
+            The prediction (in this case, the survival rate).
+        """
+        return self.survival_rate
+
+
+def preprocess(df):
+    """
+    Preprocess the data by filtering out categories with too few cases.
+
+    Arguments:
+        df: The raw (unprocessed) data as a Pandas dataframe.
+
+    Returns:
+        A Pandas dataframe without categories with fewer than 20 cases or fewer
+        than two deaths (this is to prevent models from obtaining perfect
+        scores with overfitting).
+    """
     excluded = []
-    for category, df_subset in df_singles.groupby('category'):
+    for category, df_subset in df.groupby('category'):
         if len(df_subset) < 20 or sum(df_subset.doa.as_matrix()) < 2:
             excluded.append(category)
+    return df[~df.category.isin(excluded)]
 
-    df_singles = df_singles[~df_singles.category.isin(excluded)]
 
-    # fitters = list(fit_curves(df_singles))
-    categories = Counter(df_singles.category)
-    categories, counts = zip(*categories.most_common())
+def make_fitting_function(model, df_default=None, label=None):
+    """
+    Make a function that will fit a model on some training data.
 
-    naive_fit = (lambda training_cases:
-                 sum(training_cases.survived)/len(training_cases))
-    naive_predict = lambda model, testing_case: model
+    Arguments:
+        model: The model to make a fitting function for (has a `fit` method).
+        df_default: If not `None`, this overrides the training data.
+        label: A label to attach to the model instance.
 
-    km_fit = (lambda training_cases: KaplanMeierFitter().fit(
-              df_subset.days, df_subset.doa, label=category))
-    km_predict = lambda model, testing_case: model.predict(
-                    testing_case.days)
+    Returns:
+        fit: A one-argument function that takes in training data as a Pandas
+             dataframe containing `days` and `doa` columns, and returns a
+             fitted model instance (depends on the model's implementation).
+    """
+    def fit(training_cases):
+        instance = model()
+        df = training_cases if df_default is None else df_default
+        return instance.fit(df.days, df.doa, label=label)
+    return fit
 
-    rates, counts = [], []
+
+def evaluate_fit(df, fit_fn, predict_fn, repeat=10):
+    """
+    Evaluate a model instance (fitter) with cross-validation.
+
+    Arguments:
+        df: A Pandas dataframe containing the cases to test the model on. These
+            cases are shuffled between cross-validation runs.
+        fit_fn: A one-argument function that takes in training data as a Pandas
+                dataframe and returns a fitted model (see
+                `evaluation.cross_validate`).
+        predict_fn: A two-argument function that takes in the fitted model
+                    instance and a test case and returns a prediction.
+        repeat: The number of times to repeat cross-validation.
+
+    Returns:
+        score: The mean Brier score for the category between cross-validation
+               runs.
+        errors: A list of all signed error values measured (across cross-
+                validation runs).
+    """
+    subscores, errors = [], []
+    for iteration in range(repeat):
+        df = df.sample(n=len(df))
+
+        forecast = cross_validate(df, fit_fn, predict_fn)
+        predictions = [forecast.ix[index].prediction for index in df.index]
+        outcomes = df.survived.as_matrix().astype(int)
+
+        subscores.append(compute_brier_score(predictions, outcomes))
+        errors += list(forecast.prediction - outcomes)
+    return np.mean(subscores), errors
+
+
+def execute():
+    """
+    Fit Kaplan-Meier curves to each category and evaluate the performance of
+    the curves against a naive survival rate model.
+    """
+    url = 'sqlite:///../data/isrid-master.db'
+    df_singles = read_simple_data(url, exclude_groups=True)
+    df_singles = preprocess(df_singles)
+
+    categories, counts = zip(*Counter(df_singles.category).most_common())
+    survival_rates = []
     naive_scores, km_scores = [], []
     naive_errors, km_errors = [], []
 
+    naive_fit = make_fitting_function(NaiveSurvivalRateModel)
+    predict = lambda model, test_case: model.predict(test_case.days)
+    km_fit_fns = []
+
     for category in categories:
         df_subset = df_singles[df_singles.category == category]
-        rates.append(sum(df_subset.survived)/len(df_subset))
-        counts.append(len(df_subset))
+        survival_rates.append(sum(df_subset.survived)/len(df_subset))
 
-        naive_subscores, km_subscores = [], []
+        km_fit = make_fitting_function(KaplanMeierFitter, df_subset, category)
+        km_fit_fns.append(km_fit)
 
-        for iteration in range(10):
-            df_subset = df_subset.sample(n=len(df_subset))
+        score, errors = evaluate_fit(df_subset, naive_fit, predict)
+        naive_scores.append(score)
+        naive_errors += errors
 
-            naive_predictions = cross_validate(df_subset, naive_fit, naive_predict)
-            km_predictions = cross_validate(df_subset, km_fit, km_predict)
-            outcomes = df_subset.survived.as_matrix().astype(int)
+        score, errors = evaluate_fit(df_subset, km_fit, predict)
+        km_scores.append(score)
+        km_errors += errors
 
-            naive_score = compute_brier_score([naive_predictions.ix[index].prediction for index in df_subset.index], outcomes)
-            km_score = compute_brier_score([km_predictions.ix[index].prediction for index in df_subset.index], outcomes)
+    ## Statistics
 
-            naive_subscores.append(naive_score)
-            km_subscores.append(km_score)
+    avg_abs_naive_error = np.abs(naive_errors).mean()
+    print('Average absolute naive error: {:.3f}'.format(avg_abs_naive_error))
+    avg_abs_km_error = np.abs(km_errors).mean()
+    print('Average absolute KM error: {:.3f}'.format(avg_abs_km_error))
 
-            naive_errors += list(naive_predictions.prediction - outcomes)
-            km_errors += list(km_predictions.prediction - outcomes)
+    error_diffs = [abs(naive_error) - abs(km_error)
+                   for naive_error, km_error in zip(naive_errors, km_errors)]
+    null_bound = 0.05
 
-        naive_scores.append(np.mean(naive_subscores))
-        km_scores.append(np.mean(km_subscores))
+    print('Proportions: ')
+    print('  Increase in error: {:.3f}%'.format(sum(diff < -null_bound
+          for diff in error_diffs)/len(error_diffs)*100))
+    print('  No significant change: {:.3f}%'.format(sum(-null_bound <= diff
+          <= null_bound for diff in error_diffs)/len(error_diffs)*100))
+    print('  Decrease in error: {:.3f}%'.format(sum(null_bound < diff
+          for diff in error_diffs)/len(error_diffs)*100))
 
-    print(sum(map(abs, naive_errors))/len(naive_errors))
-    print(sum(map(abs, km_errors))/len(km_errors))
+    ## Kaplan-Meier Plots
+
+    km_fitters = [km_fit(None) for km_fit in km_fit_fns]
+
+    figure, axes = plot_grid(km_fitters[:9])
+    figure.savefig('../doc/figures/kaplan-meier/grid.svg', transparent=True)
+
+    old_font_size = matplotlib.rcParams['font.size']
+    matplotlib.rc('font', size=20)
+    figure, axes = plot_grid(km_fitters[:4], rows=2, columns=2)
+    matplotlib.rc('font', size=old_font_size)
+    figure.savefig('../doc/figures/kaplan-meier/grid-large.svg',
+                   transparent=True)
+
+    figure, axes = plot_combined(km_fitters[:4])
+    figure.savefig('../doc/figures/kaplan-meier/combined.svg',
+                   transparent=True)
+
+    ## Absolute Error Difference Histogram
 
     plt.figure(figsize=(10, 8))
-
-    error_diffs = [abs(naive_error) - abs(km_error) for naive_error, km_error in zip(naive_errors, km_errors)]
-    plt.hist(error_diffs, 200, [-1, 1], weights=[0.1]*len(error_diffs), alpha=0.6)
-    plt.ylabel('Frequency')
+    plt.title('Distribution of Differences in Absolute Error ($N = {}$)'
+              .format(len(df_singles)))
     plt.xlabel('Difference in Absolute Error ($\Delta E$)')
+    plt.ylabel('Frequency')
+    plt.hist(error_diffs, 200, [-1, 1], weights=[0.1]*len(error_diffs),
+             alpha=0.6)
 
-    print(sum(1 for diff in error_diffs if diff <= -0.05)/len(error_diffs))
-    assert sum(counts) == len(df_singles)
-
-    upperbound = plt.ylim()[1]
-    plt.title('Distribution of Differences in Absolute Error ($N = {}$)'.format(sum(counts)))
-    plt.plot([-0.05, -0.05], [0, upperbound], 'r--', alpha=0.6)
-    plt.plot([0.05, 0.05], [0, upperbound], 'r--', alpha=0.6)
-    plt.plot([0, 0], [0, upperbound], 'b--', alpha=0.6)
-    plt.ylim(0, upperbound)
+    greatest_frequency = plt.ylim()[1]
+    plt.plot([-null_bound]*2, [0, greatest_frequency], 'r--', alpha=0.6)
+    plt.plot([null_bound]*2, [0, greatest_frequency], 'r--', alpha=0.6)
+    plt.plot([0, 0], [0, greatest_frequency], 'b--', alpha=0.6)
+    plt.ylim(0, greatest_frequency)
     plt.tight_layout()
-    plt.savefig('../doc/figures/pos-abs-error-diff-dist.svg', transparent=True)
+    plt.savefig('../doc/figures/evaluation/abs-error-diff-dist.svg',
+                transparent=True)
+
+    ## Brier Score Boxplot
 
     plt.figure(figsize=(10, 8))
-
-    # brier_scores = evaluate_curves(df_singles, fitters)
-    # base_scores, prediction_scores = zip(*brier_scores)
-
-    # Brier Score Boxplot
-
     plt.title('Brier Scores Across Categories')
     plt.ylabel('Brier Score')
-
     plt.boxplot([naive_scores, km_scores], vert=True,
                 labels=['Survival Rate', 'Kaplan-Meier'])
 
     colormap = plt.get_cmap('RdYlGn')
-    N = counts # [len(fitter.durations) for fitter in fitters]
-    r = rates  #[1 - sum(fitter.event_observed)/len(fitter.event_observed)
-        # for fitter in fitters]
-    c = [colormap((rate - min(r))/(1 - min(r))) for rate in r]
+    f = lambda r: (r - min(survival_rates))/(1 - min(survival_rates))
+    c = list(map(colormap, map(f, survival_rates)))
 
-    plt.scatter(np.random.normal(1, 0.025, size=len(naive_scores)), naive_scores,
-                s=N, alpha=0.3, c=c)
-
-    plt.scatter(np.random.normal(2, 0.025, size=len(km_scores)),
-                km_scores, s=N, alpha=0.3, c=c)
-
+    x = np.random.normal(1, 0.025, size=len(categories))
+    plt.scatter(x, naive_scores, s=counts, alpha=0.3, c=c)
+    plt.scatter(x + 1, km_scores, s=counts, alpha=0.3, c=c)
     plt.ylim(0, 0.25)
-
     plt.tight_layout()
-    plt.savefig('../doc/figures/brier-score-boxplot.svg', transparent=True)
+    plt.savefig('../doc/figures/evaluation/brier-score-boxplot.svg',
+                transparent=True)
 
-    # Brier Score Scatterplot
+    ## Brier Score Scatterplot
 
-    figure = plt.figure(figsize=(10, 10))
-    ax = figure.add_subplot(1, 1, 1)
+    plt.figure(figsize=(10, 10))
+    plt.title('Brier Score Comparison')
+    plt.xlabel('Brier Score with Kaplan-Meier')
+    plt.ylabel('Brier Score with Survival Rate')
+    plt.scatter(km_scores, naive_scores, counts, c=c, alpha=0.3)
 
-    print('{:<32} {:<32} {:<32} {:<32}'.format('Category', 'Naive Score', 'KM Score', 'Net Change'))
-    print(' '.join('-'*32 for i in range(4)))
-    for km_score, naive_score, category in zip(km_scores, naive_scores, categories):
-        print('{:<32} {:<32.5f} {:<32.5f} {:<32.5f}'.format(category, naive_score, km_score, km_score - naive_score))
-
-    ax.scatter(km_scores, naive_scores, N, c=c, alpha=0.3)
     t = np.linspace(0, 0.25, 100)
-    ax.plot(t, t, 'b--')
-
-    ax.set_xlim(0, 0.25)
-    ax.set_ylim(0, 0.25)
-
-    ax.set_title('Brier Score Comparison')
-    ax.set_xlabel('Brier Score by Kaplan-Meier')
-    ax.set_ylabel('Brier Score by Survival Rate')
-    ax.grid(True)
-
-    figure.tight_layout()
-    figure.savefig('../doc/figures/brier-score-comparison.svg', transparent=True)
+    plt.plot(t, t, 'b--')
+    plt.xlim(0, 0.25)
+    plt.ylim(0, 0.25)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig('../doc/figures/evaluation/brier-score-comparison.svg',
+                transparent=True)
 
     plt.show()
 
-    # title = 'Kaplan-Meier Survival Curves of Most Common Categories'
-    # figure, axes = plot_grid(fitters, 3, 3, title=title)
-    # figure, axes = plot_combined(fitters[:6])
-    # matplotlib.rc('font', size=20)
-    # plt.show()
-
-    # To-do: logrank tests
+    # To-do: logrank tests between categories
 
 
 if __name__ == '__main__':
