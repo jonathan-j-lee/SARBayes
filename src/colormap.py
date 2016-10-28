@@ -5,8 +5,9 @@ colormap -- Visualize survival rates for different categories and age groups
 
 This standalone script takes subjects from the 10 most common categories, bins
 subjects within each group by age (in increments of 10 years, up to 100 years),
-and calculates the survival rate within each bin. Then, each bin is plotted on
-a grid and colored by the survival rate.
+and calculates the survival rate within each bin. Then, each bin is plotted as
+a square on a grid and colored by the survival rate (greener for greater
+survival, redder for lesser survival).
 """
 
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ from database.models import Subject, Group
 from database.processing import tabulate
 
 
-def execute():
+def main():
     """
     Plot the profile (size and survival rate) of the most common categories.
     """
@@ -92,4 +93,4 @@ def execute():
 
 
 if __name__ == '__main__':
-    execute()
+    main()

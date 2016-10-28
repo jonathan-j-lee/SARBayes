@@ -1,8 +1,8 @@
 """
 weather.wsi -- WSI historical weather data API access
 
-This module provides access to Weather Service International's online historic
-weather data API.
+This module provides access to Weather Service International's online
+historical weather data API.
 """
 
 __all__ = ['fetch_history']

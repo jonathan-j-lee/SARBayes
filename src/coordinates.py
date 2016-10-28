@@ -1,10 +1,7 @@
 """
-geodesy -- Geodetic data manipulation
+coordinates -- Manipulate and convert coordinates of different types
 
 Notes:
-  - The reference coordinate system is decimal latitude and longitude.
-  - A negative latitude points south, a negative longitude west.
-  - This library uses the WGS84 datum.
   - Currently, UTM calculations do not handle nonstandard zones.
 
 Sources:
@@ -58,13 +55,13 @@ def from_utm(easting: float, northing: float,
     Keyword Arguments:
         easting: The easting in m.
         northing: The northing in m.
-        zone: The zone, between 1 and 60, inclusive.
+        zone: The zone, an integer between 1 and 60, inclusive.
         hemisphere: A signed number, where a negative number indicates the
-            coordinates are located in the southern hemisphere.
+                    coordinates are located in the southern hemisphere.
 
     Returns:
-        latitude: The latitude, in decimal degrees.
-        longitude: The longitude, in deciaml degrees.
+        latitude: The latitude in decimal degrees.
+        longitude: The longitude in deciaml degrees.
 
     Raises:
         OverflowError: The coordinate does not exist.
@@ -88,18 +85,18 @@ def from_utm(easting: float, northing: float,
 
 def to_utm(latitude: float, longitude: float) -> (float, float, int, int):
     """
-    Converts decimal latitude and longitude coordinates to UTM coordinates.
+    Convert decimal latitude and longitude coordinates to UTM coordinates.
 
     Keyword Arguments:
-        latitude: The latitude, in decimal degrees.
-        longitude: The longitude, in decimal degrees.
+        latitude: The latitude in decimal degrees.
+        longitude: The longitude in decimal degrees.
 
     Returns:
         easting: The easting in m.
         northing: The northing in m.
-        zone: The zone, between 1 and 60, inclusive.
+        zone: The zone, an integer between 1 and 60, inclusive.
         hemisphere: A signed number, where a negative number indicates the
-            coordinates are located in the southern hemisphere.
+                    coordinates are located in the southern hemisphere.
 
     Raises:
         OverflowError: The coordinate does not exist.
@@ -134,7 +131,7 @@ def to_utm(latitude: float, longitude: float) -> (float, float, int, int):
 def from_dms(degrees: float, minutes: float, seconds: float,
              sign: int =1) -> (float):
     """
-    Converts degree, minute, and second components to a decimal angle.
+    Convert degree, minute, and second components to a decimal angle.
 
     Keyword Arguments:
         degrees: The number of degrees.
@@ -151,7 +148,7 @@ def from_dms(degrees: float, minutes: float, seconds: float,
 
 def to_dms(decimal: float) -> (float, float, float, int):
     """
-    Converts a decimal angle to degree, minute, and second components.
+    Convert a decimal angle to degree, minute, and second components.
 
     Keyword Arguments:
         decimal: The number of degrees as as single decimal.
@@ -171,9 +168,9 @@ def to_dms(decimal: float) -> (float, float, float, int):
 def great_circle(latitude1: float, longitude1: float,
                  latitude2: float, longitude2: float) -> (float):
     """
-    Calculate the angle between two points on the surface of a sphere.
-    Multiply this angle by the sphere's radius to obtain the distance along the
-    surface between the two points.
+    Calculate the angle between two points on the surface of a sphere. Multiply
+    this angle by the sphere's radius to obtain the distance along the surface
+    between the two points.
 
     Keyword Arguments:
         latitude1: The latitude of the first point, in decimal degrees.
@@ -208,4 +205,4 @@ def bounding_box(latitude: float, longitude: float, side: float) -> (
         north: The latitude of the northern bound of the box.
         east: The longitude of the eastern bound of the box.
     """
-    raise NotImplementedError
+    ...

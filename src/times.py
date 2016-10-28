@@ -150,7 +150,7 @@ def plot_pdf(mu, kappa):
              label=label.format(*map(radians_to_hours, [mu, kappa])))
 
 
-def execute():
+def main():
     """
     Fit a von Mises distribution to the incident times and plot their empirical
     and fitted distributions (as well as the PDF of the fitted distribution).
@@ -172,4 +172,4 @@ def execute():
 
 
 if __name__ == '__main__':
-    execute()
+    main()

@@ -28,7 +28,7 @@ def survival_rate(subjects):
 
 def tabulate(query, not_null=True):
     """
-    Convert an SQLAlchemy `Query` object into a Pandas dataframe.
+    Convert an SQLAlchemy `Query` object into a `pandas` dataframe.
 
     Arguments:
         query: An `SQLAlchemy` query object.
@@ -39,7 +39,7 @@ def tabulate(query, not_null=True):
                   applied to all columns.
 
     Returns:
-        A Pandas dataframe containing the rows in the query.
+        A `pandas` dataframe containing the rows in the query.
 
     Raises:
         ValueError: if `not_null` is a list and its size is not the same as the
@@ -65,10 +65,10 @@ def tabulate(query, not_null=True):
 def export_to_orange(df, *class_names,
                      from_duration=lambda delta: delta.total_seconds()/3600):
     """
-    Convert a Pandas dataframe to an Orange `Table`.
+    Convert a `pandas` dataframe to an Orange `Table`.
 
     Arguments:
-        df: A Pandas dataframe.
+        df: A `pandas` dataframe.
         class_names: The columns in the dataframe considered to be class
                      variables.
         from_duration: A one-argument function that converts a

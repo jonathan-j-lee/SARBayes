@@ -4,9 +4,9 @@
 update -- Update and augment the database
 
 This is a standalone script for cleaning and augmenting the database. Each
-function in this module except `execute` (which bootstraps the update process)
-is a "task" that takes one argument, a SQLAlchemy scoped session, and operates
-on the database. New tasks should be added to the list inside `execute` and use
+function in this module except `main` (which bootstraps the update process) is
+a "task" that takes one argument, a SQLAlchemy scoped session, and operates on
+the database. New tasks should be added to the list inside `main` and use
 the nameless logger `logging.getLogger()`.
 """
 
@@ -204,7 +204,7 @@ def augment_weather_instances(session, limit=5000, save_every=50):
     logger.info('Updated {} weather instances'.format(count))
 
 
-def execute():
+def main():
     """
     Bootstrap the update process by wrapping the initialization and termination
     of logging and database access.
@@ -238,4 +238,4 @@ def execute():
 
 
 if __name__ == '__main__':
-    execute()
+    main()

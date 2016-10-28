@@ -10,7 +10,7 @@ import database
 from database.models import Subject
 from database.processing import tabulate
 
-# Fetch data
+## Fetch data
 
 engine, session = database.initialize('sqlite:///../data/isrid-master.db')
 query = session.query(Subject.age, Subject.weight, Subject.height)
@@ -18,7 +18,7 @@ query = query.filter(Subject.age != None)
 df = tabulate(query, not_null=False)
 database.terminate(engine, session)
 
-# Make weight vs. age plot
+## Make weight vs. age plot
 
 color = '#177788'
 df_filtered = df[df.weight.notnull()]
@@ -33,7 +33,7 @@ plt.tight_layout()
 plt.savefig('../doc/figures/subject-data/weight-vs-age-plot.svg',
             transparent=True)
 
-# Make height vs. age plot
+## Make height vs. age plot
 
 df_filtered = df[df.height.notnull()]
 plt.figure(2)

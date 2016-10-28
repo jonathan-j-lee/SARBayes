@@ -3,7 +3,7 @@
 """
 shell -- Interactive REPL shell (read-eval-print loop)
 
-You can use this standalone script for quickly querying the database or testing
+You can use this standalone script for quickly querying the database or using
 features of the framework. When executed, the script will present you with a
 prompt, where you can enter expressions to be evaluated (this will not work for
 statements, like `import`). You will have access to a SQLAlchemy scoped session
@@ -67,7 +67,7 @@ def loop():
     database.terminate(engine, session)  # Cleanly shut down SQLAlchemy
 
 
-def execute():
+def main():
     """
     Configure online API access and then run the main REPL loop.
     """
@@ -76,4 +76,4 @@ def execute():
 
 
 if __name__ == '__main__':
-    execute()
+    main()

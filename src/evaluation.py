@@ -1,5 +1,5 @@
 """
-evaluation -- Models evaluation tools
+evaluation -- Model evaluation tools
 """
 
 import numpy as np
@@ -22,8 +22,8 @@ def compute_brier_score(predictions, outcomes):
         predictions: A sequence of probabilities (i.e. real numbers between
                      zero and one).
         outcomes: A sequence of observations (i.e. a zero for the event not
-                  occurring, and a one otherwise). Each associated prediction
-                  and outcome share an index.
+                  occurring, and a one otherwise). Each prediction-outcome pair
+                  shares an index.
 
     Returns:
         A real number between zero and one (inclusive) that is the Brier score
@@ -40,8 +40,9 @@ def cross_validate(df, fit, predict, folds=10, name='prediction'):
         1. Divide the cases into k contiguous segments.
         2. Select an untested segment as the test cases.
         3. Use the other k - 1 segments to train a model.
-        4. Generate predictions for the test cases.
-        5. Go back to step 2 until there are forecasts for every observation.
+        4. Generate and store predictions for the test cases.
+        5. Return to step 2, using a different segment for testing, until there
+           are forecasts for every observation.
         6. Return the forecasts.
 
     Arguments:
@@ -56,7 +57,7 @@ def cross_validate(df, fit, predict, folds=10, name='prediction'):
 
     Returns:
         A dataframe with one column labeled with the `name` argument containing
-        the model's forecasts. The index of the result corresponds to that of
+        the model's forecasts. The indices of the result correspond to those of
         the data passed in, `df`.
     """
     if folds > len(df):

@@ -42,7 +42,7 @@ def initialize_logging(filename, mode='a+', logger=None):
         filename: A string representing the path to a log file. If no such file
                   exists, the logger will try to create one.
         mode: A string representing the behavior of the log file. By default,
-              new data is appended to the file.
+              new messages are appended to the file.
         logger: A logger object. If no logger object is provided (that is, the
                 default argument `None` is passed in), use a nameless logger.
     """
@@ -71,9 +71,9 @@ def read_simple_data(url, exclude_singles=False, exclude_groups=False):
     Arguments:
         url: A string representing the database URL to connect to.
         exclude_singles: A boolean indicating whether the query should exclude
-            subjects from groups with exactly one member.
+                         subjects from groups with exactly one member.
         exclude_groups: A boolean indicating whether the query should exclude
-            subjects from groups with more than one members.
+                        subjects from groups with more than one members.
 
     Returns:
         A pandas dataframe containing the lost person data. The columns include

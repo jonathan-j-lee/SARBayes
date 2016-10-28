@@ -19,24 +19,24 @@ Glossary:
   - A mapping is a dictionary where each raw column name points to the
     attribute of a model instance.
   - Every procedure is a function that accepts an index, labeled row, and
-    mapping, and yields an iterable of database models. These acts as rules for
+    mapping, and yields an iterable of database models. These act as rules for
     how to add a particular worksheet to the backend.
 
 Notes:
   - The name of the procedure does not matter.
-  - You may access the logger as `logging.getLogger()`.
-  - If a straightforward one-to-one conversion is available, you may add it
+  - You can access the logger with `logging.getLogger()`.
+  - If a straightforward one-to-one conversion is available, you can add it
     to the mappings file (`SARBayes/data/mappings.yaml`) like so:
 
         my-workbook:
             my-worksheet:
                 my-excel-heading:   my-model-attribute
 
-    Then, call `setup_models`, which will call `automap` and seek out the type
-    of the attribute and attempt type coercion if the raw value does not have
-    the same type as the model attribute.
-  - Once the data are added, disable the procedure when running the script in
-    the future by adding `enabled=False` to the decorator.
+    Then, call `setup_models`, which will call `automap`, seek out the type of
+    the attribute, and attempt type coercion if the raw value does not have the
+    same type as the model attribute.
+  - Once the data are added, disable a procedure when running the script in the
+    future by adding `enabled=False` to the `Registry.add` decorator.
 """
 
 import datetime
@@ -64,8 +64,8 @@ def read_excel(filename):
 
     Returns:
         A generator containing worksheet title-and-row generator pairs. The
-        title is a string representing the worksheet's title. The row generator
-        is another inner generator that iterates over the worksheet's rows,
+        title is a string containing the worksheet's title. The row generator
+        is another (inner) generator that iterates over the worksheet's rows,
         each of which is represented as a tuple of values.
     """
     workbook = openpyxl.load_workbook(filename, read_only=True)
@@ -281,7 +281,7 @@ def procedure(index, labeled_row, mapping):
               '991 cases through 2014-01-06.xlsx', 'SDF', enabled=False)
 @Registry.add('combined NPS Data (SEKI and ZION).xlsx', 'SDF', enabled=False)
 def procedure(index, labeled_row, mapping):
-    """ A procedure for merging worksheet in standard data format (SDF). """
+    """ A procedure for merging worksheets in standard data format (SDF). """
 
     if 'Medical Type' in labeled_row:
         labeled_row['Illness Type'] = None
@@ -403,7 +403,7 @@ def procedure(index, labeled_row, mapping):
     yield from models
 
 
-def execute():
+def main():
     """
     Import and merge new data into the backend.
 
@@ -447,4 +447,4 @@ def execute():
 
 
 if __name__ == '__main__':
-    execute()
+    main()

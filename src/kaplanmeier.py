@@ -22,15 +22,15 @@ def plot_grid(fitters, rows=3, columns=3, size=(15, 10), max_days=30,
     Arguments:
         fitters: A list of `KaplanMeierFitter` instances (must have at least
                  `rows` times `columns` elements).
-        rows: The number of rows of the grid of subplots.
-        columns: The number of columns of the grid of subplots.
+        rows: The subplot grid's number of rows.
+        columns: The subplot grid's number of columns.
         size: The size of the figure.
         max_days: The maximum number of days to display predictions for.
         title: The overall figure title.
 
     Returns:
         figure: A Matplotlib figure object containing the plot.
-        axes: Matplotlib axes, containing each individual subplot.
+        axes: Matplotlib axes containing the individual subplots.
     """
     if len(fitters) < rows*columns:
         raise ValueError('fewer fitters than requested')
@@ -144,12 +144,12 @@ def preprocess(df):
     Preprocess the data by filtering out categories with too few cases.
 
     Arguments:
-        df: The raw (unprocessed) data as a Pandas dataframe.
+        df: The raw (unprocessed) data as a `pandas` dataframe.
 
     Returns:
-        A Pandas dataframe without categories with fewer than 20 cases or fewer
-        than two deaths (this is to prevent models from obtaining perfect
-        scores with overfitting).
+        A `pandas` dataframe without categories with fewer than 20 cases or
+        fewer than two deaths (this is to prevent models from obtaining perfect
+        scores by overfitting).
     """
     excluded = []
     for category, df_subset in df.groupby('category'):
@@ -168,7 +168,7 @@ def make_fitting_function(model, df_default=None, label=None):
         label: A label to attach to the model instance.
 
     Returns:
-        fit: A one-argument function that takes in training data as a Pandas
+        fit: A one-argument function that takes in training data as a `pandas`
              dataframe containing `days` and `doa` columns, and returns a
              fitted model instance (depends on the model's implementation).
     """
@@ -184,10 +184,10 @@ def evaluate_fit(df, fit_fn, predict_fn, repeat=10):
     Evaluate a model instance (fitter) with cross-validation.
 
     Arguments:
-        df: A Pandas dataframe containing the cases to test the model on. These
-            cases are shuffled between cross-validation runs.
-        fit_fn: A one-argument function that takes in training data as a Pandas
-                dataframe and returns a fitted model (see
+        df: A `pandas` dataframe containing the cases to test the model on.
+            These cases are shuffled between cross-validation runs.
+        fit_fn: A one-argument function that takes in training data as a
+                `pandas` dataframe and returns a fitted model (see
                 `evaluation.cross_validate`).
         predict_fn: A two-argument function that takes in the fitted model
                     instance and a test case and returns a prediction.
@@ -212,7 +212,7 @@ def evaluate_fit(df, fit_fn, predict_fn, repeat=10):
     return np.mean(subscores), errors
 
 
-def execute():
+def main():
     """
     Fit Kaplan-Meier curves to each category and evaluate the performance of
     the curves against a naive survival rate model.
@@ -340,8 +340,8 @@ def execute():
 
     plt.show()
 
-    # To-do: logrank tests between categories
+    # TODO: logrank tests between categories
 
 
 if __name__ == '__main__':
-    execute()
+    main()

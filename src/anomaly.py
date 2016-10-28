@@ -44,7 +44,7 @@ def local_outlier_factors(x, k=1):
     lrds = [1/(sum(reach_distances[a][b] for b in neighbors[a])/
                len(neighbors[a])) for a in range(len(x))]
 
-    # To-do: compute LOFs when requested, not for all elements here
+    # TODO: compute LOFs when requested, not for all elements here
     lofs = [sum(lrds[u] for u in neighbors[a])/len(neighbors[a])
             for a in range(len(x))]
 
