@@ -1,3 +1,5 @@
+% slides.tex
+
 \documentclass[serif,final,bigger]{beamer}
 \usepackage{enumerate}
 \usepackage{graphicx}
@@ -7,13 +9,18 @@
 
 \usetheme{Rochester}
 \usecolortheme{beaver}
-\linespread{1.6}  % Double spacing
+\linespread{1.6}  % Double spacing (approximately)
 \graphicspath{{../figures/}}
+
+\setbeamertemplate{bibliography item}{}
+\setbeamertemplate{bibliography entry title}{}
+\setbeamertemplate{bibliography entry location}{}
+\setbeamertemplate{bibliography entry note}{}
 
 \title{Forecasting Lost Person Survival}
 \author{Jonathan Lee}
 \institute{TJHSST Computer Systems Lab}
-\date{June 2, 2016}
+\date{\today}
 
 \begin{document}
   \usebackgroundtemplate{\includegraphics[width=\paperwidth]{ferns}}
@@ -27,16 +34,21 @@
   \begin{frame}
     \frametitle{Purpose}
     \begin{itemize}
-      \item Advise wilderness search-and-rescue (WiSAR) personnel when to terminate a search
-      \item Augment lost person motion models
+      \item
+        Advise wilderness search-and-rescue (WiSAR) personnel when to terminate
+        a search
+      \item
+        Augment lost person motion models \cite{semple}
     \end{itemize}
   \end{frame}
 
   \begin{frame}
-    \frametitle{Goals}
+    \frametitle{Objective}
     \begin{itemize}
-      \item Classify subjects as alive or dead-on-arrival (DOA)
-      \item Describe a subject's probability of survival over time
+      \item
+        Describe a subject's probability of survival over time
+      \item
+        Evaluate survival model accuracy and stability
     \end{itemize}
   \end{frame}
 
@@ -45,71 +57,92 @@
   \begin{frame}
     \frametitle{Data Preparation}
     \begin{itemize}
-      \item International Search \& Rescue Incident Database (ISRID)
-      \item Cleaning and validation
-      \item SQLAlchemy backend
-      \item Unit testing
-      \item WSI historic weather data API
+      \item
+        International Search \& Rescue Incident Database (ISRID) \cite{isrid}
+      \item
+        Cleaning and validation
+      \item
+        SQLAlchemy backend \cite{sqlalchemy}
+      \item
+        Unit testing
+      \item
+        Augmentation with WSI historical weather data \cite{wsi}
     \end{itemize}
   \end{frame}
 
   \begin{frame}
-    \frametitle{Classification Model Selection}
-    \begin{itemize}
-      \item Bayesian network
-      \item Handles missing data well
-      \item Intuitive
-      \item Transparent
-    \end{itemize}
-  \end{frame}
+    \frametitle{Survival Function}
+    For the time of death \(T\) \cite{rochford},
 
-  \begin{frame}
-    \frametitle{Classification Model Configuration}
-    \begin{center}
-      \includegraphics[height=0.8\textheight]{bayes.png}
-    \end{center}
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{Survival Function Selection}
-    $$S(t) = P(T > t) = 1 - F_T(t) = \int_t^\infty f_T(u) du$$
+    $$S(t) = \Pr(T > t) = 1 - F_T(t) = \int_t^\infty f_T(u) du$$
     $$S(0) = 1, \lim_{t \to \infty} S(t) = 0$$
   \end{frame}
 
   \begin{frame}
-    \frametitle{Survival Function Selection}
+    \frametitle{Kaplan-Meier Estimator}
+    $$S(t) = \prod_{t_i < t} \frac{n_i - d_i}{n_i}$$
     \begin{itemize}
-      \item Kaplan-Meier:
-      $$S(t) = \prod_{t_i < t} \frac{n_i - d_i}{n_i}$$
-      \item Empirical, stepwise, decreasing survival over time
-      \item Curve should approach the true survival function
-      \item Handles right-censoring
+      \item
+        Empirical approximation of the true survival function
+      \item
+        Stepwise, nonincreasing probability of survival over time
+      \item
+        Right-censoring handling
     \end{itemize}
   \end{frame}
 
   \begin{frame}
-    \frametitle{Classification Evaluation}
+    \frametitle{Evaluation}
     \begin{itemize}
-      \item Cross-validation
-      \item Brier Score:
-      $$0 \leq \frac{1}{N} \sum_{i=1}^N (y_i - o_i)^2 \leq 1$$
-      \item Baseline BS: 0.092
-      \item Classification BS: 0.057
+      \item
+        Slice subjects by category
+      \item
+        Repeat cross-validation with random shuffling
+      \item
+        Calculate Brier score \cite{brier+score}
+        $$0 \leq \frac{1}{N} \sum_{i=1}^N (y_i - o_i)^2 \leq 1$$
+      \item
+        Calculate absolute error for each case
+      \item
+        Compare against na{\"i}ve survival rate model (baseline)
     \end{itemize}
   \end{frame}
 
   \section{Results}
 
-  \setsvg{svgpath = ../figures/kaplan-meier/}
+  \setsvg{svgpath=../figures/kaplan-meier/}
 
   \begin{frame}
     \frametitle{Kaplan-Meier Plots}
-    \includesvg[width=\textwidth]{km-single-grid-large}
+    \includesvg[width=\textwidth]{grid-large}
   \end{frame}
 
   \begin{frame}
     \frametitle{Kaplan-Meier Plots}
-    \includesvg[width=\textwidth]{km-single-combined-large}
+    \includesvg[width=\textwidth]{combined}
+  \end{frame}
+
+  \setsvg{svgpath=../figures/evaluation/}
+
+  \begin{frame}
+    \frametitle{Distribution of Absolute Error Differences}
+    \begin{center}
+      \includesvg[height=0.9\textheight]{abs-error-diff-dist}
+    \end{center}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Brier Scores Across Categories}
+    \begin{center}
+      \includesvg[height=0.9\textheight]{brier-score-boxplot}
+    \end{center}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Comparison of Brier Scores}
+    \begin{center}
+      \includesvg[height=0.9\textheight]{brier-score-comparison}
+    \end{center}
   \end{frame}
 
   \section{Conclusion}
@@ -117,14 +150,22 @@
   \begin{frame}
     \frametitle{Conclusion}
     \begin{itemize}
-      \item Good performance
-      \begin{itemize}
-        \item Stability, noise reduction
-      \end{itemize}
+      \item
+        Improvement in accuracy
+        \begin{itemize}
+          \item
+            Kaplan-Meier average absolute error: 0.14
+          \item
+            Survival rate average absolute error: 0.19
+        \end{itemize}
+      \item
+        Stability between cross-validation runs
       \item Future work
       \begin{itemize}
-        \item Terrain features
-        \item Hierarchical models
+        \item
+          Slice subjects by group size
+        \item
+          Hazard ratios by category
       \end{itemize}
     \end{itemize}
   \end{frame}
@@ -133,13 +174,9 @@
 
   \begin{frame}
     \frametitle{References}
-    \linespread{1}
     \ssmall
-    \begin{enumerate}
-      \item “Malaysia Airlines Flight 370 Anniversary Looms as Nations Weight Costs of Continuing Search,” The Wall Street Journal, last updated 2015.
-      \item “International Search \& Rescue Incident Database,” dbS Productions, last updated 2011, \url{https://www.dbs-sar.com/SAR_Research/ISRID.htm}
-      \item National Oceanic and Atmospheric Administration. Web Services API (version 2) Documentation. \url{https://www.ncdc.noaa.gov/cdo-web/webservices/v2}. [Provided for free to the public].
-      \item Weather Services International Corporation. Cleaned Observation API Documentation. PDF document. [Provided during a free trial].
-    \end{enumerate}
+    \linespread{1}
+    \bibliographystyle{unsrt}
+    \bibliography{../paper/final/forecasting-lost-person-survival}
   \end{frame}
 \end{document}

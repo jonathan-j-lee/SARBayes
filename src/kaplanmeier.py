@@ -274,9 +274,9 @@ def execute():
     old_font_size = matplotlib.rcParams['font.size']
     matplotlib.rc('font', size=20)
     figure, axes = plot_grid(km_fitters[:4], rows=2, columns=2)
-    matplotlib.rc('font', size=old_font_size)
     figure.savefig('../doc/figures/kaplan-meier/grid-large.svg',
                    transparent=True)
+    matplotlib.rc('font', size=old_font_size)
 
     figure, axes = plot_combined(km_fitters[:4])
     figure.savefig('../doc/figures/kaplan-meier/combined.svg',

@@ -238,7 +238,7 @@
 
     \setsvg{svgpath=../../figures/kaplan-meier/}
 
-    \includesvg[width=\textwidth]{km-single-subject-grid}
+    \includesvg[width=\textwidth]{grid}
 
     Kaplan-Meier curves are shown above for the nine most common categories.
     The $95\%$ credence intervals are given by the shaded regions. Survivals,
@@ -249,9 +249,9 @@
     The curve for despondents drops off especially sharply. After just over
     a day has passed, the odds of survival are worse than even.
 
-    \setsvg{svgpath=../../figures/}
+    \setsvg{svgpath=../../figures/evaluation/}
 
-    \includesvg[width=\textwidth]{pos-abs-error-diff-dist}
+    \includesvg[width=\textwidth]{abs-error-diff-dist}
 
     Using the cross-validation procedure described previously, for every
     incident, we took the difference between the absolute error of the survival
@@ -274,8 +274,8 @@
     as a benchmark. In about half of the cases,\footnote{The exact proportion
     may vary because of the random shuffling.} the Kaplan-Meier model
     exhibited significant improvement over its na{\"i}ve counterpart. In about
-    a tenth of the cases, the Kaplan-Meier performed significantly worse. The
-    remainder fall inside the ``null" zone. For a search planner, the right
+    a fifth of the cases, the Kaplan-Meier performed significantly worse. The
+    remainder fall inside the ``null" zone. For a search planner, the fat right
     tail of the distribution means that using the Kaplan-Meier model over a
     general survival rate can translate into a $0.1$ gain in raw accuracy or
     greater for a sizeable number of cases.
