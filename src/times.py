@@ -3,7 +3,7 @@
 """
 times -- Plot the distribution of incident times
 
-This standalone scripts attempts to fit a circular distribution to the time of
+This standalone script attempts to fit a circular distribution to the time of
 day of lost person incidents. In other words, we attempt to show when cases
 tend to occur most frequently.
 """
